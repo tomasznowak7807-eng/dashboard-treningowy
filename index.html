@@ -17,7 +17,24 @@
         }
         body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: #1e293b; margin: 0; padding: 20px; }
         .container { max-width: 1250px; margin: 0 auto; }
-        
+       
+
+#assistant-box { 
+    display: block; 
+    background: #ffffff; 
+    border-left: 10px solid #cbd5e1; /* Ten kolor zmieni się automatycznie na zielony/czerwony */
+    padding: 20px; 
+    border-radius: 12px; 
+    margin-bottom: 25px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+    border: 1px solid #e2e8f0;
+}
+
+#warn-msg {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 800;
+} 
         /* High-Contrast Header */
         header { background: var(--primary); color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 20px; border-bottom: 4px solid var(--secondary); display: flex; justify-content: space-between; align-items: center; }
         
@@ -42,6 +59,7 @@
         .tech { background: #8b5cf6; height: 70%; width: 4%; }
         .p-s { background: #cbd5e1; height: 15%; width: 2%; }
 
+
         /* Tabela */
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600; }
@@ -65,6 +83,11 @@
             <div style="text-align:right"><label style="font-size:0.7rem; display:block">FTP (Manual)</label><input type="number" id="ftp" onchange="updateProfile()" style="width:60px; background:#334155; color:white; border:none; padding:5px; border-radius:4px;"></div>
         </div>
     </header>
+
+<div id="assistant-box">
+    <h3 id="warn-msg" style="margin:0; font-size: 1.1rem;">Inicjalizacja systemu...</h3>
+    <p id="sugg-msg" style="margin:5px 0 0 0; font-weight: 500; color: #475569;">Sprawdzanie połączenia z arkuszem Google Sheets...</p>
+</div>
 
     <div class="sync-dashboard">
         <div class="sync-stat">
@@ -275,52 +298,82 @@
         // Odświeżaj co 60 sekund
         setInterval(fetchDataFromSheets, 60000);
     };
-
 async function fetchDataFromSheets() {
-    console.log("Rozpoczynam pobieranie...");
+    const warnMsg = document.getElementById('warn-msg');
+    const suggMsg = document.getElementById('sugg-msg');
+    
+    // 1. Status początkowy
+    warnMsg.innerHTML = `<span style="color: var(--secondary)">⏳ ŁĄCZENIE Z ARKUSZEM...</span>`;
+    console.log("Próba pobrania danych...");
+
     try {
-        // Dodajemy losowy parametr, by Google nie wysyłało starych danych
-        const response = await fetch(csvUrl + "&t=" + Math.random());
+        // Cache-busting: dodajemy unikalny timestamp, by uniknąć starych danych
+        const response = await fetch(csvUrl + (csvUrl.includes('?') ? '&' : '?') + 't=' + Date.now());
         
         if (!response.ok) {
-            document.getElementById('warn-msg').innerText = "Błąd Google: " + response.status;
-            return;
+            throw new Error(`Błąd serwera Google (Status: ${response.status})`);
         }
 
         const csvText = await response.text();
-        
-        // Sprawdzenie czy to na pewno CSV
-        if (csvText.includes("<!DOCTYPE html>")) {
-            document.getElementById('warn-msg').innerText = "BŁĄD: Link prowadzi do strony, a nie do danych CSV!";
+
+        // 2. Weryfikacja formatu (czy to na pewno CSV?)
+        if (csvText.includes("<!DOCTYPE html>") || csvText.includes("google-site-verification")) {
+            warnMsg.innerHTML = `<span style="color: var(--accent)">⚠️ BŁĄD LINKU</span>`;
+            suggMsg.innerText = "Podałeś link do strony WWW zamiast do pliku CSV. Wejdź w Arkusz -> Publikuj w internecie -> Wybierz CSV.";
             return;
         }
 
+        // 3. Parsowanie danych
         const rows = csvText.split('\n').map(row => row.split(',').map(cell => cell.trim()));
         
-        // Jeśli plik jest pusty
-        if (rows.length < 1) {
-            document.getElementById('warn-msg').innerText = "BŁĄD: Arkusz jest pusty!";
+        if (rows.length < 2) {
+            warnMsg.innerHTML = `<span style="color: var(--recovery)">⚠️ PUSTY ARKUSZ</span>`;
+            suggMsg.innerText = "Połączono, ale nie znaleziono żadnych danych w zakładce Logic.";
             return;
         }
 
+        // 4. Sukces - przetwarzanie wierszy
+        let foundData = false;
         rows.forEach(row => {
             const param = row[0];
             const value = row[1];
-            if (param === 'Waga') document.getElementById('cloud-weight').innerText = value + " kg";
-            if (param === 'FTP') document.getElementById('cloud-ftp').innerText = value + " W";
+            if (!param || !value) return;
+
+            if (param === 'Waga') {
+                document.getElementById('cloud-weight').innerText = value + " kg";
+                document.getElementById('weight').value = value;
+                foundData = true;
+            }
+            if (param === 'FTP') {
+                document.getElementById('cloud-ftp').innerText = value + " W";
+                document.getElementById('ftp').value = value;
+                foundData = true;
+            }
             if (param === 'TSS') document.getElementById('cloud-tss').innerText = value;
             if (param === 'Status_Zmeczenia') updateWellnessUI(value);
-            if (param === 'Rekomendacja') document.getElementById('sugg-msg').innerText = value;
+            if (param === 'Rekomendacja') suggMsg.innerText = value;
         });
 
-        console.log("Synchronizacja OK!");
+        if (foundData) {
+            // Komunikat sukcesu (zniknie po 3 sekundach, ustępując miejsca statusowi Wellness)
+            const lastUpdate = new Date().toLocaleTimeString();
+            console.log("Zsynchronizowano: " + lastUpdate);
+            
+            // Jeśli wszystko OK, updateWellnessUI wstawi tam status formy
+        } else {
+            warnMsg.innerHTML = `<span style="color: var(--recovery)">⚠️ BRAK DOPASOWANIA</span>`;
+            suggMsg.innerText = "Nie znaleziono parametrów 'Waga', 'FTP' itd. Sprawdź kolumnę A w arkuszu.";
+        }
+
         updateProfile();
 
     } catch (error) {
+        // 5. Obsługa błędów sieciowych / CORS
         console.error("Błąd krytyczny:", error);
-        document.getElementById('warn-msg').innerText = "Błąd sieci: Brak połączenia z arkuszem";
+        warnMsg.innerHTML = `<span style="color: var(--accent)">🔴 BŁĄD SYNCHRONIZACJI</span>`;
+        suggMsg.innerHTML = `Brak połączenia z Google Sheets. <br><small>${error.message}</small>`;
     }
-}
+};
 </script>
 </body>
 </html>
