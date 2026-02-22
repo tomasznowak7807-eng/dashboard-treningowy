@@ -3,151 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro-Coach AI 2026 | Stabilna Synchronizacja</title>
+    <title>Pro-Coach AI | Performance Dashboard</title>
     <style>
         :root {
             --primary: #0f172a; --secondary: #2563eb; --accent: #dc2626;
             --strength: #059669; --recovery: #d97706; --bg: #f8fafc;
+            --text-dark: #1e293b; --card-border: #e2e8f0;
         }
-        body { font-family: sans-serif; background: var(--bg); color: #1e293b; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        header { background: var(--primary); color: white; padding: 1rem; border-radius: 8px; margin-bottom: 20px; }
-        
-        /* Panel Statystyk */
-        .sync-dashboard { background: #1e293b; color: white; padding: 15px; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
-        .stat-box { border-left: 3px solid var(--secondary); padding-left: 10px; }
-        .stat-box small { font-size: 0.7rem; color: #94a3b8; display: block; }
-        .stat-box span { font-size: 1.2rem; font-weight: bold; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text-dark); margin: 0; padding: 20px; line-height: 1.6; }
+        .container { max-width: 1100px; margin: 0 auto; }
 
-        /* Panel Komunikatów - Centrum Diagnostyki */
-        #assistant-box { background: white; border-left: 10px solid #cbd5e1; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        #warn-msg { margin: 0; font-size: 1rem; font-weight: 800; color: #1e293b; }
-        #sugg-msg { margin: 5px 0 0 0; font-size: 0.9rem; color: #64748b; }
+        /* HEADER */
+        header { background: var(--primary); color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--secondary); }
+        header h1 { margin: 0; font-size: 1.2rem; letter-spacing: 1px; }
 
-        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        /* SYNC PANEL (DARK MODE) */
+        .sync-dashboard { background: #1e293b; color: white; padding: 20px; border-radius: 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; border: 1px solid var(--secondary); }
+        .stat-box { border-left: 3px solid var(--secondary); padding-left: 15px; }
+        .stat-box small { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 800; display: block; }
+        .stat-box span { font-size: 1.4rem; font-weight: 900; }
+
+        /* ASYSTENT I REKOMENDACJE */
+        #assistant-box { background: white; border-left: 10px solid #cbd5e1; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        #warn-msg { margin: 0; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; }
+        #sugg-msg { margin: 8px 0 0 0; color: #475569; font-weight: 500; }
+
+        /* GRID SYSTEM */
+        .grid { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--card-border); margin-bottom: 20px; }
+        h2 { font-size: 1rem; border-left: 4px solid var(--secondary); padding-left: 10px; margin-top: 0; text-transform: uppercase; }
+
+        /* WYKRES TRENINGU */
+        .workout-preview { background: #f1f5f9; padding: 15px; border-radius: 8px; border: 1px dotted #cbd5e1; }
+        .bar-chart { display: flex; height: 60px; align-items: flex-end; gap: 3px; margin-top: 10px; }
+        .bar { border-radius: 2px 2px 0 0; min-width: 15px; }
+        .z1 { background: #94a3b8; height: 30%; width: 15%; } /* Warm up */
+        .z2 { background: var(--strength); height: 50%; width: 40%; } /* Zone 2 */
+        .z4 { background: var(--recovery); height: 80%; width: 10%; } /* Intervals */
+        .z6 { background: var(--accent); height: 100%; width: 5%; } /* Sprints */
+
+        /* LISTY I TABELE */
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 12px 8px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; font-weight: 600; }
+        .tag { padding: 3px 6px; border-radius: 4px; color: white; font-size: 0.7rem; font-weight: 800; }
+        .tag-bike { background: var(--secondary); }
+        .tag-gym { background: var(--strength); }
+        .tag-rest { background: #64748b; }
+
+        ul { padding-left: 20px; margin: 0; }
+        li { margin-bottom: 8px; font-size: 0.85rem; }
+
+        @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>PRO-COACH AI DASHBOARD</h1>
+        <h1>PRO-COACH AI <span style="color:var(--secondary)">2026</span></h1>
+        <div id="sync-status" style="font-size: 0.7rem; opacity: 0.7;">Oczekiwanie na dane...</div>
     </header>
 
     <div class="sync-dashboard">
-        <div class="stat-box"><small>WELLNESS</small><span id="cloud-wellness">--%</span></div>
-        <div class="stat-box"><small>TSS LIVE</small><span id="cloud-tss">---</span></div>
-        <div class="stat-box"><small>WAGA (SHEETS)</small><span id="cloud-weight">-- kg</span></div>
-        <div class="stat-box"><small>W/KG</small><span id="wkg">0.00</span></div>
+        <div class="stat-box"><small>Wellness</small><span id="cloud-wellness">--%</span></div>
+        <div class="stat-box"><small>TSS (7d)</small><span id="cloud-tss">---</span></div>
+        <div class="stat-box"><small>Waga</small><span id="cloud-weight">-- kg</span></div>
+        <div class="stat-box"><small>Moc relatywna</small><span id="wkg">0.00</span> W/kg</div>
     </div>
 
     <div id="assistant-box">
-        <div id="warn-msg">Ładowanie...</div>
-        <div id="sugg-msg">Inicjalizacja skryptu...</div>
+        <div id="warn-msg">Inicjalizacja systemu...</div>
+        <div id="sugg-msg">Łączenie z bazą danych treningowych.</div>
     </div>
 
-    <div class="card">
-        <h3>Plan Treningowy</h3>
-        <table><tbody id="plan-body"></tbody></table>
+    <div class="grid">
+        <div class="col-main">
+            <div class="card">
+                <h2>Plan Tygodniowy</h2>
+                <table>
+                    <tbody id="plan-body"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>Analiza Jednostki: Endurance + Sprint</h2>
+                <div class="workout-preview">
+                    <strong>Profil: 90 min Z2 + 4x15s Max Sprint</strong>
+                    <div class="bar-chart">
+                        <div class="bar z1"></div>
+                        <div class="bar z2"></div>
+                        <div class="bar z4"></div>
+                        <div class="bar z2"></div>
+                        <div class="bar z6"></div>
+                        <div class="bar z2"></div>
+                        <div class="bar z6"></div>
+                        <div class="bar z2"></div>
+                        <div class="bar z6"></div>
+                        <div class="bar z2"></div>
+                        <div class="bar z6"></div>
+                        <div class="bar z1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-side">
+            <div class="card" style="border-top: 4px solid var(--strength);">
+                <h2>Trening Siłowy (FBW)</h2>
+                <ul>
+                    <li><b>Przysiad ze sztangą:</b> 3x8 (RPE 8)</li>
+                    <li><b>Podciąganie / TRX:</b> 3x Max</li>
+                    <li><b>Plank / Core:</b> 4x1 min</li>
+                    <li><b>Wspięcia na palce:</b> 3x20</li>
+                </ul>
+            </div>
+
+            <div class="card" style="border-top: 4px solid var(--recovery);">
+                <h2>Suplementacja</h2>
+                <ul>
+                    <li><b>Rano:</b> Omega-3, Wit. D3+K2</li>
+                    <li><b>Trening:</b> Izotonik (60g węgli/h)</li>
+                    <li><b>Po treningu:</b> Białko (30g) + Kreatyna (5g)</li>
+                    <li><b>Wieczór:</b> Magnez (Cytrynian)</li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    // --- KONFIGURACJA ---
-    // Pamiętaj: Link musi kończyć się na output=csv
+    // KONFIGURACJA LINKU
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRVLylCkxR1sbSnxYdWGCBpgeILRZMa3uTZCz6qPQ47Q5QJsinxI_T2n_KkjxKlbbz6JBadfQLLXxDP/pub?gid=950508224&single=true&output=csv';
 
-    const defaultPlan = [
-        { d: "Poniedziałek", t: "GYM", n: "FBW Siła" },
-        { d: "Wtorek", t: "BIKE", n: "Sprinty 10s" },
-        { d: "Środa", t: "REST", n: "Regeneracja" },
-        { d: "Czwartek", t: "BIKE", n: "Tempo 9x5'" },
-        { d: "Piątek", t: "GYM", n: "FBW Siła" },
-        { d: "Sobota", t: "REST", n: "Regeneracja" },
-        { d: "Niedziela", t: "BIKE", n: "Strefa 2 (2h)" }
+    const planData = [
+        { d: "Pon", t: "GYM", n: "FBW Siła Max", c: "tag-gym" },
+        { d: "Wt", t: "BIKE", n: "Interwały VO2Max", c: "tag-bike" },
+        { d: "Śr", t: "REST", n: "Joga / Rolowanie", c: "tag-rest" },
+        { d: "Czw", t: "BIKE", n: "Sweet Spot 2x20'", c: "tag-bike" },
+        { d: "Pt", t: "GYM", n: "Siła Eksplozywna", c: "tag-gym" },
+        { d: "Sob", t: "BIKE", n: "Tlen (Z2) 3h", c: "tag-bike" },
+        { d: "Nie", t: "REST", n: "Aktywna regeneracja", c: "tag-rest" }
     ];
 
-    async function fetchData() {
+    async function syncSheets() {
         const warn = document.getElementById('warn-msg');
         const sugg = document.getElementById('sugg-msg');
-        
+        const status = document.getElementById('sync-status');
+
         try {
-            warn.innerText = "⏳ PRÓBA POŁĄCZENIA...";
-            // t= sprawia, że Google zawsze wysyła nowe dane
-            const resp = await fetch(csvUrl + "&t=" + Date.now());
+            const response = await fetch(csvUrl + "&cache=" + Date.now());
+            if (!response.ok) throw new Error("Błąd serwera");
             
-            if (!resp.ok) throw new Error("Google nie odpowiada (Błąd " + resp.status + ")");
-            
-            const text = await resp.text();
-            
-            // Sprawdzenie czy to HTML zamiast CSV
-            if (text.includes("<!DOCTYPE html>")) {
-                warn.innerText = "❌ BŁĄD FORMATU";
-                sugg.innerText = "Link prowadzi do strony, a nie do CSV. Opublikuj zakładkę LOGIC jako CSV.";
-                return;
-            }
+            const data = await response.text();
+            if (data.includes("<!DOCTYPE html>")) throw new Error("Link to nie CSV");
 
-            const rows = text.split('\n').map(r => r.split(',').map(c => c.trim()));
-            
+            const rows = data.split('\n').map(r => r.split(',').map(c => c.trim()));
+            let weight = 63, ftp = 200;
+
             rows.forEach(row => {
-                const p = row[0]; // Parametr
-                const v = row[1]; // Wartość
-                if (!p || !v) return;
-
-                if (p === 'Waga') safeSetText('cloud-weight', v + " kg");
-                if (p === 'FTP') window.currentFTP = v; 
-                if (p === 'TSS') safeSetText('cloud-tss', v);
+                const [p, v] = row;
+                if (p === 'Waga') { document.getElementById('cloud-weight').innerText = v + " kg"; weight = parseFloat(v); }
+                if (p === 'FTP') { ftp = parseFloat(v); }
+                if (p === 'TSS') document.getElementById('cloud-tss').innerText = v;
+                if (p === 'Rekomendacja') sugg.innerText = v;
                 if (p === 'Status_Zmeczenia') updateWellness(v);
-                if (p === 'Rekomendacja') safeSetText('sugg-msg', v);
             });
 
-            warn.innerText = "✅ ZSYNCHRONIZOWANO";
-            calcWkg();
+            document.getElementById('wkg').innerText = (ftp / weight).toFixed(2);
+            warn.innerText = "✅ SYSTEM ZSYNCHRONIZOWANY";
+            status.innerText = "Ostatnia aktualizacja: " + new Date().toLocaleTimeString();
 
         } catch (e) {
-            console.error(e);
-            warn.innerText = "🔴 BŁĄD SYNCHRONIZACJI";
-            sugg.innerText = "Błąd: " + e.message + ". Sprawdź czy arkusz jest opublikowany.";
+            warn.innerText = "🔴 BŁĄD POŁĄCZENIA";
+            warn.style.color = "var(--accent)";
+            sugg.innerText = "Sprawdź publikację arkusza Logic jako CSV i status GitHub Pages.";
         }
-    }
-
-    function safeSetText(id, txt) {
-        const el = document.getElementById(id);
-        if (el) el.innerText = txt;
     }
 
     function updateWellness(score) {
         const s = parseInt(score);
         const box = document.getElementById('assistant-box');
         const cloud = document.getElementById('cloud-wellness');
-        if (cloud) cloud.innerText = s + "%";
+        cloud.innerText = s + "%";
         
-        let color = "#059669"; // Zielony
-        if (s < 40) color = "#dc2626"; // Czerwony
-        else if (s < 70) color = "#ea580c"; // Pomarańczowy
-        
-        if (box) box.style.borderLeft = "10px solid " + color;
+        let color = "var(--strength)";
+        let msg = "GOTOWY NA TRENING";
+
+        if (s < 40) { color = "var(--accent)"; msg = "REGENERACJA WYMAGANA"; }
+        else if (s < 70) { color = "var(--recovery)"; msg = "ZACHOWAJ OSTROŻNOŚĆ"; }
+
+        box.style.borderLeft = "10px solid " + color;
+        document.getElementById('warn-msg').style.color = color;
+        document.getElementById('warn-msg').innerText = msg;
     }
 
-    function calcWkg() {
-        const w = parseFloat(document.getElementById('cloud-weight')?.innerText) || 63;
-        const f = parseFloat(window.currentFTP) || 200;
-        safeSetText('wkg', (f / w).toFixed(2));
+    function init() {
+        const body = document.getElementById('plan-body');
+        body.innerHTML = planData.map(p => `<tr><td style="width:50px">${p.d}</td><td style="width:80px"><span class="tag ${p.c}">${p.t}</span></td><td>${p.n}</td></tr>`).join('');
+        syncSheets();
     }
 
-    function render() {
-        const b = document.getElementById('plan-body');
-        if (!b) return;
-        b.innerHTML = defaultPlan.map(p => `<tr><td><b>${p.d}</b></td><td>${p.t}</td><td>${p.n}</td></tr>`).join('');
-    }
-
-    window.onload = () => {
-        render();
-        fetchData();
-        setInterval(fetchData, 60000);
-    };
+    window.onload = init;
+    setInterval(syncSheets, 60000);
 </script>
 
 </body>
