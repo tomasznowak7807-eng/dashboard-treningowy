@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro-Coach 2026 | Smart Sync Dashboard</title>
+    <style>
+        :root {
+            --primary: #0f172a;    /* Navy Deep */
+            --secondary: #2563eb;  /* Blue */
+            --accent: #dc2626;     /* Red */
+            --strength: #059669;   /* Green */
+            --recovery: #d97706;   /* Orange */
+            --bg: #f8fafc;
+            --tempo: #ea580c;
+            --sync-panel: #1e293b; /* Darker panel for cloud data */
+        }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: #1e293b; margin: 0; padding: 20px; }
+        .container { max-width: 1250px; margin: 0 auto; }
+        
+        /* High-Contrast Header */
+        header { background: var(--primary); color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 20px; border-bottom: 4px solid var(--secondary); display: flex; justify-content: space-between; align-items: center; }
+        
+        /* NOWY PANEL ANALIZY DANYCH CLOUD */
+        .sync-dashboard { background: var(--sync-panel); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; border: 1px solid var(--secondary); }
+        .sync-stat { border-left: 3px solid var(--secondary); padding-left: 15px; }
+        .sync-stat label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 800; display: block; }
+        .sync-stat .value { font-size: 1.4rem; font-weight: 900; letter-spacing: -1px; }
+        .sync-tag { font-size: 0.6rem; background: var(--secondary); padding: 2px 5px; border-radius: 4px; vertical-align: middle; margin-left: 5px; }
+
+        .card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        h2 { font-size: 1.2rem; border-left: 5px solid var(--secondary); padding-left: 12px; text-transform: uppercase; margin-bottom: 20px; }
+
+        /* Wykresy */
+        .chart-container { margin-top: 15px; padding: 15px; background: #f1f5f9; border-radius: 8px; border: 1px solid #cbd5e1; }
+        .bar-wrapper { display: flex; height: 50px; align-items: flex-end; gap: 2px; }
+        .bar { border-radius: 2px 2px 0 0; }
+        .wu { background: #94a3b8; height: 35%; width: 10%; }
+        .sp { background: var(--accent); height: 100%; width: 3%; }
+        .tp { background: var(--tempo); height: 75%; width: 6%; }
+        .z2 { background: var(--strength); height: 50%; width: 15%; }
+        .tech { background: #8b5cf6; height: 70%; width: 4%; }
+        .p-s { background: #cbd5e1; height: 15%; width: 2%; }
+
+        /* Tabela */
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600; }
+        .tag { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; color: white; font-weight: 800; }
+        .tag-BIKE { background: var(--secondary); } .tag-GYM { background: var(--strength); } .tag-REST { background: #64748b; }
+
+        .grid-main { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 20px; }
+        @media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1 style="margin:0; font-size: 1.4rem;">PRO-COACH <span style="color:var(--secondary)">AI</span> 2026</h1>
+            <p style="margin:0; font-size: 0.8rem; opacity: 0.8;">Masters 48+ | Adaptacyjny Dashboard</p>
+        </div>
+        <div style="display:flex; gap: 15px;">
+            <div style="text-align:right"><label style="font-size:0.7rem; display:block">Waga (Manual)</label><input type="number" id="weight" onchange="updateProfile()" style="width:60px; background:#334155; color:white; border:none; padding:5px; border-radius:4px;"></div>
+            <div style="text-align:right"><label style="font-size:0.7rem; display:block">FTP (Manual)</label><input type="number" id="ftp" onchange="updateProfile()" style="width:60px; background:#334155; color:white; border:none; padding:5px; border-radius:4px;"></div>
+        </div>
+    </header>
+
+    <div class="sync-dashboard">
+        <div class="sync-stat">
+            <label>Wellness Score <span class="sync-tag">Cloud</span></label>
+            <div class="value" id="cloud-wellness">--%</div>
+        </div>
+        <div class="sync-stat">
+            <label>Ostatnie TSS <span class="sync-tag">Zapier</span></label>
+            <div class="value" id="cloud-tss">---</div>
+        </div>
+        <div class="sync-stat">
+            <label>Waga z Wagi Smart <span class="sync-tag">Sheets</span></label>
+            <div class="value" id="cloud-weight">-- kg</div>
+        </div>
+        <div class="sync-stat">
+            <label>W/kg (Aktualne)</label>
+            <div class="value" id="wkg">0.00</div>
+        </div>
+    </div>
+
+    <div id="assistant-box" style="background:#fff; border-left:10px solid #cbd5e1; padding:20px; border-radius:12px; margin-bottom:20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <h3 id="warn-msg" style="margin:0; font-size: 1.1rem;">Inicjalizacja systemu...</h3>
+        <p id="sugg-msg" style="margin:5px 0 0 0; font-weight: 500; color: #475569;"></p>
+    </div>
+
+    <div class="grid-main">
+        <div class="col-left">
+            <div class="card">
+                <h2>Harmonogram Treningowy</h2>
+                <table id="plan-table">
+                    <tbody id="plan-body"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>Struktura Treningów</h2>
+                
+                <div class="chart-container">
+                    <strong>STREFA 2: Wytrzymałość 2h + Akcenty (Niedziela)</strong>
+                    <div class="bar-wrapper" style="margin-top:10px">
+                        <div class="bar wu" style="width:10%"></div>
+                        <div class="bar z2" style="width:30%"></div>
+                        <div class="bar tech"></div><div class="bar p-s"></div><div class="bar tech"></div><div class="bar p-s"></div><div class="bar tech"></div>
+                        <div class="bar z2" style="width:40%"></div>
+                        <div class="bar sp" style="height:90%"></div><div class="bar p-s"></div><div class="bar sp" style="height:90%"></div>
+                        <div class="bar z2" style="width:10%"></div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <strong>SPRINTY: 2 bloki po 5x10s (Wtorek)</strong>
+                    <div class="bar-wrapper" style="margin-top:10px">
+                        <div class="bar wu" style="width:20%"></div>
+                        <div class="bar sp"></div><div class="bar p-s"></div><div class="bar sp"></div><div class="bar p-s"></div><div class="bar sp"></div>
+                        <div class="bar p-l"></div>
+                        <div class="bar sp"></div><div class="bar p-s"></div><div class="bar sp"></div><div class="bar p-s"></div><div class="bar sp"></div>
+                        <div class="bar wu" style="width:10%; height:20%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-right">
+            <div class="card" style="border-top: 5px solid var(--strength)">
+                <h3>Siłownia (FBW)</h3>
+                <p style="font-size:0.9rem"><b>Główne:</b> Przysiad 3x8, Bułgary 3x10, Podciąganie 3xM.<br><b>Uzupełnienie:</b> Plank 3x1', Magnez po treningu.</p>
+            </div>
+            <div class="card" style="border-top: 5px solid var(--recovery)">
+                <h3>Regeneracja Masters</h3>
+                <p style="font-size:0.9rem">Dla wieku 48 lat: 8h snu to absolutne minimum. Jeśli Wellness < 50%, zamień interwały na spacer.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- KONFIGURACJA GOOGLE SHEETS ---
+    // Upewnij się, że w arkuszu: Plik -> Udostępnij -> Opublikuj w internecie -> CSV
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRVLylCkxR1sbSnxYdWGCBpgeILRZMa3uTZCz6qPQ47Q5QJsinxI_T2n_KkjxKlbbz6JBadfQLLXxDP/pub?output=csv';
+
+    const defaultPlan = [
+        { day: "Poniedziałek", type: "GYM", name: "FBW 1 (Siła)", cat: "tag-GYM" },
+        { day: "Wtorek", type: "BIKE", name: "Sprinty 10s", cat: "tag-BIKE" },
+        { day: "Środa", type: "REST", name: "Regeneracja", cat: "tag-REST" },
+        { day: "Czwartek", type: "BIKE", name: "Tempo 9x5'", cat: "tag-BIKE" },
+        { day: "Piątek", type: "GYM", name: "FBW 2 (Siła)", cat: "tag-GYM" },
+        { day: "Sobota", type: "REST", name: "Regeneracja", cat: "tag-REST" },
+        { day: "Niedziela", type: "BIKE", name: "Strefa 2 (2h)", cat: "tag-BIKE" }
+    ];
+
+    let currentPlan = [...defaultPlan];
+
+    function updateProfile() {
+        const w = document.getElementById('weight').value || 63;
+        const f = document.getElementById('ftp').value || 200;
+        const wkg = (f / w).toFixed(2);
+        const wkgDisplay = document.getElementById('wkg');
+        if(wkgDisplay) wkgDisplay.innerText = wkg;
+        
+        // Zapisz lokalnie, by nie tracić danych przy błędzie sieci
+        localStorage.setItem('cyclistWeight', w);
+        localStorage.setItem('cyclistFTP', f);
+    }
+
+    async function fetchDataFromSheets() {
+        console.log("Próba synchronizacji z Google Sheets...");
+        try {
+            // Dodajemy timestamp, aby uniknąć cache'owania danych przez przeglądarkę
+            const response = await fetch(`${csvUrl}&cachebust=${Date.now()}`);
+            
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const csvText = await response.text();
+            console.log("Dane pobrane, parsuję...");
+            
+            // Czyszczenie danych z cudzysłowów i zbędnych spacji
+            const rows = csvText.split('\n')
+                                .map(row => row.split(',').map(cell => cell.replace(/"/g, '').trim()));
+
+            rows.forEach(row => {
+                const param = row[0];
+                const value = row[1];
+
+                if (!param || !value) return;
+
+                if (param === 'Waga') {
+                    document.getElementById('cloud-weight').innerText = value + " kg";
+                    document.getElementById('weight').value = value;
+                }
+                if (param === 'FTP') {
+                    document.getElementById('cloud-ftp').innerText = value + " W";
+                    document.getElementById('ftp').value = value;
+                }
+                if (param === 'TSS') {
+                    document.getElementById('cloud-tss').innerText = value;
+                }
+                if (param === 'Status_Zmeczenia') {
+                    updateWellnessUI(value);
+                }
+                if (param === 'Rekomendacja') {
+                    document.getElementById('sugg-msg').innerText = value;
+                }
+            });
+            
+            updateProfile();
+            console.log("Synchronizacja zakończona sukcesem.");
+            
+        } catch (error) {
+            console.error("Błąd synchronizacji:", error);
+            document.getElementById('warn-msg').innerHTML = `<span style="color:red">Błąd połączenia: Sprawdź publikację arkusza</span>`;
+        }
+    }
+
+    function updateWellnessUI(score) {
+        const box = document.getElementById('assistant-box');
+        const warn = document.getElementById('warn-msg');
+        const cloudLabel = document.getElementById('cloud-wellness');
+        const scoreInt = parseInt(score);
+        
+        if(cloudLabel) cloudLabel.innerText = score + "%";
+        
+        let color = "#059669";
+        let status = "ŚWIETNA FORMA";
+
+        if (scoreInt < 40) {
+            color = "#dc2626";
+            status = "WYSOKIE ZMĘCZENIE - ODPUŚĆ";
+        } else if (scoreInt < 70) {
+            color = "#ea580c";
+            status = "UMIARKOWANE OBCIĄŻENIE";
+        }
+
+        box.style.borderLeft = `10px solid ${color}`;
+        warn.innerHTML = `<span style="color:${color}">${status} (Wellness: ${score}%)</span>`;
+        if(cloudLabel) cloudLabel.style.color = color;
+    }
+
+    function renderPlan() {
+        const body = document.getElementById('plan-body');
+        if(!body) return;
+        body.innerHTML = '';
+        currentPlan.forEach((task, i) => {
+            body.innerHTML += `<tr>
+                <td style="width:120px; font-weight:800">${task.day}</td>
+                <td style="width:100px"><span class="tag ${task.cat}">${task.type}</span></td>
+                <td>${task.name}</td>
+                <td style="text-align:right">${i < 6 ? `<button class="btn-move" onclick="moveTask(${i})">➔</button>` : ''}</td>
+            </tr>`;
+        });
+    }
+
+    function moveTask(i) {
+        const temp = { ...currentPlan[i], day: currentPlan[i+1].day };
+        currentPlan[i] = { ...currentPlan[i+1], day: currentPlan[i].day };
+        currentPlan[i+1] = temp;
+        renderPlan();
+    }
+
+    window.onload = () => {
+        // Przywróć dane z localStorage jeśli są dostępne
+        document.getElementById('weight').value = localStorage.getItem('cyclistWeight') || 63;
+        document.getElementById('ftp').value = localStorage.getItem('cyclistFTP') || 200;
+        
+        renderPlan();
+        updateProfile();
+        fetchDataFromSheets();
+        
+        // Odświeżaj co 60 sekund
+        setInterval(fetchDataFromSheets, 60000);
+    };
+</script>
+</body>
+</html>
