@@ -275,6 +275,52 @@
         // Odświeżaj co 60 sekund
         setInterval(fetchDataFromSheets, 60000);
     };
+
+async function fetchDataFromSheets() {
+    console.log("Rozpoczynam pobieranie...");
+    try {
+        // Dodajemy losowy parametr, by Google nie wysyłało starych danych
+        const response = await fetch(csvUrl + "&t=" + Math.random());
+        
+        if (!response.ok) {
+            document.getElementById('warn-msg').innerText = "Błąd Google: " + response.status;
+            return;
+        }
+
+        const csvText = await response.text();
+        
+        // Sprawdzenie czy to na pewno CSV
+        if (csvText.includes("<!DOCTYPE html>")) {
+            document.getElementById('warn-msg').innerText = "BŁĄD: Link prowadzi do strony, a nie do danych CSV!";
+            return;
+        }
+
+        const rows = csvText.split('\n').map(row => row.split(',').map(cell => cell.trim()));
+        
+        // Jeśli plik jest pusty
+        if (rows.length < 1) {
+            document.getElementById('warn-msg').innerText = "BŁĄD: Arkusz jest pusty!";
+            return;
+        }
+
+        rows.forEach(row => {
+            const param = row[0];
+            const value = row[1];
+            if (param === 'Waga') document.getElementById('cloud-weight').innerText = value + " kg";
+            if (param === 'FTP') document.getElementById('cloud-ftp').innerText = value + " W";
+            if (param === 'TSS') document.getElementById('cloud-tss').innerText = value;
+            if (param === 'Status_Zmeczenia') updateWellnessUI(value);
+            if (param === 'Rekomendacja') document.getElementById('sugg-msg').innerText = value;
+        });
+
+        console.log("Synchronizacja OK!");
+        updateProfile();
+
+    } catch (error) {
+        console.error("Błąd krytyczny:", error);
+        document.getElementById('warn-msg').innerText = "Błąd sieci: Brak połączenia z arkuszem";
+    }
+}
 </script>
 </body>
 </html>
