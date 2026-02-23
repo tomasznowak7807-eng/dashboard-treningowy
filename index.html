@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v4.2 | Full Bio-Sync</title>
+    <title>ADAPTIVE COACH AI v4.2 | Full Bio-Sync & Stable Parser</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -61,19 +61,19 @@
     <header>
         <div>
             <h1 style="margin:0">ADAPTIVE COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v4.2 Stable</span></h1>
-            <small>Synchronizacja Mocy, Tętna i Odczuć Subiektywnych</small>
+            <small>Poprawiony Parser & Pełna Biometria</small>
         </div>
         <button onclick="resetApp()" style="background:none; border: 1px solid white; color: white; padding: 5px 12px; border-radius: 6px; cursor:pointer;">Reset Bazy</button>
     </header>
 
     <div class="drop-grid">
-        <div class="drop-box" id="drop-activities"><strong>🏃 AKTYWNOŚCI</strong><br>Importuj Garmin (CSV)</div>
-        <div class="drop-box" id="drop-ftp"><strong>⚡ HISTORIA FTP</strong><br>Importuj Moc (CSV)</div>
-        <div class="drop-box" id="drop-vo2"><strong>🫁 PUŁAP TLENOWY</strong><br>Importuj VO2Max (CSV)</div>
+        <div class="drop-box" id="drop-activities"><strong>🏃 AKTYWNOŚCI</strong><br>Upuść Garmin CSV</div>
+        <div class="drop-box" id="drop-ftp"><strong>⚡ DANE MOCY</strong><br>Upuść FTP CSV</div>
+        <div class="drop-box" id="drop-vo2"><strong>🫁 WYDOLNOŚĆ</strong><br>Upuść VO2Max CSV</div>
     </div>
 
     <div class="card">
-        <h3 style="margin-top:0; font-size: 1rem;">🧬 Biometria i Tętno</h3>
+        <h3 style="margin-top:0; font-size: 1rem;">🧬 Parametry Życiowe & Tętno</h3>
         <div class="input-grid">
             <div><label>Waga (kg)</label><input type="number" id="in-weight" step="0.1"></div>
             <div><label>FTP (W)</label><input type="number" id="in-ftp"></div>
@@ -82,7 +82,7 @@
             <div><label>Tętno spocz.</label><input type="number" id="in-rest-bpm"></div>
             <div><label>VO2Max</label><input type="number" id="in-vo2"></div>
         </div>
-        <button class="btn-main" onclick="updateBiometry()">Zapisz Parametry Biometryczne</button>
+        <button class="btn-main" onclick="updateBiometry()">Zapisz Dane Biometryczne</button>
     </div>
 
     <div class="dashboard-grid">
@@ -137,8 +137,8 @@
         <div class="card">
             <h3 style="margin-top:0">🧠 Werdykt i Sugestia AI</h3>
             <div id="ai-verdict-box">
-                <div id="ai-title" style="font-weight: 900; font-size: 1.2rem; color: var(--primary);">Analiza hybrydowa...</div>
-                <p id="ai-desc" style="font-size: 0.95rem; margin: 15px 0; line-height: 1.5; color: var(--text);">Wgraj pliki CSV i uzupełnij ankietę.</p>
+                <div id="ai-title" style="font-weight: 900; font-size: 1.2rem; color: var(--primary);">Oczekiwanie na dane...</div>
+                <p id="ai-desc" style="font-size: 0.95rem; margin: 15px 0; line-height: 1.5; color: var(--text);">Wgraj plik CSV i wypełnij ankietę.</p>
                 <div id="ai-workout" style="font-weight: 800; color: var(--secondary); border-top: 2px solid #e0f2fe; padding-top: 15px; margin-top: 15px; font-size: 1.1rem;"></div>
             </div>
             <div style="margin-top:20px;">
@@ -220,20 +220,26 @@
     }
 
     function handleCSV(content, type) {
-        const lines = content.split(/\r?\n/).filter(l => l.trim() !== '');
         const delimiter = content.includes(';') ? ';' : ',';
+        const lines = content.split(/\r?\n/).filter(l => l.trim() !== '');
+        const headers = lines[0].toLowerCase().split(delimiter).map(h => h.replace(/"/g, '').trim());
+
         if (type === 'ACT') {
+            const idxDate = headers.findIndex(h => h.includes('dat'));
+            const idxDist = headers.findIndex(h => h.includes('dist') || h.includes('dystans'));
+            
             store.history = lines.slice(1).map(l => {
-                const c = l.split(delimiter);
-                const d = parseFloat(c[3].replace(',', '.')) || 0;
-                return { date: new Date(c[0]), tss: d * 6 };
+                const c = l.split(delimiter).map(col => col.replace(/"/g, '').trim());
+                // Konwersja przecinka na kropkę dla dystansu
+                const rawDist = c[idxDist] ? c[idxDist].replace(',', '.') : "0";
+                const d = parseFloat(rawDist) || 0;
+                return { date: new Date(c[idxDate]), tss: d * 6 };
             }).filter(i => !isNaN(i.date.getTime())).sort((a,b) => a.date - b.date);
-        } else if (type === 'FTP') {
-            const last = lines[lines.length-1].split(delimiter);
-            store.ftp = parseInt(last.find(v => !isNaN(v) && v > 50)) || store.ftp;
-        } else if (type === 'VO2') {
-            const last = lines[lines.length-1].split(delimiter);
-            store.vo2 = parseInt(last.find(v => !isNaN(v) && v > 20)) || store.vo2;
+        } else {
+            const lastLine = lines[lines.length-1].split(delimiter);
+            const val = parseInt(lastLine.find(v => !isNaN(v.replace(',', '.')) && v.trim() !== ''));
+            if (type === 'FTP') store.ftp = val || store.ftp;
+            if (type === 'VO2') store.vo2 = val || store.vo2;
         }
         saveAll();
         refreshApp();
@@ -272,15 +278,15 @@
 
         if (survey && survey.health >= 5) {
             title.innerText = "🚨 ALARM: KONTUZJA / BÓL";
-            desc.innerText = "Zgłosiłeś problemy zdrowotne. Dane TSB schodzą na drugi plan. Odpoczynek jest obowiązkowy.";
+            desc.innerText = "Zgłosiłeś problemy zdrowotne. Odpoczynek jest priorytetem.";
             work.innerText = "SUGESTIA: Pełna regeneracja.";
         } else if (tsb < -20) {
             title.innerText = "STAN: PRZEMĘCZENIE";
-            desc.innerText = "Twoje tętno spoczynkowe ("+store.restBpm+") może być podwyższone. TSB wskazuje na brak świeżości.";
+            desc.innerText = "Uważaj na tętno spoczynkowe ("+store.restBpm+"). Twoja forma wymaga świeżości.";
             work.innerText = "SUGESTIA: Rozjazd Z1 poniżej "+Math.round(store.ftp*0.55)+" W.";
         } else {
-            title.innerText = "STAN: GOTOWOŚĆ";
-            desc.innerText = "Jesteś wypoczęty. Threshold BPM: "+store.thrBpm+". Idealny moment na intensywność.";
+            title.innerText = "STAN: PRODUKTYWNY";
+            desc.innerText = "Balans zachowany. Twój próg tętna to "+store.thrBpm+".";
             work.innerText = "SUGESTIA: Tempo Z3 @ "+Math.round(store.ftp * 0.9)+" W.";
         }
     }
