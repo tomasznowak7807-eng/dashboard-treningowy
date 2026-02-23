@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro-Coach AI | Dynamic Performance Dashboard</title>
+    <title>Pro-Coach AI | Ultimate Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #0f172a; --secondary: #3b82f6; --accent: #ef4444;
@@ -16,22 +17,20 @@
         body { margin: 0; padding: 20px; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
         .container { max-width: 1000px; margin: auto; }
 
-        /* HEADER & CONTROLS */
         header {
             background: linear-gradient(135deg, var(--primary) 0%, #1e293b 100%);
             color: white; padding: 1.5rem; border-radius: 16px; margin-bottom: 20px;
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 10px 15px rgba(0,0,0,0.1);
         }
+
         .btn-reset {
-            background: var(--accent); color: white; border: none; padding: 8px 16px;
+            background: rgba(255,255,255,0.1); color: white; border: 1px solid white; padding: 8px 16px;
             border-radius: 8px; cursor: pointer; font-weight: 700; transition: 0.2s;
         }
-        .btn-reset:hover { filter: brightness(1.2); }
 
-        /* STATS PANEL */
         .sync-dashboard {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;
         }
         .stat-box {
             background: var(--dark); color: white; padding: 20px; border-radius: 16px;
@@ -40,33 +39,29 @@
         .stat-box small { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; }
         .stat-box span { font-size: 1.8rem; font-weight: 800; }
 
-        /* ASSISTANT */
         #assistant-box {
             background: white; padding: 25px; border-left: 8px solid #cbd5e1; border-radius: 16px;
             margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
-        /* DYNAMIC PLAN */
-        #dynamic-plan { display: flex; flex-direction: column; gap: 15px; }
         .training-card {
             background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0;
-            cursor: grab; position: relative; transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 15px; position: relative;
         }
-        .training-card:active { cursor: grabbing; transform: scale(1.02); }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .day-tag { background: var(--primary); color: white; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.8rem; }
         
-        /* CHARTS */
         .bar-chart {
-            display: flex; align-items: flex-end; gap: 3px; height: 100px; 
-            background: #f1f5f9; padding: 10px; border-radius: 8px; margin: 15px 0;
+            display: flex; align-items: flex-end; gap: 3px; height: 80px; 
+            background: #f1f5f9; padding: 8px; border-radius: 8px; margin: 15px 0;
         }
-        .bar { flex: 1; border-radius: 2px; position: relative; }
+        .bar { flex: 1; border-radius: 2px; }
         .z1 { background: #94a3b8; } .z2 { background: #3b82f6; } .z3 { background: #06b6d4; }
         .z4 { background: #f59e0b; } .z5 { background: #f97316; } .z6 { background: #ef4444; }
 
-        .move-buttons { display: flex; gap: 5px; }
-        .btn-move { background: #f1f5f9; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .trend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-top: 20px; }
+        .chart-card { background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; }
+
+        @media(max-width: 600px) { .trend-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -74,53 +69,56 @@
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">PRO-COACH AI</h1>
-            <small id="sync-status" style="opacity:0.7">Status: Ready</small>
+            <h1 style="margin:0">PRO-COACH AI 2026</h1>
+            <small id="sync-status" style="opacity:0.7">Inicjalizacja...</small>
         </div>
-        <button class="btn-reset" onclick="resetPlan()">RESET PLANU</button>
+        <button class="btn-reset" onclick="resetPlan()">RESET KOLEJNOŚCI</button>
     </header>
 
     <div class="sync-dashboard">
         <div class="stat-box"><small>Wellness</small><span id="cloud-wellness">--%</span></div>
         <div class="stat-box"><small>TSS (Live)</small><span id="cloud-tss">---</span></div>
         <div class="stat-box"><small>Waga</small><span id="cloud-weight">-- kg</span></div>
-        <div class="stat-box"><small>Moc Relatywna</small><span id="wkg">--</span></div>
+        <div class="stat-box"><small>Moc (W/kg)</small><span id="wkg">--</span></div>
     </div>
 
     <div id="assistant-box">
-        <div id="warn-msg" style="font-weight: 900; text-transform: uppercase;">Inicjalizacja...</div>
-        <div id="sugg-msg" style="color: #64748b; margin-top: 5px;">Pobieranie rekomendacji z Google Sheets...</div>
+        <div id="warn-msg" style="font-weight: 900; text-transform: uppercase;">Łączenie...</div>
+        <div id="sugg-msg" style="color: #64748b; margin-top: 5px;">Czekam na dane z Google Sheets...</div>
     </div>
 
-    <div id="dynamic-plan">
-        </div>
+    <div id="dynamic-plan"></div>
 
-    <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
-        <div class="stat-box" style="background: white; color: var(--text); border: 1px solid #e2e8f0;">
-            <h3 style="margin:0 0 10px 0; font-size: 1rem;">Siłownia FBW</h3>
-            <small style="text-transform: none; color: #64748b;">Przysiad 3x8, Podciąganie 3xMax, Bułgary 3x10/nogę, Pompki 3xMax, Plank 4x1'.</small>
+    <div class="trend-grid">
+        <div class="chart-card">
+            <h3 style="margin:0 0 15px 0; font-size: 1rem;">📊 Trend Obciążenia (TSS)</h3>
+            <canvas id="tssChart"></canvas>
         </div>
-        <div class="stat-box" style="background: white; color: var(--text); border: 1px solid #e2e8f0;">
-            <h3 style="margin:0 0 10px 0; font-size: 1rem;">Suplementacja</h3>
-            <small style="text-transform: none; color: #64748b;">Omega-3, D3+K2, Kreatyna 5g, Magnez na noc. Izotonik 60-90g węgli/h na BIKE.</small>
+        <div class="chart-card">
+            <h3 style="margin:0 0 15px 0; font-size: 1rem;">📈 Stosunek FTP / Masa (W/kg)</h3>
+            <canvas id="wkgChart"></canvas>
         </div>
     </div>
 </div>
 
 <script>
     const CONFIG = {
-        csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRVLylCkxR1sbSnxYdWGCBpgeILRZMa3uTZCz6qPQ47Q5QJsinxI_T2n_KkjxKlbbz6JBadfQLLXxDP/pub?gid=950508224&single=true&output=csv"
+        csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRVLylCkxR1sbSnxYdWGCBpgeILRZMa3uTZCz6qPQ47Q5QJsinxI_T2n_KkjxKlbbz6JBadfQLLXxDP/pub?gid=950508224&single=true&output=csv",
+        cacheKey: "procoach_trends_v1"
     };
 
     const initialPlan = [
-        { id: 'tue', day: 'Wtorek', title: 'Sprinty & Tempo', desc: '7x 10s HARD (Zatrzymaj) + 3\' Easy. 2 bloki.', type: 'bike', chart: 'sprints' },
-        { id: 'thu', day: 'Czwartek', title: 'Sweet Spot', desc: 'Bloki 5\' Z3-Z4 / 50s Z2. Łącznie 9 powtórzeń.', type: 'bike', chart: 'sweet' },
-        { id: 'sun', day: 'Niedziela', title: 'Tlen + Kadencja', desc: 'Spokojny tlen + 5x1\' Max Kadencja + 5x1\' Single Leg.', type: 'bike', chart: 'endurance' },
-        { id: 'mon', day: 'Poniedziałek', title: 'Siła FBW', desc: 'Zestaw bazowy siły.', type: 'gym' },
-        { id: 'wed', day: 'Środa', title: 'Regeneracja', desc: 'Wolne / Joga.', type: 'rest' }
+        { id: 1, day: 'Poniedziałek', title: 'Siła FBW (Zestaw A)', desc: 'Przysiad 3x8, Podciąganie 3xMax, Core.', type: 'gym' },
+        { id: 2, day: 'Wtorek', title: 'Sprinty & Tempo', desc: '7x 10s HARD (Zatrzymaj) + 3\' Easy. 2 bloki.', type: 'bike', chart: 'sprints' },
+        { id: 3, day: 'Środa', title: 'Regeneracja', desc: 'Wolne / Joga / Spacer.', type: 'rest' },
+        { id: 4, day: 'Czwartek', title: 'Sweet Spot', desc: 'Bloki 5\' Z3-Z4 / 50s Z2. Łącznie 9 powtórzeń.', type: 'bike', chart: 'sweet' },
+        { id: 5, day: 'Piątek', title: 'Siła FBW (Zestaw B)', desc: 'Bułgary 3x10, Pompki 3xMax, Dead Bug.', type: 'gym' },
+        { id: 6, day: 'Sobota', title: 'Tlen (Z2)', desc: 'Jazda spokojna 90-120 min.', type: 'bike' },
+        { id: 7, day: 'Niedziela', title: 'Tlen + Technika', desc: '5x1\' Max Kadencja + 5x1\' Single Leg.', type: 'bike', chart: 'endurance' }
     ];
 
     let currentPlan = [...initialPlan];
+    let tssChart, wkgChart;
 
     function renderPlan() {
         const container = document.getElementById('dynamic-plan');
@@ -129,15 +127,15 @@
             const card = document.createElement('div');
             card.className = 'training-card';
             card.innerHTML = `
-                <div class="card-header">
+                <div style="display:flex; justify-content:space-between;">
                     <span class="day-tag">${t.day}</span>
-                    <div class="move-buttons">
-                        <button class="btn-move" onclick="move(${index}, -1)">▲</button>
-                        <button class="btn-move" onclick="move(${index}, 1)">▼</button>
+                    <div>
+                        <button onclick="move(${index}, -1)" style="cursor:pointer; border:none; background:none;">▲</button>
+                        <button onclick="move(${index}, 1)" style="cursor:pointer; border:none; background:none;">▼</button>
                     </div>
                 </div>
-                <h3 style="margin:0">${t.title}</h3>
-                <p style="font-size: 0.85rem; color: #64748b; margin: 5px 0;">${t.desc}</p>
+                <h3 style="margin:10px 0 5px 0">${t.title}</h3>
+                <p style="font-size: 0.85rem; color: #64748b; margin: 0;">${t.desc}</p>
                 ${t.chart ? `<div class="bar-chart">${getChartHTML(t.chart)}</div>` : ''}
             `;
             container.appendChild(card);
@@ -145,25 +143,47 @@
     }
 
     function getChartHTML(type) {
-        if(type === 'sprints') return '<div class="bar z2" style="height:40%"></div>' + Array(7).fill('<div class="bar z6" style="height:100%"></div><div class="bar z1" style="height:20%"></div>').join('') + '<div class="bar z3" style="height:60%"></div>';
-        if(type === 'sweet') return '<div class="bar z1" style="height:20%"></div>' + Array(5).fill('<div class="bar z4" style="height:80%"></div><div class="bar z2" style="height:40%"></div>').join('');
-        if(type === 'endurance') return '<div class="bar z2" style="height:50%"></div><div class="bar z5" style="height:90%"></div><div class="bar z2" style="height:50%"></div><div class="bar z5" style="height:90%"></div><div class="bar z2" style="height:50%"></div>';
+        if(type === 'sprints') return '<div class="bar z2" style="height:40%"></div>' + Array(7).fill('<div class="bar z6" style="height:100%"></div><div class="bar z1" style="height:20%"></div>').join('');
+        if(type === 'sweet') return Array(9).fill('<div class="bar z4" style="height:80%"></div><div class="bar z2" style="height:30%"></div>').join('');
+        if(type === 'endurance') return '<div class="bar z2" style="height:50%"></div>' + Array(5).fill('<div class="bar z5" style="height:90%"></div><div class="bar z2" style="height:50%"></div>').join('');
         return '';
     }
 
-    function move(index, direction) {
-        const newIndex = index + direction;
-        if(newIndex >= 0 && newIndex < currentPlan.length) {
-            const temp = currentPlan[index];
-            currentPlan[index] = currentPlan[newIndex];
-            currentPlan[newIndex] = temp;
+    function move(index, dir) {
+        let newIdx = index + dir;
+        if(newIdx >= 0 && newIdx < currentPlan.length) {
+            [currentPlan[index], currentPlan[newIdx]] = [currentPlan[newIdx], currentPlan[index]];
             renderPlan();
         }
     }
 
-    function resetPlan() {
-        currentPlan = [...initialPlan];
-        renderPlan();
+    function resetPlan() { currentPlan = [...initialPlan]; renderPlan(); }
+
+    function initCharts() {
+        const ctxTSS = document.getElementById('tssChart').getContext('2d');
+        const ctxWKG = document.getElementById('wkgChart').getContext('2d');
+        
+        const commonOptions = { 
+            responsive: true, 
+            scales: { y: { beginAtZero: false } },
+            plugins: { legend: { display: false } }
+        };
+
+        tssChart = new Chart(ctxTSS, { type: 'line', data: { labels: [], datasets: [{ label: 'TSS', data: [], borderColor: '#ef4444', fill: true, backgroundColor: 'rgba(239, 68, 68, 0.1)', tension: 0.4 }] }, options: commonOptions });
+        wkgChart = new Chart(ctxWKG, { type: 'line', data: { labels: [], datasets: [{ label: 'W/kg', data: [], borderColor: '#10b981', fill: true, backgroundColor: 'rgba(16, 185, 129, 0.1)', tension: 0.4 }] }, options: commonOptions });
+    }
+
+    function updateTrends(tss, wkg) {
+        let data = JSON.parse(localStorage.getItem(CONFIG.cacheKey)) || { labels: [], tss: [], wkg: [] };
+        const now = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        if (data.labels.length > 10) { data.labels.shift(); data.tss.shift(); data.wkg.shift(); }
+        data.labels.push(now); data.tss.push(tss); data.wkg.push(wkg);
+        
+        localStorage.setItem(CONFIG.cacheKey, JSON.stringify(data));
+        tssChart.data.labels = data.labels; tssChart.data.datasets[0].data = data.tss;
+        wkgChart.data.labels = data.labels; wkgChart.data.datasets[0].data = data.wkg;
+        tssChart.update(); wkgChart.update();
     }
 
     async function sync() {
@@ -171,17 +191,19 @@
             const r = await fetch(CONFIG.csvUrl + "&t=" + Date.now());
             const txt = await r.text();
             const rows = txt.split(/\r?\n/).map(l => l.split(","));
-            let w=63, f=200;
+            let w=63, f=200, t=0;
             rows.forEach(([p,v]) => {
                 if(p === "Waga") { document.getElementById('cloud-weight').innerText = v + "kg"; w=parseFloat(v); }
                 if(p === "FTP") f=parseFloat(v);
-                if(p === "TSS") document.getElementById('cloud-tss').innerText = v;
+                if(p === "TSS") { document.getElementById('cloud-tss').innerText = v; t=parseFloat(v); }
                 if(p === "Rekomendacja") document.getElementById('sugg-msg').innerText = v;
                 if(p === "Status_Zmeczenia") updateWellness(v);
             });
-            document.getElementById('wkg').innerText = (f/w).toFixed(2) + " W/kg";
-            document.getElementById('sync-status').innerText = "Status: OK (" + new Date().toLocaleTimeString() + ")";
-        } catch(e) { document.getElementById('sync-status').innerText = "Status: Błąd sync"; }
+            const ratio = (f/w).toFixed(2);
+            document.getElementById('wkg').innerText = ratio;
+            document.getElementById('sync-status').innerText = "Ostatnia synchronizacja: " + new Date().toLocaleTimeString();
+            updateTrends(t, ratio);
+        } catch(e) { console.error(e); }
     }
 
     function updateWellness(val) {
@@ -190,13 +212,13 @@
         const warn = document.getElementById('warn-msg');
         document.getElementById('cloud-wellness').innerText = s + "%";
         let col = "#10b981"; let txt = "Gotowy do treningu";
-        if(s < 40) { col="#ef4444"; txt="Regeneracja wymagana"; }
+        if(s < 40) { col="#ef4444"; txt="Wymagana regeneracja"; }
         else if(s < 70) { col="#f59e0b"; txt="Umiarkowane zmęczenie"; }
         box.style.borderLeft = "10px solid " + col;
         warn.innerText = txt; warn.style.color = col;
     }
 
-    window.onload = () => { renderPlan(); sync(); setInterval(sync, 60000); };
+    window.onload = () => { initCharts(); renderPlan(); sync(); setInterval(sync, 60000); };
 </script>
 
 </body>
