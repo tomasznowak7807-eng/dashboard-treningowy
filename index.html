@@ -3,169 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro-Coach AI 2026 | Ultimate Interactive Dashboard</title>
+    <title>Pro-Coach AI | Adaptive Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #0f172a; --secondary: #3b82f6; --accent: #ef4444;
-            --strength: #10b981; --recovery: #f59e0b; --bg: #f1f5f9;
+            --strength: #10b981; --recovery: #f59e0b; --bg: #f8fafc;
             --dark: #1e293b; --text: #334155;
         }
 
         * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         body { margin: 0; padding: 20px; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
-        .container { max-width: 1100px; margin: auto; }
+        .container { max-width: 1000px; margin: auto; }
 
-        /* HEADER */
         header {
             background: linear-gradient(135deg, var(--primary) 0%, #1e293b 100%);
-            color: white; padding: 1.5rem; border-radius: 20px; margin-bottom: 20px;
+            color: white; padding: 1.5rem; border-radius: 16px; margin-bottom: 20px;
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
         }
 
-        /* STATS */
+        /* Sekcja Onboardingu */
+        #onboarding-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%; 
+            background: rgba(15, 23, 42, 0.95); z-index: 1000; 
+            display: flex; justify-content: center; align-items: center;
+        }
+        .onboarding-card {
+            background: white; padding: 30px; border-radius: 20px; max-width: 500px; width: 90%;
+        }
+        input, select, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
+
+        .btn-main {
+            background: var(--secondary); color: white; border: none; padding: 12px 20px;
+            border-radius: 8px; cursor: pointer; font-weight: 700; width: 100%;
+        }
+
         .sync-dashboard {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;
         }
-        .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; position: relative; }
+        .stat-box {
+            background: var(--dark); color: white; padding: 20px; border-radius: 16px;
+            display: flex; flex-direction: column;
+        }
         .stat-box small { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; }
-        .stat-box span { font-size: 1.8rem; font-weight: 800; display: block; }
+        .stat-box span { font-size: 1.8rem; font-weight: 800; }
 
-        /* AI COACH & ASSISTANT */
-        .coach-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-bottom: 20px; }
-        #assistant-box { background: white; padding: 25px; border-left: 10px solid #cbd5e1; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .ai-verdict { background: #e0f2fe; border: 1px solid #bae6fd; padding: 15px; border-radius: 12px; font-size: 0.9rem; }
+        #assistant-box {
+            background: white; padding: 25px; border-left: 8px solid #cbd5e1; border-radius: 16px;
+            margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
 
-        /* DYNAMIC PLAN */
         .training-card {
             background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0;
-            margin-bottom: 15px; transition: 0.3s;
+            margin-bottom: 15px; position: relative; transition: 0.3s;
         }
-        .training-card:hover { border-color: var(--secondary); }
-        .card-header { display: flex; justify-content: space-between; align-items: center; }
-        .day-tag { background: var(--primary); color: white; padding: 4px 12px; border-radius: 8px; font-weight: 800; font-size: 0.75rem; }
+        .day-tag { background: var(--primary); color: white; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.8rem; }
         
-        /* EDIT MODAL-LIKE INPUTS */
-        .edit-fields { display: none; margin-top: 10px; }
-        .edit-fields input, .edit-fields textarea { 
-            width: 100%; margin-bottom: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit;
+        .bar-chart {
+            display: flex; align-items: flex-end; gap: 3px; height: 60px; 
+            background: #f1f5f9; padding: 8px; border-radius: 8px; margin: 15px 0;
         }
-
-        /* CHARTS */
-        .bar-chart { display: flex; align-items: flex-end; gap: 3px; height: 60px; background: #f8fafc; padding: 5px; border-radius: 8px; margin: 10px 0; }
         .bar { flex: 1; border-radius: 2px; }
-        .z1{background:#94a3b8} .z2{background:#3b82f6} .z3{background:#06b6d4} .z4{background:#f59e0b} .z5{background:#f97316} .z6{background:#ef4444}
+        .z1 { background: #94a3b8; } .z2 { background: #3b82f6; } .z4 { background: #f59e0b; } .z6 { background: #ef4444; }
 
-        /* BUTTONS */
-        .btn { cursor: pointer; border: none; border-radius: 8px; font-weight: 700; transition: 0.2s; }
-        .btn-edit { background: #f1f5f9; color: var(--primary); padding: 5px 10px; font-size: 0.7rem; }
-        .btn-save { background: var(--strength); color: white; padding: 8px 15px; }
-        .btn-reset { background: rgba(255,255,255,0.2); color: white; border: 1px solid white; padding: 8px 15px; }
+        .trend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+        .chart-card { background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; }
+        
+        .subjective-btns { display: flex; gap: 10px; margin-bottom: 20px; }
+        .btn-sub { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; background: white; font-weight: 600; }
 
-        /* SUPLEMENTACJA */
-        .suple-card { background: white; padding: 20px; border-radius: 16px; border-top: 5px solid var(--recovery); }
-
-        @media(max-width: 768px) { .coach-grid { grid-template-columns: 1fr; } }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
+<div id="onboarding-overlay" class="hidden">
+    <div class="onboarding-card">
+        <h2 style="margin-top:0">Witaj w ACAI 2026</h2>
+        <p style="font-size: 0.9rem; color: #64748b;">Zanim zaczniemy, AI musi zrozumieć Twój kontekst.</p>
+        <label>Twój główny cel:</label>
+        <select id="user-goal">
+            <option value="marathon">Ukończenie Maratonu</option>
+            <option value="weight">Redukcja wagi / Zdrowie</option>
+            <option value="ftp">Zwiększenie mocy (FTP)</option>
+        </select>
+        <label>Poziom wytrenowania (1-10):</label>
+        <input type="number" id="user-level" min="1" max="10" value="5">
+        <label>Największe utrudnienie życiowe:</label>
+        <textarea id="user-stress" placeholder="np. nienormowany czas pracy, małe dziecko..."></textarea>
+        <button class="btn-main" onclick="saveOnboarding()">ROZPOCZNIJ WSPÓŁPRACĘ</button>
+    </div>
+</div>
+
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">PRO-COACH AI <span style="color:var(--secondary)">2.0</span></h1>
-            <small id="sync-status">Status: Gotowy</small>
+            <h1 style="margin:0">ADAPTIVE COACH AI</h1>
+            <small id="sync-status" style="opacity:0.7">Inicjalizacja systemu...</small>
         </div>
-        <button class="btn btn-reset" onclick="resetToDefaults()">PRZYWRÓĆ PLAN</button>
+        <button class="btn-main" style="width:auto;" onclick="resetAll()">RESET PROFILU</button>
     </header>
 
-    <div class="sync-dashboard">
-        <div class="stat-box"><small>Wellness</small><span id="cloud-wellness">--%</span></div>
-        <div class="stat-box"><small>TSS (Live)</small><span id="cloud-tss">---</span></div>
-        <div class="stat-box"><small>Waga</small><span id="cloud-weight">-- kg</span></div>
-        <div class="stat-box"><small>W/kg</small><span id="wkg">--</span></div>
+    <div class="subjective-btns">
+        <button class="btn-sub" onclick="logSubjective('bol')">😫 Coś mnie boli</button>
+        <button class="btn-sub" onclick="logSubjective('zmeczenie')">😴 Słaby sen</button>
+        <button class="btn-sub" onclick="logSubjective('ready')">🚀 Czuję moc</button>
     </div>
 
-    <div class="coach-grid">
-        <div id="assistant-box">
-            <div id="warn-msg" style="font-weight: 900; text-transform: uppercase; font-size: 1.2rem;">Łączenie...</div>
-            <div id="sugg-msg" style="color: #64748b; margin: 10px 0;">Czekam na analizę Google Sheets...</div>
-            <div class="ai-verdict">
-                <strong>🤖 AI COACH VERDICT:</strong> <span id="coach-verdict">Analizuję Twoje ostatnie dane...</span>
-            </div>
-        </div>
-        
-        <div class="suple-card">
-            <h3 style="margin:0 0 10px 0; font-size: 1rem;">💊 Suplementacja Dnia</h3>
-            <ul style="padding-left:15px; font-size: 0.85rem; color: #475569;">
-                <li><strong>Rano:</strong> Wit. D3+K2, Omega-3, Kompleks witamin.</li>
-                <li><strong>Trening:</strong> 60g węgli/h (żele/izotonik) + elektrolity.</li>
-                <li><strong>Po:</strong> 30g izolatu białka + 5g Kreatyny.</li>
-                <li><strong>Wieczór:</strong> Magnez Cytrynian (ułatwia sen).</li>
-            </ul>
-        </div>
+    <div class="sync-dashboard">
+        <div class="stat-box"><small>Wellness (HRV)</small><span id="cloud-wellness">--%</span></div>
+        <div class="stat-box"><small>Obciążenie (TSS)</small><span id="cloud-tss">---</span></div>
+        <div class="stat-box"><small>Waga</small><span id="cloud-weight">-- kg</span></div>
+        <div class="stat-box"><small>Moc (W/kg)</small><span id="wkg">--</span></div>
+    </div>
+
+    <div id="assistant-box">
+        <div id="warn-msg" style="font-weight: 900; text-transform: uppercase;">Analiza danych...</div>
+        <div id="sugg-msg" style="color: #64748b; margin-top: 5px;">Synchronizacja z Twoim profilem...</div>
     </div>
 
     <div id="dynamic-plan"></div>
 
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap:20px; margin-top:30px;">
-        <div style="background:white; padding:20px; border-radius:16px;"><canvas id="tssChart"></canvas></div>
-        <div style="background:white; padding:20px; border-radius:16px;"><canvas id="wkgChart"></canvas></div>
+    <div class="trend-grid">
+        <div class="chart-card">
+            <h3 style="margin:0 0 15px 0; font-size: 1rem;">📊 Trend Obciążenia</h3>
+            <canvas id="tssChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3 style="margin:0 0 15px 0; font-size: 1rem;">📈 Stosunek W/kg</h3>
+            <canvas id="wkgChart"></canvas>
+        </div>
     </div>
 </div>
 
 <script>
     const CONFIG = {
         csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRVLylCkxR1sbSnxYdWGCBpgeILRZMa3uTZCz6qPQ47Q5QJsinxI_T2n_KkjxKlbbz6JBadfQLLXxDP/pub?gid=950508224&single=true&output=csv",
-        storageKey: "procoach_user_plan_v2"
+        cacheKey: "acai_v2_data"
     };
 
-    const defaultPlan = [
-        { id: 0, day: 'Poniedziałek', title: 'Siła FBW (Zestaw A)', desc: 'Przysiad 3x8, Podciąganie 3xMax, Core 10\'.', type: 'gym' },
-        { id: 1, day: 'Wtorek', title: 'Sprinty & Tempo', desc: '7x 10s HARD + 3\' Easy. Skupienie na mocy z zatrzymania.', type: 'bike', chart: 'sprints' },
-        { id: 2, day: 'Środa', title: 'Regeneracja Aktywna', desc: 'Spacer lub 30min bardzo lekkiego kręcenia.', type: 'rest' },
-        { id: 3, day: 'Czwartek', title: 'Sweet Spot', desc: 'Bloki 5\' Z3-Z4 / 50s Z2. Budowanie wytrzymałości siłowej.', type: 'bike', chart: 'sweet' },
-        { id: 4, day: 'Piątek', title: 'Siła FBW (Zestaw B)', desc: 'Bułgary 3x10, Pompki 3xMax, Dead Bug 3x12.', type: 'gym' },
-        { id: 5, day: 'Sobota', title: 'REGENERACJA', desc: 'Dzień całkowicie wolny od treningu. Skupienie na śnie.', type: 'rest' },
-        { id: 6, day: 'Niedziela', title: 'Tlen + Technika', desc: 'Spokojne Z2 + 5x1\' Max Kadencja + 5x1\' Single Leg.', type: 'bike', chart: 'endurance' }
+    const initialPlan = [
+        { id: 1, day: 'Poniedziałek', title: 'Interwały VO2Max', desc: '5x3min Z5 / 3min Z1. Hard!', type: 'hard', chart: 'sprints' },
+        { id: 2, day: 'Wtorek', title: 'Siła Podbiegi', desc: '8x20s sprint pod górę. Skupienie na technice.', type: 'medium' },
+        { id: 3, day: 'Środa', title: 'Regeneracja AI', desc: 'Wolne lub 30 min bardzo lekkiego truchtu.', type: 'rest' },
+        { id: 4, day: 'Czwartek', title: 'Tempo (Sweet Spot)', desc: '2x15min Z4. Budowanie wytrzymałości.', type: 'hard', chart: 'sweet' },
+        { id: 5, day: 'Piątek', title: 'Bieg spokojny', desc: '45 min w 2 strefie. Relaks.', type: 'easy' },
+        { id: 6, day: 'Sobota', title: 'Długie wybieganie', desc: '90-120 min tlenowo.', type: 'medium', chart: 'endurance' },
+        { id: 7, day: 'Niedziela', title: 'Joga / Mobility', desc: 'Praca nad zakresem ruchów.', type: 'rest' }
     ];
 
-    let userPlan = JSON.parse(localStorage.getItem(CONFIG.storageKey)) || [...defaultPlan];
+    let currentPlan = [...initialPlan];
+    let tssChart, wkgChart;
 
+    // --- ONBOARDING LOGIC ---
+    function checkOnboarding() {
+        if(!localStorage.getItem('acai_user_profile')) {
+            document.getElementById('onboarding-overlay').classList.remove('hidden');
+        } else {
+            const profile = JSON.parse(localStorage.getItem('acai_user_profile'));
+            document.getElementById('sugg-msg').innerText = "Witaj trenerze! Twój cel: " + profile.goal;
+        }
+    }
+
+    function saveOnboarding() {
+        const profile = {
+            goal: document.getElementById('user-goal').value,
+            level: document.getElementById('user-level').value,
+            stress: document.getElementById('user-stress').value
+        };
+        localStorage.setItem('acai_user_profile', JSON.stringify(profile));
+        document.getElementById('onboarding-overlay').classList.add('hidden');
+        sync();
+    }
+
+    // --- CORE AI LOGIC ---
+    function adaptPlan(wellnessScore) {
+        const restDayIdx = currentPlan.findIndex(t => t.type === 'rest');
+        if (wellnessScore < 50 && restDayIdx !== -1 && currentPlan[0].type !== 'rest') {
+            [currentPlan[0], currentPlan[restDayIdx]] = [currentPlan[restDayIdx], currentPlan[0]];
+            currentPlan[0].title = "🛡️ ADAPTACJA: Regeneracja";
+            currentPlan[0].desc = "Zauważyłem niskie parametry regeneracji. Przesunąłem odpoczynek na dzisiaj.";
+            renderPlan();
+        }
+    }
+
+    function logSubjective(status) {
+        const box = document.getElementById('assistant-box');
+        if(status === 'bol') {
+            document.getElementById('warn-msg').innerText = "Wykryto zgłoszenie bólu!";
+            document.getElementById('sugg-msg').innerText = "AI sugeruje: Zrezygnuj z dzisiejszej sesji. Skup się na rolowaniu i lodzie.";
+            box.style.background = "#fff1f2";
+        } else if(status === 'ready') {
+            document.getElementById('warn-msg').innerText = "Super samopoczucie!";
+            document.getElementById('sugg-msg').innerText = "Możesz dołożyć 1-2 powtórzenia do dzisiejszego głównego bloku.";
+            box.style.background = "#f0fdf4";
+        }
+    }
+
+    // --- RENDER & CHARTS ---
     function renderPlan() {
         const container = document.getElementById('dynamic-plan');
         container.innerHTML = '';
-        userPlan.forEach((t, idx) => {
+        currentPlan.forEach((t) => {
             const card = document.createElement('div');
             card.className = 'training-card';
             card.innerHTML = `
-                <div class="card-header">
-                    <span class="day-tag">${t.day}</span>
-                    <button class="btn btn-edit" onclick="toggleEdit(${idx})">Edytuj</button>
-                </div>
-                <div id="view-${idx}">
-                    <h3 style="margin:10px 0 5px 0">${t.title}</h3>
-                    <p style="font-size: 0.9rem; color: #64748b; margin: 0;">${t.desc}</p>
-                    ${t.chart ? `<div class="bar-chart">${getChart(t.chart)}</div>` : ''}
-                </div>
-                <div id="edit-${idx}" class="edit-fields">
-                    <input type="text" id="input-title-${idx}" value="${t.title}">
-                    <textarea id="input-desc-${idx}">${t.desc}</textarea>
-                    <button class="btn btn-save" onclick="saveEdit(${idx})">Zapisz</button>
-                </div>
+                <span class="day-tag">${t.day}</span>
+                <h3 style="margin:10px 0 5px 0">${t.title}</h3>
+                <p style="font-size: 0.85rem; color: #64748b; margin: 0;">${t.desc}</p>
+                ${t.chart ? `<div class="bar-chart">${getChartHTML(t.chart)}</div>` : ''}
             `;
             container.appendChild(card);
         });
     }
 
-    function getChart(type) {
-        if(type === 'sprints') return '<div class="bar z2" style="height:40%"></div>' + Array(7).fill('<div class="bar z6" style="height:100%"></div><div class="bar z1" style="height:20%"></div>').join('');
-        if(type === 'sweet') return Array(5).fill('<div class="bar z4" style="height:80%"></div><div class="bar z2" style="height:30%"></div>').join('');
-        if(type === 'endurance') return '<div class="bar z2" style="height:50%"></div><div class="bar z5" style="height:90%"></div><div class="bar z2" style="height:50%"></div>';
-        return '';
+    function getChartHTML(type) {
+        if(type === 'sprints') return '<div class="bar z2" style="height:30%"></div>' + Array(5).fill('<div class="bar z6" style="height:100%"></div><div class="bar z1" style="height:20%"></div>').join('');
+        if(type === 'sweet') return Array(2).fill('<div class="bar z4" style="height:80%"></div><div class="bar z2" style="height:30%"></div>').join('');
+        return '<div class="bar z2" style="height:60%"></div>';
     }
 
-    function toggleEdit(idx) {
-        document.getElementById(`view-${idx}`).style.display = 'none
+    async function sync() {
+        try {
+            const r = await fetch(CONFIG.csvUrl + "&t=" + Date.now());
+            const txt = await r.text();
+            const rows = txt.split(/\r?\n/).map(l => l.split(","));
+            let w=70, f=250, t=0, s=80;
+            rows.forEach(([p,v]) => {
+                if(p === "Waga") { document.getElementById('cloud-weight').innerText = v + "kg"; w=parseFloat(v); }
+                if(p === "TSS") { document.getElementById('cloud-tss').innerText = v; t=parseFloat(v); }
+                if(p === "Status_Zmeczenia") { s=parseInt(v); updateWellnessUI(s); }
+            });
+            document.getElementById('wkg').innerText = (f/w).toFixed(2);
+            document.getElementById('sync-status').innerText = "Synchronizacja: " + new Date().toLocaleTimeString();
+            adaptPlan(s);
+        } catch(e) { console.warn("Brak połączenia z Google Sheets - działam w trybie offline."); }
+    }
+
+    function updateWellnessUI(s) {
+        document.getElementById('cloud-wellness').innerText = s + "%";
+        const box = document.getElementById('assistant-box');
+        const warn = document.getElementById('warn-msg');
+        if(s < 50) { box.style.borderLeftColor = "#ef4444"; warn.style.color = "#ef4444"; warn.innerText = "ALARM REGENERACJI"; }
+        else { box.style.borderLeftColor = "#10b981"; warn.style.color = "#10b981"; warn.innerText = "ORGANIZM GOTOWY"; }
+    }
+
+    function initCharts() {
+        const common = { responsive: true, plugins: { legend: { display: false } } };
+        tssChart = new Chart(document.getElementById('tssChart'), { type: 'line', data: { labels: ['P','W','Ś','C','P','S','N'], datasets: [{ data: [40,65,0,85,30,120,45], borderColor: '#ef4444', tension: 0.4 }] }, options: common });
+        wkgChart = new Chart(document.getElementById('wkgChart'), { type: 'line', data: { labels: ['Sty','Lut','Mar'], datasets: [{ data: [3.1, 3.3, 3.5], borderColor: '#10b981', tension: 0.4 }] }, options: common });
+    }
+
+    function resetAll() { localStorage.clear(); location.reload(); }
+
+    window.onload = () => { checkOnboarding(); initCharts(); renderPlan(); sync(); setInterval(sync, 30000); };
+</script>
+</body>
+</html>
