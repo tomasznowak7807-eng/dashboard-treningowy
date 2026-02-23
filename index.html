@@ -1,211 +1,323 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro-Coach AI | Performance Dashboard</title>
-    <style>
-        :root {
-            --primary: #0f172a; --secondary: #2563eb; --accent: #dc2626;
-            --strength: #059669; --recovery: #d97706; --bg: #f8fafc;
-            --text-dark: #1e293b; --card-border: #e2e8f0;
-        }
-        * { box-sizing: border-box; }
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text-dark); margin: 0; padding: 20px; line-height: 1.6; }
-        .container { max-width: 1100px; margin: 0 auto; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pro-Coach AI | Performance Dashboard</title>
 
-        /* HEADER */
-        header { background: var(--primary); color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--secondary); }
-        header h1 { margin: 0; font-size: 1.2rem; letter-spacing: 1px; }
+<style>
+:root{
+--primary:#0f172a;
+--secondary:#2563eb;
+--accent:#dc2626;
+--strength:#059669;
+--recovery:#d97706;
+--bg:#f8fafc;
+--text-dark:#1e293b;
+--card-border:#e2e8f0;
+}
+*{box-sizing:border-box;}
+body{
+font-family:system-ui,-apple-system,sans-serif;
+background:var(--bg);
+color:var(--text-dark);
+margin:0;
+padding:20px;
+line-height:1.6;
+}
+.container{max-width:1100px;margin:0 auto;}
+header{
+background:var(--primary);
+color:white;
+padding:1.5rem;
+border-radius:12px;
+margin-bottom:20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+border-bottom:4px solid var(--secondary);
+}
+header h1{margin:0;font-size:1.2rem;}
 
-        /* SYNC PANEL (DARK MODE) */
-        .sync-dashboard { background: #1e293b; color: white; padding: 20px; border-radius: 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; border: 1px solid var(--secondary); }
-        .stat-box { border-left: 3px solid var(--secondary); padding-left: 15px; }
-        .stat-box small { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 800; display: block; }
-        .stat-box span { font-size: 1.4rem; font-weight: 900; }
+.sync-dashboard{
+background:#1e293b;
+color:white;
+padding:20px;
+border-radius:12px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:15px;
+margin-bottom:20px;
+}
+.stat-box{border-left:3px solid var(--secondary);padding-left:15px;}
+.stat-box small{font-size:0.7rem;color:#94a3b8;text-transform:uppercase;font-weight:800;display:block;}
+.stat-box span{font-size:1.4rem;font-weight:900;}
 
-        /* ASYSTENT I REKOMENDACJE */
-        #assistant-box { background: white; border-left: 10px solid #cbd5e1; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        #warn-msg { margin: 0; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; }
-        #sugg-msg { margin: 8px 0 0 0; color: #475569; font-weight: 500; }
+#assistant-box{
+background:white;
+border-left:10px solid #cbd5e1;
+padding:20px;
+border-radius:12px;
+margin-bottom:20px;
+box-shadow:0 4px 6px rgba(0,0,0,0.05);
+}
+#warn-msg{margin:0;font-size:1.1rem;font-weight:800;text-transform:uppercase;}
+#sugg-msg{margin:8px 0 0 0;color:#475569;}
 
-        /* GRID SYSTEM */
-        .grid { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 20px; }
-        .card { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--card-border); margin-bottom: 20px; }
-        h2 { font-size: 1rem; border-left: 4px solid var(--secondary); padding-left: 10px; margin-top: 0; text-transform: uppercase; }
+.card{
+background:white;
+padding:20px;
+border-radius:12px;
+border:1px solid var(--card-border);
+margin-bottom:20px;
+}
+h2{
+font-size:1rem;
+border-left:4px solid var(--secondary);
+padding-left:10px;
+margin-top:0;
+text-transform:uppercase;
+}
 
-        /* WYKRES TRENINGU */
-        .workout-preview { background: #f1f5f9; padding: 15px; border-radius: 8px; border: 1px dotted #cbd5e1; }
-        .bar-chart { display: flex; height: 60px; align-items: flex-end; gap: 3px; margin-top: 10px; }
-        .bar { border-radius: 2px 2px 0 0; min-width: 15px; }
-        .z1 { background: #94a3b8; height: 30%; width: 15%; } /* Warm up */
-        .z2 { background: var(--strength); height: 50%; width: 40%; } /* Zone 2 */
-        .z4 { background: var(--recovery); height: 80%; width: 10%; } /* Intervals */
-        .z6 { background: var(--accent); height: 100%; width: 5%; } /* Sprints */
+canvas{
+width:100%;
+display:block;
+}
 
-        /* LISTY I TABELE */
-        table { width: 100%; border-collapse: collapse; }
-        td { padding: 12px 8px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; font-weight: 600; }
-        .tag { padding: 3px 6px; border-radius: 4px; color: white; font-size: 0.7rem; font-weight: 800; }
-        .tag-bike { background: var(--secondary); }
-        .tag-gym { background: var(--strength); }
-        .tag-rest { background: #64748b; }
-
-        ul { padding-left: 20px; margin: 0; }
-        li { margin-bottom: 8px; font-size: 0.85rem; }
-
-        @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
-    </style>
+@media(max-width:850px){
+.grid{grid-template-columns:1fr;}
+}
+</style>
 </head>
+
 <body>
 
 <div class="container">
-    <header>
-        <h1>PRO-COACH AI <span style="color:var(--secondary)">2026</span></h1>
-        <div id="sync-status" style="font-size: 0.7rem; opacity: 0.7;">Oczekiwanie na dane...</div>
-    </header>
 
-    <div class="sync-dashboard">
-        <div class="stat-box"><small>Wellness</small><span id="cloud-wellness">--%</span></div>
-        <div class="stat-box"><small>TSS (7d)</small><span id="cloud-tss">---</span></div>
-        <div class="stat-box"><small>Waga</small><span id="cloud-weight">-- kg</span></div>
-        <div class="stat-box"><small>Moc relatywna</small><span id="wkg">0.00</span> W/kg</div>
-    </div>
+<header>
+<h1>PRO-COACH AI 2026</h1>
+<div id="sync-status">Oczekiwanie na dane...</div>
+</header>
 
-    <div id="assistant-box">
-        <div id="warn-msg">Inicjalizacja systemu...</div>
-        <div id="sugg-msg">Łączenie z bazą danych treningowych.</div>
-    </div>
+<div class="sync-dashboard">
+<div class="stat-box"><small>Wellness</small><span id="cloud-wellness">--%</span></div>
+<div class="stat-box"><small>TSS (7d)</small><span id="cloud-tss">---</span></div>
+<div class="stat-box"><small>Waga</small><span id="cloud-weight">-- kg</span></div>
+<div class="stat-box"><small>Moc relatywna</small><span id="wkg">--</span> W/kg</div>
+</div>
 
-    <div class="grid">
-        <div class="col-main">
-            <div class="card">
-                <h2>Plan Tygodniowy</h2>
-                <table>
-                    <tbody id="plan-body"></tbody>
-                </table>
-            </div>
+<div id="assistant-box">
+<div id="warn-msg">Inicjalizacja...</div>
+<div id="sugg-msg">Łączenie z arkuszem.</div>
+</div>
 
-            <div class="card">
-                <h2>Analiza Jednostki: Endurance + Sprint</h2>
-                <div class="workout-preview">
-                    <strong>Profil: 90 min Z2 + 4x15s Max Sprint</strong>
-                    <div class="bar-chart">
-                        <div class="bar z1"></div>
-                        <div class="bar z2"></div>
-                        <div class="bar z4"></div>
-                        <div class="bar z2"></div>
-                        <div class="bar z6"></div>
-                        <div class="bar z2"></div>
-                        <div class="bar z6"></div>
-                        <div class="bar z2"></div>
-                        <div class="bar z6"></div>
-                        <div class="bar z2"></div>
-                        <div class="bar z6"></div>
-                        <div class="bar z1"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="card">
+<h2>Trend TSS (30 dni)</h2>
+<canvas id="tssChart" height="120"></canvas>
+</div>
 
-        <div class="col-side">
-            <div class="card" style="border-top: 4px solid var(--strength);">
-                <h2>Trening Siłowy (FBW)</h2>
-                <ul>
-                    <li><b>Przysiad ze sztangą:</b> 3x8 (RPE 8)</li>
-                    <li><b>Podciąganie / TRX:</b> 3x Max</li>
-                    <li><b>Plank / Core:</b> 4x1 min</li>
-                    <li><b>Wspięcia na palce:</b> 3x20</li>
-                </ul>
-            </div>
+<div class="card">
+<h2>Trend FTP / Masa (W/kg)</h2>
+<canvas id="ftpChart" height="120"></canvas>
+</div>
 
-            <div class="card" style="border-top: 4px solid var(--recovery);">
-                <h2>Suplementacja</h2>
-                <ul>
-                    <li><b>Rano:</b> Omega-3, Wit. D3+K2</li>
-                    <li><b>Trening:</b> Izotonik (60g węgli/h)</li>
-                    <li><b>Po treningu:</b> Białko (30g) + Kreatyna (5g)</li>
-                    <li><b>Wieczór:</b> Magnez (Cytrynian)</li>
-                </ul>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
-    // KONFIGURACJA LINKU
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRVLylCkxR1sbSnxYdWGCBpgeILRZMa3uTZCz6qPQ47Q5QJsinxI_T2n_KkjxKlbbz6JBadfQLLXxDP/pub?gid=950508224&single=true&output=csv';
+/* ==============================
+   CONFIG
+============================== */
 
-    const planData = [
-        { d: "Pon", t: "GYM", n: "FBW Siła Max", c: "tag-gym" },
-        { d: "Wt", t: "BIKE", n: "Interwały VO2Max", c: "tag-bike" },
-        { d: "Śr", t: "REST", n: "Joga / Rolowanie", c: "tag-rest" },
-        { d: "Czw", t: "BIKE", n: "Sweet Spot 2x20'", c: "tag-bike" },
-        { d: "Pt", t: "GYM", n: "Siła Eksplozywna", c: "tag-gym" },
-        { d: "Sob", t: "BIKE", n: "Tlen (Z2) 3h", c: "tag-bike" },
-        { d: "Nie", t: "REST", n: "Aktywna regeneracja", c: "tag-rest" }
-    ];
+const CONFIG = {
+csvUrl: "TWÓJ_LINK_CSV",
+refreshInterval: 60000,
+cacheKey: "procoach_cache_v2",
+timeout: 8000
+};
 
-    async function syncSheets() {
-        const warn = document.getElementById('warn-msg');
-        const sugg = document.getElementById('sugg-msg');
-        const status = document.getElementById('sync-status');
+let isSyncing = false;
 
-        try {
-            const response = await fetch(csvUrl + "&cache=" + Date.now());
-            if (!response.ok) throw new Error("Błąd serwera");
-            
-            const data = await response.text();
-            if (data.includes("<!DOCTYPE html>")) throw new Error("Link to nie CSV");
+/* ==============================
+   UTILS
+============================== */
 
-            const rows = data.split('\n').map(r => r.split(',').map(c => c.trim()));
-            let weight = 63, ftp = 200;
+function safeNumber(v){
+const n=parseFloat(v);
+return isNaN(n)?null:n;
+}
 
-            rows.forEach(row => {
-                const [p, v] = row;
-                if (p === 'Waga') { document.getElementById('cloud-weight').innerText = v + " kg"; weight = parseFloat(v); }
-                if (p === 'FTP') { ftp = parseFloat(v); }
-                if (p === 'TSS') document.getElementById('cloud-tss').innerText = v;
-                if (p === 'Rekomendacja') sugg.innerText = v;
-                if (p === 'Status_Zmeczenia') updateWellness(v);
-            });
+function parseCSV(text){
+return text.trim().split(/\r?\n/).map(r=>r.split(",").map(c=>c.trim()));
+}
 
-            document.getElementById('wkg').innerText = (ftp / weight).toFixed(2);
-            warn.innerText = "✅ SYSTEM ZSYNCHRONIZOWANY";
-            status.innerText = "Ostatnia aktualizacja: " + new Date().toLocaleTimeString();
+function saveCache(data){
+localStorage.setItem(CONFIG.cacheKey,JSON.stringify(data));
+}
 
-        } catch (e) {
-            warn.innerText = "🔴 BŁĄD POŁĄCZENIA";
-            warn.style.color = "var(--accent)";
-            sugg.innerText = "Sprawdź publikację arkusza Logic jako CSV i status GitHub Pages.";
-        }
-    }
+function loadCache(){
+const raw=localStorage.getItem(CONFIG.cacheKey);
+return raw?JSON.parse(raw):null;
+}
 
-    function updateWellness(score) {
-        const s = parseInt(score);
-        const box = document.getElementById('assistant-box');
-        const cloud = document.getElementById('cloud-wellness');
-        cloud.innerText = s + "%";
-        
-        let color = "var(--strength)";
-        let msg = "GOTOWY NA TRENING";
+function updateHistory(history,value,maxDays=30){
+const today=new Date().toISOString().split("T")[0];
+history[today]=value;
+const keys=Object.keys(history).sort();
+while(keys.length>maxDays){
+delete history[keys.shift()];
+}
+return history;
+}
 
-        if (s < 40) { color = "var(--accent)"; msg = "REGENERACJA WYMAGANA"; }
-        else if (s < 70) { color = "var(--recovery)"; msg = "ZACHOWAJ OSTROŻNOŚĆ"; }
+function fetchWithTimeout(url,timeout){
+return Promise.race([
+fetch(url),
+new Promise((_,reject)=>setTimeout(()=>reject(new Error("Timeout")),timeout))
+]);
+}
 
-        box.style.borderLeft = "10px solid " + color;
-        document.getElementById('warn-msg').style.color = color;
-        document.getElementById('warn-msg').innerText = msg;
-    }
+/* ==============================
+   SYNC
+============================== */
 
-    function init() {
-        const body = document.getElementById('plan-body');
-        body.innerHTML = planData.map(p => `<tr><td style="width:50px">${p.d}</td><td style="width:80px"><span class="tag ${p.c}">${p.t}</span></td><td>${p.n}</td></tr>`).join('');
-        syncSheets();
-    }
+async function syncSheets(){
+if(isSyncing)return;
+isSyncing=true;
 
-    window.onload = init;
-    setInterval(syncSheets, 60000);
+const warn=document.getElementById("warn-msg");
+const sugg=document.getElementById("sugg-msg");
+const status=document.getElementById("sync-status");
+
+try{
+
+const response=await fetchWithTimeout(CONFIG.csvUrl+"&cache="+Date.now(),CONFIG.timeout);
+if(!response.ok)throw new Error();
+
+const text=await response.text();
+const rows=parseCSV(text);
+
+let weight=null,ftp=null,tss=null;
+
+rows.forEach(([p,v])=>{
+switch(p){
+case "Waga":weight=safeNumber(v);break;
+case "FTP":ftp=safeNumber(v);break;
+case "TSS":tss=safeNumber(v);break;
+case "Status_Zmeczenia":updateWellness(v);break;
+case "Rekomendacja":sugg.innerText=v;break;
+}
+});
+
+const cache=loadCache()||{tssHistory:{},wkgHistory:{}};
+
+if(tss)cache.tssHistory=updateHistory(cache.tssHistory,tss);
+if(weight&&ftp&&weight>0){
+const wkg=(ftp/weight).toFixed(2);
+document.getElementById("wkg").innerText=wkg;
+cache.wkgHistory=updateHistory(cache.wkgHistory,parseFloat(wkg));
+}else{
+document.getElementById("wkg").innerText="--";
+}
+
+if(weight)document.getElementById("cloud-weight").innerText=weight+" kg";
+if(tss)document.getElementById("cloud-tss").innerText=tss;
+
+saveCache(cache);
+renderCharts(cache);
+
+warn.style.color="var(--strength)";
+warn.innerText="SYSTEM ZSYNCHRONIZOWANY";
+status.innerText="Ostatnia aktualizacja: "+new Date().toLocaleTimeString();
+
+}catch(e){
+
+warn.style.color="var(--accent)";
+warn.innerText="BŁĄD POŁĄCZENIA (tryb offline)";
+const cache=loadCache();
+if(cache)renderCharts(cache);
+
+}
+
+isSyncing=false;
+}
+
+/* ==============================
+   WELLNESS
+============================== */
+
+function updateWellness(score){
+const s=parseInt(score);
+if(isNaN(s))return;
+
+const box=document.getElementById("assistant-box");
+const cloud=document.getElementById("cloud-wellness");
+
+cloud.innerText=s+"%";
+
+let color="var(--strength)";
+let msg="GOTOWY NA TRENING";
+
+if(s<40){color="var(--accent)";msg="REGENERACJA WYMAGANA";}
+else if(s<70){color="var(--recovery)";msg="ZACHOWAJ OSTROŻNOŚĆ";}
+
+box.style.borderLeft="10px solid "+color;
+document.getElementById("warn-msg").style.color=color;
+document.getElementById("warn-msg").innerText=msg;
+}
+
+/* ==============================
+   CHART ENGINE
+============================== */
+
+function drawLineChart(id,data,color){
+const canvas=document.getElementById(id);
+if(!canvas)return;
+const ctx=canvas.getContext("2d");
+const width=canvas.width=canvas.offsetWidth;
+const height=canvas.height;
+ctx.clearRect(0,0,width,height);
+
+const values=Object.values(data);
+if(values.length<2)return;
+
+const max=Math.max(...values);
+const min=Math.min(...values);
+const pad=20;
+
+ctx.beginPath();
+ctx.strokeStyle=color;
+ctx.lineWidth=2;
+
+values.forEach((v,i)=>{
+const x=pad+(i/(values.length-1))*(width-pad*2);
+const y=height-pad-((v-min)/(max-min||1))*(height-pad*2);
+if(i===0)ctx.moveTo(x,y);
+else ctx.lineTo(x,y);
+});
+
+ctx.stroke();
+}
+
+function renderCharts(cache){
+drawLineChart("tssChart",cache.tssHistory,"#dc2626");
+drawLineChart("ftpChart",cache.wkgHistory,"#059669");
+}
+
+/* ==============================
+   INIT
+============================== */
+
+window.onload=()=>{
+const cache=loadCache();
+if(cache)renderCharts(cache);
+syncSheets();
+
+setInterval(()=>{
+if(document.visibilityState==="visible"){
+syncSheets();
+}
+},CONFIG.refreshInterval);
+};
 </script>
 
 </body>
