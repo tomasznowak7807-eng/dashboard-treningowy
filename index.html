@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v4.1 | Stable Parser</title>
+    <title>ACAI 4.2 | Pro Coach Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -14,7 +14,7 @@
         }
         * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         body { margin: 0; padding: 20px; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
-        .container { max-width: 1200px; margin: auto; }
+        .container { max-width: 900px; margin: auto; }
 
         header {
             background: linear-gradient(135deg, var(--primary) 0%, #1e293b 100%);
@@ -22,235 +22,275 @@
             display: flex; justify-content: space-between; align-items: center;
         }
 
-        .drop-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .drop-box {
-            border: 2px dashed #cbd5e1; border-radius: 12px; padding: 15px; 
-            text-align: center; font-size: 0.8rem; cursor: pointer; transition: 0.3s; background: white;
+        /* Overlaye dla ankiet */
+        .overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%; 
+            background: rgba(15, 23, 42, 0.98); z-index: 1000; 
+            display: flex; justify-content: center; align-items: center;
         }
-        .drop-box:hover { border-color: var(--secondary); background: #f0f7ff; }
-
-        .dashboard-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;
+        .card-modal {
+            background: white; padding: 30px; border-radius: 20px; max-width: 500px; width: 90%;
+            max-height: 90vh; overflow-y: auto; color: var(--text); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
         }
-        .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; }
-        .stat-box small { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 5px; }
-        .stat-box span { font-size: 1.8rem; font-weight: 800; }
 
-        .card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+        .btn-main {
+            background: var(--secondary); color: white; border: none; padding: 12px 20px;
+            border-radius: 8px; cursor: pointer; font-weight: 700; width: 100%; margin-top: 10px;
+        }
+        .btn-outline { background: none; border: 1px solid #ddd; padding: 10px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 5px; }
+
+        label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 5px; color: var(--primary); }
+        input, select, textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; }
+
+        .sync-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-box { background: var(--dark); color: white; padding: 15px; border-radius: 16px; text-align: center; }
+        .stat-box small { display: block; font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-box span { font-size: 1.3rem; font-weight: 800; }
+
+        #assistant-box {
+            background: white; padding: 20px; border-left: 8px solid #3b82f6; border-radius: 16px;
+            margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .training-card {
+            background: white; padding: 18px; border-radius: 16px; border: 1px solid #e2e8f0;
+            margin-bottom: 12px; cursor: pointer; transition: transform 0.2s;
+        }
+        .training-card:hover { transform: translateY(-2px); border-color: var(--secondary); }
+        .day-tag { background: var(--primary); color: white; padding: 3px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: 700; }
         
-        .biometry-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 10px; }
-        .input-group { flex: 1; min-width: 140px; }
-        label { display: block; font-size: 0.75rem; font-weight: 800; margin-bottom: 5px; color: var(--primary); }
-        input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; }
-        
-        .btn-update { padding: 11px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-
-        .zones-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
-        .zones-table th { text-align: left; padding: 10px; border-bottom: 2px solid #f1f5f9; color: #64748b; }
-        .zones-table td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-weight: 600; }
-        .z-tag { padding: 3px 8px; border-radius: 4px; color: white; font-size: 0.7rem; font-weight: 900; }
-
-        .grid-main { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        #ai-verdict { border-left: 10px solid var(--secondary); background: #f0f9ff; padding: 20px; border-radius: 12px; }
+        .hidden { display: none !important; }
+        .hr-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <div>
-            <h1 style="margin:0">ADAPTIVE COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v4.1 Stable</span></h1>
-            <small>Poprawiony parser danych CSV</small>
-        </div>
-        <button onclick="resetApp()" style="background:none; border: 1px solid white; color: white; padding: 5px 12px; border-radius: 6px; cursor:pointer;">Resetuj Bazę</button>
-    </header>
+<div id="onboarding-overlay" class="overlay hidden">
+    <div class="card-modal">
+        <h2 style="margin-top:0">Konfiguracja ACAI</h2>
+        
+        <label>Dyscyplina:</label>
+        <select id="user-sport">
+            <option value="run">Bieganie</option>
+            <option value="mtb">Kolarstwo MTB</option>
+            <option value="road">Kolarstwo Szosowe</option>
+            <option value="triathlon">Triathlon</option>
+        </select>
 
-    <div class="drop-grid">
-        <div class="drop-box" id="drop-activities"><strong>🏃 AKTYWNOŚCI</strong><br>Importuj Garmin (CSV)</div>
-        <div class="drop-box" id="drop-ftp"><strong>⚡ HISTORIA FTP</strong><br>Importuj Moc (CSV)</div>
-        <div class="drop-box" id="drop-vo2"><strong>🫁 PUŁAP TLENOWY</strong><br>Importuj VO2Max (CSV)</div>
-    </div>
+        <label>Dni treningowe (budżet):</label>
+        <input type="number" id="user-days" min="1" max="7" value="4">
 
-    <div class="card">
-        <div class="biometry-row">
-            <div class="input-group"><label>Waga (kg)</label><input type="number" id="in-weight" step="0.1"></div>
-            <div class="input-group"><label>FTP (W)</label><input type="number" id="in-ftp"></div>
-            <div class="input-group"><label>VO2Max</label><input type="number" id="in-vo2"></div>
-            <button class="btn-update" onclick="updateBiometry()">Zaktualizuj Profil</button>
-        </div>
-    </div>
-
-    <div class="dashboard-grid">
-        <div class="stat-box"><small>Współczynnik W/kg</small><span id="val-wkg">--</span></div>
-        <div class="stat-box"><small>Freshness (TSB)</small><span id="val-tsb">--</span></div>
-        <div class="stat-box"><small>Aktualne FTP</small><span id="val-ftp">-- W</span></div>
-        <div class="stat-box"><small>Aktualny VO2Max</small><span id="val-vo2">--</span></div>
-    </div>
-
-    <div class="grid-main">
-        <div class="card">
-            <h3 style="margin-top:0">📉 Obciążenie Treningowe (TSS)</h3>
-            <canvas id="mainChart" height="110"></canvas>
-            
-            <h3 style="margin: 30px 0 10px 0;">🚲 Strefy Treningowe</h3>
-            <table class="zones-table" id="zones-body">
-                <thead><tr><th>Strefa</th><th>Opis</th><th>Zakres Mocy (W)</th><th>% FTP</th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <div class="card">
-            <h3 style="margin-top:0">🧠 Sugestia Trenera AI</h3>
-            <div id="ai-verdict">
-                <div id="ai-title" style="font-weight: 900; font-size: 1.1rem; color: var(--primary);">Czekam na dane...</div>
-                <p id="ai-desc" style="font-size: 0.95rem; margin: 15px 0; line-height: 1.5; color: var(--text);">Przeciągnij plik CSV do odpowiedniej strefy.</p>
-                <div id="ai-workout" style="font-weight: 800; color: var(--secondary); border-top: 2px solid #e0f2fe; padding-top: 15px; margin-top: 15px; font-size: 1.1rem;"></div>
+        <div class="hr-grid">
+            <div>
+                <label>Max HR</label>
+                <input type="number" id="user-max-hr" value="190">
+            </div>
+            <div>
+                <label>Threshold</label>
+                <input type="number" id="user-lthr" value="170">
+            </div>
+            <div>
+                <label>Rest HR</label>
+                <input type="number" id="user-rest-hr" value="55">
             </div>
         </div>
+
+        <label>Stres życiowy:</label>
+        <select id="user-life-stress">
+            <option value="low">Niski</option>
+            <option value="mid" selected>Normalny</option>
+            <option value="high">Wysoki</option>
+        </select>
+
+        <button class="btn-main" onclick="saveOnboarding()">ZAPISZ I GENERUJ PLAN</button>
     </div>
 </div>
 
+<div id="post-workout-overlay" class="overlay hidden">
+    <div class="card-modal">
+        <h2 style="margin-top:0">Raport po treningu</h2>
+        <p id="pw-title" style="font-weight: 700; color: var(--secondary);"></p>
+        
+        <label>Jak ciężko było? (RPE 1-10)</label>
+        <input type="range" id="pw-rpe" min="1" max="10" value="5" oninput="this.nextElementSibling.value = this.value">
+        <output>5</output> / 10
+
+        <label style="margin-top:15px">Czy czujesz nietypowy ból?</label>
+        <select id="pw-pain">
+            <option value="no">Nie, wszystko OK</option>
+            <option value="yes_minor">Lekki dyskomfort</option>
+            <option value="yes_major">Tak, wyraźny ból</option>
+        </select>
+
+        <label>Dodatkowe notatki:</label>
+        <textarea id="pw-notes" rows="2" placeholder="Jak się czułeś?"></textarea>
+
+        <button class="btn-main" onclick="savePostWorkout()">WYŚLIJ DO TRENERA AI</button>
+        <button class="btn-outline" onclick="closeModals()">ANULUJ</button>
+    </div>
+</div>
+
+<div class="container">
+    <header>
+        <div>
+            <h1 style="margin:0; font-size: 1.4rem;">ACAI PRO 4.2</h1>
+            <small id="sync-status">Ładowanie profilu...</small>
+        </div>
+        <button onclick="resetAll()" style="background:none; border:1px solid white; color:white; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:0.7rem;">RESET PROFILU</button>
+    </header>
+
+    <div class="sync-dashboard">
+        <div class="stat-box"><small>Wellness</small><span id="cloud-wellness">--%</span></div>
+        <div class="stat-box"><small>LTHR</small><span id="disp-lthr">--</span></div>
+        <div class="stat-box"><small>Max HR</small><span id="disp-max">--</span></div>
+        <div class="stat-box"><small>Rest HR</small><span id="disp-rest">--</span></div>
+    </div>
+
+    <div id="assistant-box">
+        <div id="warn-msg" style="font-weight: 900; text-transform: uppercase; color: var(--secondary);">System gotowy</div>
+        <div id="sugg-msg" style="color: #64748b; margin-top: 5px; font-size: 0.9rem;">Kliknij dzisiejszy trening, aby wysłać raport.</div>
+    </div>
+
+    <h3 style="margin-left: 10px;">Twój Plan (Kliknij, by zaraportować)</h3>
+    <div id="dynamic-plan"></div>
+</div>
+
 <script>
-    let chart;
-    let dataStore = {
-        history: JSON.parse(localStorage.getItem('v4_history')) || [],
-        weight: parseFloat(localStorage.getItem('v4_weight')) || 0,
-        ftp: parseInt(localStorage.getItem('v4_ftp')) || 0,
-        vo2: parseInt(localStorage.getItem('v4_vo2')) || 0
+    const CONFIG = {
+        csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRVLylCkxR1sbSnxYdWGCBpgeILRZMa3uTZCz6qPQ47Q5QJsinxI_T2n_KkjxKlbbz6JBadfQLLXxDP/pub?gid=950508224&single=true&output=csv"
     };
 
-    window.onload = () => {
-        document.getElementById('in-weight').value = dataStore.weight || '';
-        document.getElementById('in-ftp').value = dataStore.ftp || '';
-        document.getElementById('in-vo2').value = dataStore.vo2 || '';
-        refreshApp();
-        ['drop-activities', 'drop-ftp', 'drop-vo2'].forEach(id => {
-            const type = id.split('-')[1].toUpperCase();
-            setupDrop(id, type === 'ACTIVITIES' ? 'ACT' : type);
-        });
+    const workoutLibrary = {
+        run: [
+            { day: 'Pon', title: 'Bieg spokojny + Przebieżki', desc: '40m Z2 + 6x20s żwawo.', type: 'filler' },
+            { day: 'Wt', title: 'Interwały LTHR', desc: '3x10m @ Threshold HR.', type: 'priority' },
+            { day: 'Śr', title: 'Regeneracja', desc: 'Wolne.', type: 'rest' },
+            { day: 'Czw', title: 'Siła biegowa', desc: 'Podbiegi 10x150m.', type: 'priority' },
+            { day: 'Pią', title: 'Bieg tlenowy', desc: '50m Z1/Z2.', type: 'filler' },
+            { day: 'Sob', title: 'Long Run', desc: '90m tlenowo.', type: 'priority' },
+            { day: 'Nie', title: 'Joga / Mobility', desc: '30m pracy nad zakresem.', type: 'rest' }
+        ],
+        bike: [
+            { day: 'Pon', title: 'Base Ride', desc: '60m Z2.', type: 'filler' },
+            { day: 'Wt', title: 'Sweet Spot', desc: '2x20m @ 90% LTHR.', type: 'priority' },
+            { day: 'Śr', title: 'Wolne', desc: 'Odpoczynek.', type: 'rest' },
+            { day: 'Czw', title: 'VO2 Max Boost', desc: '5x3m Max HR.', type: 'priority' },
+            { day: 'Pią', title: 'Recovery Spin', desc: '40m lekko.', type: 'filler' },
+            { day: 'Sob', title: 'Dłuższa jazda', desc: '120m w terenie.', type: 'priority' },
+            { day: 'Nie', title: 'Mobilizacja', desc: 'Rolowanie.', type: 'rest' }
+        ]
     };
 
-    function updateBiometry() {
-        dataStore.weight = parseFloat(document.getElementById('in-weight').value) || 0;
-        dataStore.ftp = parseInt(document.getElementById('in-ftp').value) || 0;
-        dataStore.vo2 = parseInt(document.getElementById('in-vo2').value) || 0;
-        syncStorage();
-        refreshApp();
+    let currentPlan = [];
+    let selectedWorkoutIndex = null;
+
+    function saveOnboarding() {
+        const profile = {
+            sport: document.getElementById('user-sport').value,
+            days: parseInt(document.getElementById('user-days').value),
+            maxHR: document.getElementById('user-max-hr').value,
+            lthr: document.getElementById('user-lthr').value,
+            restHR: document.getElementById('user-rest-hr').value,
+            stress: document.getElementById('user-life-stress').value
+        };
+        localStorage.setItem('acai_user_profile', JSON.stringify(profile));
+        document.getElementById('onboarding-overlay').classList.add('hidden');
+        initApp();
     }
 
-    function syncStorage() {
-        localStorage.setItem('v4_history', JSON.stringify(dataStore.history));
-        localStorage.setItem('v4_weight', dataStore.weight);
-        localStorage.setItem('v4_ftp', dataStore.ftp);
-        localStorage.setItem('v4_vo2', dataStore.vo2);
+    function initApp() {
+        const p = JSON.parse(localStorage.getItem('acai_user_profile'));
+        if(!p) {
+            document.getElementById('onboarding-overlay').classList.remove('hidden');
+            return;
+        }
+        
+        document.getElementById('disp-max').innerText = p.maxHR;
+        document.getElementById('disp-lthr').innerText = p.lthr;
+        document.getElementById('disp-rest').innerText = p.restHR;
+        
+        buildPlan(p);
+        sync();
     }
 
-    function setupDrop(id, type) {
-        const el = document.getElementById(id);
-        el.addEventListener('dragover', e => { e.preventDefault(); el.style.background = "#f0f7ff"; });
-        el.addEventListener('dragleave', () => el.style.background = "white");
-        el.addEventListener('drop', e => {
-            e.preventDefault();
-            el.style.background = "white";
-            const file = e.dataTransfer.files[0];
-            const reader = new FileReader();
-            reader.onload = (ev) => handleCSV(ev.target.result, type);
-            reader.readAsText(file);
+    function buildPlan(p) {
+        let base = (p.sport === 'run') ? workoutLibrary.run : workoutLibrary.bike;
+        currentPlan = JSON.parse(JSON.stringify(base));
+        
+        let activeDays = currentPlan.filter(t => t.type !== 'rest').length;
+        
+        // Redukcja dni jeśli budżet mniejszy niż baza
+        for(let i=0; i<currentPlan.length; i++) {
+            if(activeDays > p.days && currentPlan[i].type === 'filler') {
+                currentPlan[i].title = "Odpoczynek (Limit czasu)";
+                currentPlan[i].desc = "AI zwolniło ten dzień.";
+                currentPlan[i].type = 'rest';
+                activeDays--;
+            }
+        }
+        renderPlan();
+    }
+
+    function renderPlan() {
+        const container = document.getElementById('dynamic-plan');
+        container.innerHTML = '';
+        currentPlan.forEach((t, idx) => {
+            const card = document.createElement('div');
+            card.className = 'training-card';
+            if(t.type === 'rest') card.style.opacity = '0.5';
+            card.onclick = () => openPostWorkout(idx);
+            card.innerHTML = `
+                <span class="day-tag">${t.day}</span>
+                <strong style="margin-left:10px">${t.title}</strong>
+                <p style="font-size: 0.8rem; color: #64748b; margin: 8px 0 0 0;">${t.desc}</p>
+            `;
+            container.appendChild(card);
         });
     }
 
-    function handleCSV(content, type) {
-        const delimiter = content.includes(';') ? ';' : ',';
-        const lines = content.split(/\r?\n/).filter(l => l.trim() !== '');
-        const headers = lines[0].toLowerCase().split(delimiter).map(h => h.replace(/"/g, '').trim());
-
-        if (type === 'ACT') {
-            const idxDate = headers.findIndex(h => h.includes('dat'));
-            const idxDist = headers.findIndex(h => h.includes('dystans') || h.includes('distance'));
-            
-            dataStore.history = lines.slice(1).map(l => {
-                const c = l.split(delimiter).map(col => col.replace(/"/g, '').trim());
-                const dStr = c[idxDist] ? c[idxDist].replace(',', '.') : "0";
-                const d = parseFloat(dStr) || 0;
-                return { date: new Date(c[idxDate]), tss: d * 6 };
-            }).filter(i => !isNaN(i.date.getTime())).sort((a,b) => a.date - b.date);
-        } else {
-            // Logika dla FTP i VO2 - szuka pierwszej sensownej liczby
-            const lastLine = lines[lines.length-1].split(delimiter);
-            const val = parseInt(lastLine.find(v => !isNaN(v.replace(',', '.')) && v.trim() !== ''));
-            if (type === 'FTP') dataStore.ftp = val || dataStore.ftp;
-            if (type === 'VO2') dataStore.vo2 = val || dataStore.vo2;
-        }
-        syncStorage();
-        refreshApp();
-        alert("Pomyślnie wczytano dane " + type);
+    function openPostWorkout(idx) {
+        if(currentPlan[idx].type === 'rest') return;
+        selectedWorkoutIndex = idx;
+        document.getElementById('pw-title').innerText = currentPlan[idx].title;
+        document.getElementById('post-workout-overlay').classList.remove('hidden');
     }
 
-    function refreshApp() {
-        if (dataStore.weight > 0 && dataStore.ftp > 0) {
-            document.getElementById('val-wkg').innerText = (dataStore.ftp / dataStore.weight).toFixed(2);
-        }
-        document.getElementById('val-ftp').innerText = dataStore.ftp > 0 ? dataStore.ftp + " W" : "-- W";
-        document.getElementById('val-vo2').innerText = dataStore.vo2 > 0 ? dataStore.vo2 : "--";
-
-        if (dataStore.history.length > 0) {
-            const now = new Date();
-            const atl = dataStore.history.filter(a => (now - new Date(a.date))/86400000 <= 7).reduce((s,x)=>s+x.tss,0)/7;
-            const ctl = dataStore.history.filter(a => (now - new Date(a.date))/86400000 <= 28).reduce((s,x)=>s+x.tss,0)/28;
-            const tsb = ctl - atl;
-            document.getElementById('val-tsb').innerText = Math.round(tsb);
-            updateAI(tsb);
-            updateChart();
-        }
-        renderZones();
+    function savePostWorkout() {
+        const rpe = document.getElementById('pw-rpe').value;
+        const pain = document.getElementById('pw-pain').value;
+        
+        // AI Reaction
+        let feedback = `Zapisano RPE ${rpe}/10. `;
+        if(rpe > 8) feedback += "Bardzo mocna sesja. AI sugeruje wydłużenie snu. ";
+        if(pain !== 'no') feedback += "⚠️ Uwaga: Zgłoszono ból. Monitoruję sytuację.";
+        
+        document.getElementById('sugg-msg').innerText = feedback;
+        closeModals();
+        
+        // Wizualne oznaczenie ukończenia
+        const cards = document.getElementsByClassName('training-card');
+        cards[selectedWorkoutIndex].style.borderLeft = "8px solid var(--strength)";
     }
 
-    function renderZones() {
-        const ftp = dataStore.ftp || 0;
-        const zones = [
-            { n: "Z1", name: "Recovery", p: "55%", c: "#94a3b8" },
-            { n: "Z2", name: "Endurance", p: "75%", c: "#10b981" },
-            { n: "Z3", name: "Tempo", p: "90%", c: "#3b82f6" },
-            { n: "Z4", name: "Threshold", p: "105%", c: "#f59e0b" },
-            { n: "Z5", name: "VO2Max", p: "120%", c: "#ef4444" }
-        ];
-        const tbody = document.querySelector("#zones-body tbody");
-        tbody.innerHTML = zones.map(z => {
-            const val = Math.round(ftp * (parseInt(z.p)/100));
-            return `<tr><td><span class="z-tag" style="background:${z.c}">${z.n}</span></td><td>${z.name}</td><td>do ${ftp > 0 ? val : '--'} W</td><td>${z.p}</td></tr>`;
-        }).join('');
+    function closeModals() {
+        document.querySelectorAll('.overlay').forEach(el => el.classList.add('hidden'));
     }
 
-    function updateAI(tsb) {
-        const title = document.getElementById('ai-title');
-        const desc = document.getElementById('ai-desc');
-        const work = document.getElementById('ai-workout');
-        if (tsb < -20) {
-            title.innerText = "STAN: ZMĘCZENIE";
-            desc.innerText = "Wysokie obciążenie krótkoterminowe. Twoje ciało potrzebuje adaptacji.";
-            work.innerText = "DZISIAJ: Z1 (Recovery) poniżej " + Math.round(dataStore.ftp * 0.55) + " W";
-        } else {
-            title.innerText = "STAN: GOTOWOŚĆ";
-            desc.innerText = "Balans zachowany. Możesz wykonać mocniejszy trening.";
-            work.innerText = "DZISIAJ: Z3 (Tempo) @ " + Math.round(dataStore.ftp * 0.9) + " W";
-        }
+    async function sync() {
+        try {
+            const r = await fetch(CONFIG.csvUrl + "&t=" + Date.now());
+            const txt = await r.text();
+            const rows = txt.split(/\r?\n/).map(l => l.split(","));
+            rows.forEach(([p,v]) => {
+                if(p === "Status_Zmeczenia") document.getElementById('cloud-wellness').innerText = v + "%";
+            });
+            document.getElementById('sync-status').innerText = "Sync: " + new Date().toLocaleTimeString();
+        } catch(e) { console.warn("Working offline"); }
     }
 
-    function updateChart() {
-        const ctx = document.getElementById('mainChart').getContext('2d');
-        if (chart) chart.destroy();
-        const last14 = dataStore.history.slice(-14);
-        chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: last14.map(a => new Date(a.date).toLocaleDateString()),
-                datasets: [{ label: 'TSS', data: last14.map(a=>a.tss), borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.05)' }]
-            },
-            options: { responsive: true, plugins: { legend: { display: false } } }
-        });
-    }
+    function resetAll() { localStorage.clear(); location.reload(); }
 
-    function resetApp() { if(confirm("Czyścić dane?")) { localStorage.clear(); location.reload(); } }
+    window.onload = initApp;
 </script>
 </body>
 </html>
