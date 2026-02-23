@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v4.5 PRO | Performance & Bio Sync</title>
+    <title>ADAPTIVE COACH AI v4.6 PRO</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -22,163 +22,150 @@
             display: flex; justify-content: space-between; align-items: center;
         }
 
-        /* Dashboard */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .stat-box small { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 5px; }
         .stat-box span { font-size: 1.8rem; font-weight: 800; }
 
-        /* Karty i Grid */
-        .grid-main { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
         
-        /* Ostatnia sesja */
-        #last-session-card { border-left: 8px solid var(--secondary); background: #f8fafc; }
-        .session-meta { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.85rem; color: #64748b; }
-
         /* Popup Profile */
         #profile-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.8); display: none; justify-content: center; align-items: center; z-index: 1000;
         }
-        .popup-card { background: white; padding: 30px; border-radius: 20px; max-width: 600px; width: 90%; position: relative; }
-        .close-btn { position: absolute; top: 15px; right: 15px; cursor: pointer; font-weight: 900; }
-
-        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 15px; }
-        label { display: block; font-size: 0.7rem; font-weight: 800; margin-bottom: 4px; color: var(--primary); }
-        input, select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; }
-
-        .btn-main { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .drop-box { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; margin-bottom: 10px; font-size: 0.8rem; }
+        .popup-card { background: white; padding: 30px; border-radius: 20px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; }
         
-        @media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 15px; }
+        label { display: block; font-size: 0.75rem; font-weight: 800; margin-bottom: 4px; color: var(--primary); }
+        input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; }
+
+        .btn-main { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
+        .btn-accept { background: var(--strength); margin-top: 10px; }
+        
+        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: #f8fafc; margin-bottom: 10px; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
 <div id="profile-overlay">
     <div class="popup-card">
-        <span class="close-btn" onclick="toggleProfile()">✕</span>
-        <h2 style="margin-top:0">⚙️ Profil Zawodnika</h2>
+        <h2 style="margin-top:0">⚙️ Konfiguracja Profilu i Planu</h2>
         <div class="input-grid">
-            <div><label>Wiek</label><input type="number" id="in-age"></div>
-            <div><label>Waga (kg)</label><input type="number" id="in-weight" step="0.1"></div>
-            <div><label>FTP (W)</label><input type="number" id="in-ftp"></div>
-            <div><label>Threshold HR</label><input type="number" id="in-thr-hr"></div>
-            <div><label>Max HR</label><input type="number" id="in-max-hr"></div>
-            <div><label>Cel startu</label><input type="date" id="in-race-date"></div>
+            <div><label>Wiek</label><input type="number" id="p-age"></div>
+            <div><label>Waga (kg)</label><input type="number" id="p-weight"></div>
+            <div><label>FTP (W)</label><input type="number" id="p-ftp"></div>
+            <div><label>Treningi / tydzień</label><input type="number" id="p-freq" min="1" max="7"></div>
+            <div><label>Typ siłowego</label>
+                <select id="p-strength-type">
+                    <option value="none">Brak</option>
+                    <option value="fbw">FBW (Całe ciało)</option>
+                    <option value="split">Góra / Dół</option>
+                </select>
+            </div>
+            <div><label>Dzień regeneracji</label>
+                <select id="p-rest-day">
+                    <option value="1">Poniedziałek</option>
+                    <option value="5">Piątek</option>
+                    <option value="7">Niedziela</option>
+                </select>
+            </div>
         </div>
-        <hr style="margin: 20px 0; opacity: 0.2;">
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <div class="drop-box" id="drop-activities">Wgraj Activities.csv</div>
-            <div class="drop-box" id="drop-vo2">Wgraj VO2Max.csv</div>
+        <div class="grid-2">
+            <div class="drop-zone" id="drop-act">Wgraj Activities (8).csv</div>
+            <div class="drop-zone" id="drop-vo2">Wgraj Pułap tlenowy.csv</div>
         </div>
-        <button class="btn-main" onclick="updateProfile()" style="margin-top:10px;">Zapisz i Przelicz</button>
+        <button class="btn-main" onclick="saveProfile()">Zapisz i Zamknij</button>
     </div>
 </div>
 
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">ADAPTIVE COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v4.5 PRO</span></h1>
-            <small id="sync-status">Witaj Trenerze! System gotowy.</small>
+            <h1 style="margin:0">ADAPTIVE COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v4.6 PRO</span></h1>
+            <small id="sync-status">Status: Gotowy do analizy danych</small>
         </div>
-        <button class="btn-main" style="width:auto; padding: 10px 20px;" onclick="toggleProfile()">Ustawienia Profilu</button>
+        <button class="btn-main" style="width:auto" onclick="document.getElementById('profile-overlay').style.display='flex'">Ustawienia Profilu</button>
     </header>
 
     <div class="dashboard-grid">
         <div class="stat-box"><small>Freshness (TSB)</small><span id="val-tsb">--</span></div>
-        <div class="stat-box"><small>CTL (Forma)</small><span id="val-ctl">--</span></div>
-        <div class="stat-box"><small>W/kg Ratio</small><span id="val-wkg">--</span></div>
-        <div class="stat-box"><small>VO2 Max</small><span id="val-vo2">--</span></div>
+        <div class="stat-box"><small>Obciążenie (CTL)</small><span id="val-ctl">--</span></div>
+        <div class="stat-box"><small>W/kg</small><span id="val-wkg">--</span></div>
+        <div class="stat-box"><small>VO2Max</small><span id="val-vo2">--</span></div>
     </div>
 
-    <div class="card" id="last-session-card">
-        <div class="session-meta">
-            <span id="session-date">Ostatni trening</span>
-            <span id="session-type">Typ aktywności</span>
-        </div>
-        <h2 id="session-title" style="margin:0 0 10px 0">Nazwa aktywności</h2>
-        <div class="dashboard-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 0;">
-            <div style="text-align: center;"><small>TSS</small><b id="session-tss">--</b></div>
-            <div style="text-align: center;"><small>Dystans</small><b id="session-dist">-- km</b></div>
-            <div style="text-align: center;"><small>Śr. Tętno</small><b id="session-hr">--</b></div>
-            <div style="text-align: center;"><small>Czas</small><b id="session-time">--</b></div>
-        </div>
-    </div>
-
-    <div class="grid-main">
+    <div class="grid-2">
         <div class="card">
-            <h3 style="margin-top:0">📋 Ankieta Potreningowa</h3>
-            <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
-                <div><label>RPE (Wysiłek 1-10)</label><input type="number" id="s-rpe" min="1" max="10" value="5"></div>
-                <div><label>Sen / Regeneracja</label><select id="s-sleep"><option value="5">Bardzo dobry</option><option value="3">Średni</option><option value="1">Słaby</option></select></div>
-                <div style="grid-column: span 2;"><label>Bóle / Problemy zdrowotne</label><input type="text" id="s-health" placeholder="Np. ból kolana, brak"></div>
-            </div>
-            <button class="btn-main" onclick="analyzeDay()" style="background: var(--strength);">Wyślij Raport i Generuj Werdykt</button>
-            
-            <div id="ai-status-desc" style="margin-top: 20px; padding: 15px; background: #f0f9ff; border-radius: 12px; border-left: 6px solid var(--secondary);">
-                <strong>Status Formy:</strong> <span id="desc-current">Brak danych. Wgraj pliki i wypełnij ankietę.</span>
-            </div>
+            <h3 style="margin-top:0">📋 Ankieta Potreningowa (v3.0 Fix)</h3>
+            <label>Jakość treningu</label>
+            <select id="s-quality">
+                <option value="5">Idealna - zgodnie z planem</option>
+                <option value="3">Średnia - walka o domknięcie</option>
+                <option value="1">Słaba - przerwana jednostka</option>
+            </select>
+            <label style="margin-top:10px">Odczuwalny wysiłek (RPE 1-10)</label>
+            <input type="number" id="s-rpe" min="1" max="10" value="5">
+            <label style="margin-top:10px">Samopoczucie po</label>
+            <select id="s-mood">
+                <option value="5">🚀 Pełen mocy</option>
+                <option value="3">😐 OK</option>
+                <option value="1">😫 Wyczerpany</option>
+            </select>
+            <button class="btn-main" style="margin-top:15px; background: var(--strength);" onclick="processSurvey()">Analizuj i Generuj Sugestię</button>
         </div>
 
         <div class="card">
-            <h3 style="margin-top:0">📈 Trend Obciążenia i Freshness</h3>
-            <canvas id="performanceChart" height="200"></canvas>
-            <div id="ai-suggestion" style="margin-top: 15px; font-weight: 700; color: var(--secondary);">Sugestia: --</div>
+            <h3 style="margin-top:0">🧠 Werdykt Trenera AI</h3>
+            <div id="ai-verdict" style="padding:15px; background:#f0f9ff; border-radius:12px; border-left:6px solid var(--secondary);">
+                <p id="ai-text">Wgraj dane, aby otrzymać werdykt.</p>
+                <div id="accept-container" style="display:none">
+                    <button class="btn-main btn-accept" onclick="acceptPlan()">Akceptuję Sugestię</button>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0">📉 Wykres Wytrenowania (TSS Trend)</h3>
+        <canvas id="performanceChart" height="100"></canvas>
     </div>
 </div>
 
 <script>
     let chart;
-    let store = {
-        history: JSON.parse(localStorage.getItem('v45_history')) || [],
-        vo2: localStorage.getItem('v45_vo2_val') || "--",
-        weight: localStorage.getItem('v45_weight') || 0,
-        ftp: localStorage.getItem('v45_ftp') || 0,
-        age: localStorage.getItem('v45_age') || 0,
-        thrHr: localStorage.getItem('v45_thr_hr') || 0,
-        raceDate: localStorage.getItem('v45_race_date') || null
+    let data = {
+        history: JSON.parse(localStorage.getItem('v46_history')) || [],
+        vo2: localStorage.getItem('v46_vo2_val') || "--",
+        config: JSON.parse(localStorage.getItem('v46_config')) || { weight: 0, ftp: 0 }
     };
 
     window.onload = () => {
         refreshUI();
-        setupDrop('drop-activities', 'ACT');
+        setupDrop('drop-act', 'ACT');
         setupDrop('drop-vo2', 'VO2');
     };
 
-    function toggleProfile() { 
-        const el = document.getElementById('profile-overlay');
-        el.style.display = el.style.display === 'flex' ? 'none' : 'flex';
-        // Załaduj wartości do inputów
-        document.getElementById('in-age').value = store.age;
-        document.getElementById('in-weight').value = store.weight;
-        document.getElementById('in-ftp').value = store.ftp;
-        document.getElementById('in-thr-hr').value = store.thrHr;
-        document.getElementById('in-race-date').value = store.raceDate;
-    }
-
-    function updateProfile() {
-        store.age = document.getElementById('in-age').value;
-        store.weight = document.getElementById('in-weight').value;
-        store.ftp = document.getElementById('in-ftp').value;
-        store.thrHr = document.getElementById('in-thr-hr').value;
-        store.raceDate = document.getElementById('in-race-date').value;
-        
-        localStorage.setItem('v45_age', store.age);
-        localStorage.setItem('v45_weight', store.weight);
-        localStorage.setItem('v45_ftp', store.ftp);
-        localStorage.setItem('v45_thr_hr', store.thrHr);
-        localStorage.setItem('v45_race_date', store.raceDate);
-        
-        toggleProfile();
+    function saveProfile() {
+        data.config = {
+            age: document.getElementById('p-age').value,
+            weight: document.getElementById('p-weight').value,
+            ftp: document.getElementById('p-ftp').value,
+            freq: document.getElementById('p-freq').value,
+            sType: document.getElementById('p-strength-type').value,
+            restDay: document.getElementById('p-rest-day').value
+        };
+        localStorage.setItem('v46_config', JSON.stringify(data.config));
+        document.getElementById('profile-overlay').style.display = 'none';
         refreshUI();
     }
 
     function setupDrop(id, type) {
         const el = document.getElementById(id);
-        el.addEventListener('dragover', e => { e.preventDefault(); el.style.borderColor = "var(--secondary)"; });
+        el.addEventListener('dragover', e => { e.preventDefault(); el.style.background = "#e0e7ff"; });
         el.addEventListener('drop', e => {
             e.preventDefault();
             const reader = new FileReader();
@@ -190,100 +177,76 @@
     function parseCSV(content, type) {
         const lines = content.split('\n').filter(l => l.trim() !== '');
         const delimiter = content.includes(';') ? ';' : ',';
-        
+
         if (type === 'ACT') {
-            const headers = lines[0].split(delimiter).map(h => h.trim());
+            const headers = lines[0].split(delimiter).map(h => h.trim().replace(/"/g, ''));
             const idxDate = headers.indexOf('Data');
             const idxTss = headers.findIndex(h => h.includes('Training Stress Score'));
-            const idxTitle = headers.indexOf('Tytuł');
-            const idxDist = headers.indexOf('Dystans');
-            const idxHR = headers.indexOf('Średnie tętno');
-            const idxTime = headers.indexOf('Czas');
-            const idxType = headers.indexOf('Typ aktywności');
-
-            store.history = lines.slice(1).map(l => {
+            
+            data.history = lines.slice(1).map(l => {
                 const c = l.split(delimiter).map(v => v.replace(/"/g, ''));
-                return {
-                    date: c[idxDate],
-                    title: c[idxTitle],
-                    tss: parseFloat(c[idxTss]) || 0,
-                    dist: c[idxDist],
-                    hr: c[idxHR],
-                    time: c[idxTime],
-                    type: c[idxType]
-                };
+                return { date: c[idxDate], tss: parseFloat(c[idxTss]) || 0 };
             }).filter(i => i.tss > 0);
-            localStorage.setItem('v45_history', JSON.stringify(store.history));
+            localStorage.setItem('v46_history', JSON.stringify(data.history));
         } else if (type === 'VO2') {
+            // Skonfigurowane pod "Pułap tlenowy.csv"
             const lastLine = lines[lines.length - 1].split(delimiter);
-            store.vo2 = lastLine[2] || "--";
-            localStorage.setItem('v45_vo2_val', store.vo2);
+            data.vo2 = lastLine[2] || "--";
+            localStorage.setItem('v46_vo2_val', data.vo2);
         }
         refreshUI();
+        alert("Pobrano dane pomyślnie!");
     }
 
     function refreshUI() {
-        const history = store.history;
-        if (history.length > 0) {
-            const last = history[0]; // Garmin export zazwyczaj od najnowszych
-            document.getElementById('session-title').innerText = last.title;
-            document.getElementById('session-date').innerText = last.date;
-            document.getElementById('session-type').innerText = last.type;
-            document.getElementById('session-tss').innerText = last.tss;
-            document.getElementById('session-dist').innerText = last.dist + " km";
-            document.getElementById('session-hr').innerText = last.hr;
-            document.getElementById('session-time').innerText = last.time;
-
-            // Stats
+        if (data.history.length > 0) {
             const now = new Date();
-            const atl = history.filter(h => (now - new Date(h.date.split(' ')[0]))/86400000 <= 7).reduce((s,i)=>s+i.tss,0)/7;
-            const ctl = history.filter(h => (now - new Date(h.date.split(' ')[0]))/86400000 <= 42).reduce((s,i)=>s+i.tss,0)/42;
+            const history = data.history.map(h => ({...h, date: new Date(h.date.split(' ')[0])}));
+            
+            const atl = history.filter(h => (now - h.date)/86400000 <= 7).reduce((s,i)=>s+i.tss,0)/7;
+            const ctl = history.filter(h => (now - h.date)/86400000 <= 42).reduce((s,i)=>s+i.tss,0)/42;
             const tsb = ctl - atl;
 
             document.getElementById('val-tsb').innerText = Math.round(tsb);
             document.getElementById('val-ctl').innerText = Math.round(ctl);
-            document.getElementById('val-wkg').innerText = store.weight > 0 ? (store.ftp / store.weight).toFixed(2) : "--";
-            document.getElementById('val-vo2').innerText = store.vo2;
+            document.getElementById('val-wkg').innerText = data.config.weight > 0 ? (data.config.ftp / data.config.weight).toFixed(2) : "--";
+            document.getElementById('val-vo2').innerText = data.vo2;
 
             updateChart(history.slice(0, 30).reverse());
-            generateVerdict(tsb, ctl);
         }
     }
 
-    function generateVerdict(tsb, ctl) {
-        let status = "";
-        let sugg = "";
-        const rDate = new Date(store.raceDate);
-        const daysToRace = Math.ceil((rDate - new Date()) / 86400000);
+    function processSurvey() {
+        const tsb = parseInt(document.getElementById('val-tsb').innerText) || 0;
+        const mood = document.getElementById('s-mood').value;
+        let verdict = "";
 
-        if (tsb < -20) {
-            status = "Wykryto duże zmęczenie (Overreaching). Twój organizm wymaga regeneracji.";
-            sugg = "Sugestia: Dzisiaj pełny odpoczynek lub 30 min rozbiegania Z1.";
-        } else if (daysToRace > 0 && daysToRace <= 7) {
-            status = "Tapering przed zawodami. CTL jest wysoki ("+Math.round(ctl)+"), teraz budujemy świeżość.";
-            sugg = "Sugestia: Krótka aktywacja (3x30s tempo startowe), reszta wolne.";
+        if (tsb < -20 || mood === "1") {
+            verdict = "REGENERACJA: Twoje TSB i samopoczucie wskazują na zmęczenie. Dzisiaj tylko Joga lub Spacer.";
         } else {
-            status = "Stan bazy stabilny. Możesz realizować planowaną objętość.";
-            sugg = "Sugestia: Trening tlenowy Z2 z elementami techniki.";
+            verdict = `MOC: Stan stabilny. Zasugerowany trening: ${data.config.sType !== 'none' ? 'Siłowy ' + data.config.sType.toUpperCase() : 'Bieg Z2/Z3'}.`;
         }
-        document.getElementById('desc-current').innerText = status;
-        document.getElementById('ai-suggestion').innerText = "Sugestia: " + sugg;
+        document.getElementById('ai-text').innerText = verdict;
+        document.getElementById('accept-container').style.display = 'block';
     }
 
-    function updateChart(data) {
+    function acceptPlan() {
+        alert("Sugestia zapisana w kalendarzu AI.");
+        document.getElementById('accept-container').style.display = 'none';
+    }
+
+    function updateChart(history) {
         const ctx = document.getElementById('performanceChart').getContext('2d');
         if (chart) chart.destroy();
         chart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: data.map(d => d.date.split(' ')[0]),
-                datasets: [{ label: 'TSS/Load', data: data.map(d=>d.tss), borderColor: '#3b82f6', tension: 0.4 }]
+                labels: history.map(h => h.date.toLocaleDateString()),
+                datasets: [{ label: 'TSS (Obciążenie)', data: history.map(h=>h.tss), borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' }]
             },
             options: { responsive: true, plugins: { legend: { display: false } } }
         });
     }
-
-    function resetApp() { if(confirm("Czyścić dane?")) { localStorage.clear(); location.reload(); } }
 </script>
 </body>
 </html>
