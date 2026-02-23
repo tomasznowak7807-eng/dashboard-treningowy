@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v4.2 | Full Bio-Sync & Stable Parser</title>
+    <title>ADAPTIVE COACH AI v4.4 | Race & Bio Engine</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -39,111 +39,91 @@
         .grid-main { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
         
-        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
         label { display: block; font-size: 0.7rem; font-weight: 800; margin-bottom: 4px; color: var(--primary); }
         input, select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem; }
         
         .btn-main { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn-main:hover { background: var(--secondary); }
 
+        #ai-verdict-box { border-left: 10px solid var(--secondary); background: #f0f9ff; padding: 20px; border-radius: 12px; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 12px 24px; border-radius: 8px; display: none; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
         .zones-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; }
         .zones-table th { text-align: left; padding: 8px; border-bottom: 2px solid #f1f5f9; }
         .zones-table td { padding: 8px; border-bottom: 1px solid #f1f5f9; }
-
-        #ai-verdict-box { border-left: 10px solid var(--secondary); background: #f0f9ff; padding: 20px; border-radius: 12px; }
 
         @media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } .drop-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
+<div id="toast" class="toast">Zaktualizowano!</div>
+
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">ADAPTIVE COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v4.2 Stable</span></h1>
-            <small>Poprawiony Parser & Pełna Biometria</small>
+            <h1 style="margin:0">ADAPTIVE COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v4.4 PRO</span></h1>
+            <small>Inteligentny Tapering & Analiza Wydolności</small>
         </div>
         <button onclick="resetApp()" style="background:none; border: 1px solid white; color: white; padding: 5px 12px; border-radius: 6px; cursor:pointer;">Reset Bazy</button>
     </header>
 
     <div class="drop-grid">
-        <div class="drop-box" id="drop-activities"><strong>🏃 AKTYWNOŚCI</strong><br>Upuść Garmin CSV</div>
-        <div class="drop-box" id="drop-ftp"><strong>⚡ DANE MOCY</strong><br>Upuść FTP CSV</div>
-        <div class="drop-box" id="drop-vo2"><strong>🫁 WYDOLNOŚĆ</strong><br>Upuść VO2Max CSV</div>
+        <div class="drop-box" id="drop-activities"><strong>🏃 AKTYWNOŚCI</strong><br>Activities (8).csv</div>
+        <div class="drop-box" id="drop-vo2"><strong>🫁 PUŁAP TLENOWY</strong><br>Pułap tlenowy.csv</div>
+        <div class="drop-box" id="drop-ftp"><strong>⚡ DANE MOCY</strong><br>Wgraj plik FTP</div>
     </div>
 
     <div class="card">
-        <h3 style="margin-top:0; font-size: 1rem;">🧬 Parametry Życiowe & Tętno</h3>
+        <h3 style="margin-top:0; font-size: 1rem;">👤 Profil Zawodnika & Biometria</h3>
         <div class="input-grid">
+            <div><label>Wiek</label><input type="number" id="in-age"></div>
             <div><label>Waga (kg)</label><input type="number" id="in-weight" step="0.1"></div>
             <div><label>FTP (W)</label><input type="number" id="in-ftp"></div>
-            <div><label>Threshold BPM</label><input type="number" id="in-thr-bpm"></div>
-            <div><label>Max BPM</label><input type="number" id="in-max-bpm"></div>
-            <div><label>Tętno spocz.</label><input type="number" id="in-rest-bpm"></div>
-            <div><label>VO2Max</label><input type="number" id="in-vo2"></div>
+            <div><label>Threshold HR</label><input type="number" id="in-thr-hr"></div>
+            <div><label>Rest HR</label><input type="number" id="in-rest-hr"></div>
+            <div><label>Max HR</label><input type="number" id="in-max-hr"></div>
         </div>
-        <button class="btn-main" onclick="updateBiometry()">Zapisz Dane Biometryczne</button>
+        <button class="btn-main" onclick="updateBiometry()">Zapisz Profil</button>
     </div>
 
     <div class="dashboard-grid">
-        <div class="stat-box"><small>W/kg Ratio</small><span id="val-wkg">--</span></div>
         <div class="stat-box"><small>Freshness (TSB)</small><span id="val-tsb">--</span></div>
-        <div class="stat-box"><small>Threshold HR</small><span id="val-thr-hr">--</span></div>
-        <div class="stat-box"><small>Rest HR</small><span id="val-rest-hr">--</span></div>
+        <div class="stat-box"><small>CTL (Forma)</small><span id="val-ctl">--</span></div>
+        <div class="stat-box"><small>W/kg Ratio</small><span id="val-wkg">--</span></div>
+        <div class="stat-box"><small>VO2Max</small><span id="val-vo2">--</span></div>
     </div>
 
     <div class="grid-main">
         <div class="card">
-            <h3 style="margin-top:0; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">📋 Ankieta Potreningowa</h3>
+            <h3 style="margin-top:0; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">🏆 Planowanie Startów (Tapering)</h3>
             <div class="input-grid">
-                <div>
-                    <label>Jakość sesji</label>
-                    <select id="s-quality">
-                        <option value="5">Bardzo dobra</option>
-                        <option value="3">Przeciętna</option>
-                        <option value="1">Słaba</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Wysiłek (RPE 1-10)</label>
-                    <input type="number" id="s-rpe" min="1" max="10" value="5">
-                </div>
-                <div>
-                    <label>Bóle / Kontuzje</label>
-                    <select id="s-health">
-                        <option value="0">Brak</option>
-                        <option value="5">Lekki ból</option>
-                        <option value="10">Silny ból (STOP)</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Samopoczucie</label>
-                    <select id="s-mood">
-                        <option value="5">Świetne</option>
-                        <option value="3">OK</option>
-                        <option value="1">Złe</option>
-                    </select>
-                </div>
+                <div style="grid-column: span 2;"><label>Nazwa Zawodów</label><input type="text" id="race-name" placeholder="np. Maraton Warszawski"></div>
+                <div><label>Data Startu</label><input type="date" id="race-date"></div>
+                <div><label>Priorytet (A/B/C)</label><select id="race-priority"><option value="A">A (Główny)</option><option value="B">B (Kontrolny)</option><option value="C">C (Treningowy)</option></select></div>
             </div>
-            <button class="btn-main" style="background: var(--strength);" onclick="processSurvey()">Analizuj Dzisiejszy Trening</button>
+            <button class="btn-main" style="background: var(--recovery);" onclick="saveRace()">Ustaw Cel Startowy</button>
             
-            <h3 style="margin: 25px 0 10px 0; font-size: 1rem;">🚲 Strefy Mocy (Power)</h3>
-            <table class="zones-table" id="zones-body">
-                <thead><tr><th>Strefa</th><th>Zakres (W)</th><th>% FTP</th></tr></thead>
+            <div id="race-countdown" style="margin-top: 20px; font-weight: 800; color: var(--accent); display:none;">
+                Do zawodów: <span id="days-to-race">--</span> dni
+            </div>
+
+            <h3 style="margin: 25px 0 10px 0; font-size: 1rem;">🫀 Strefy Tętna</h3>
+            <table class="zones-table" id="hr-zones">
+                <thead><tr><th>Strefa</th><th>Zakres (BPM)</th><th>Cel</th></tr></thead>
                 <tbody></tbody>
             </table>
         </div>
 
         <div class="card">
-            <h3 style="margin-top:0">🧠 Werdykt i Sugestia AI</h3>
+            <h3 style="margin-top:0">🧠 Sugestia Trenera AI</h3>
             <div id="ai-verdict-box">
-                <div id="ai-title" style="font-weight: 900; font-size: 1.2rem; color: var(--primary);">Oczekiwanie na dane...</div>
-                <p id="ai-desc" style="font-size: 0.95rem; margin: 15px 0; line-height: 1.5; color: var(--text);">Wgraj plik CSV i wypełnij ankietę.</p>
-                <div id="ai-workout" style="font-weight: 800; color: var(--secondary); border-top: 2px solid #e0f2fe; padding-top: 15px; margin-top: 15px; font-size: 1.1rem;"></div>
+                <div id="ai-title" style="font-weight: 900; font-size: 1.2rem;">Synchronizacja...</div>
+                <p id="ai-desc" style="font-size: 0.95rem; margin: 15px 0; line-height: 1.5; color: var(--text);">Wgraj pliki i ustal cel zawodów.</p>
+                <div id="ai-workout" style="font-weight: 800; color: var(--secondary); border-top: 2px solid #e0f2fe; padding-top: 15px; margin-top: 15px;"></div>
             </div>
-            <div style="margin-top:20px;">
-                <canvas id="mainChart" height="150"></canvas>
-            </div>
+            <canvas id="mainChart" height="150" style="margin-top:20px;"></canvas>
         </div>
     </div>
 </div>
@@ -151,60 +131,67 @@
 <script>
     let chart;
     let store = {
-        history: JSON.parse(localStorage.getItem('v42_history')) || [],
-        weight: parseFloat(localStorage.getItem('v42_weight')) || 0,
-        ftp: parseInt(localStorage.getItem('v42_ftp')) || 0,
-        vo2: parseInt(localStorage.getItem('v42_vo2')) || 0,
-        thrBpm: parseInt(localStorage.getItem('v42_thr_bpm')) || 0,
-        maxBpm: parseInt(localStorage.getItem('v42_max_bpm')) || 0,
-        restBpm: parseInt(localStorage.getItem('v42_rest_bpm')) || 0,
-        lastSurvey: JSON.parse(localStorage.getItem('v42_survey')) || null
+        history: JSON.parse(localStorage.getItem('v44_history')) || [],
+        vo2Trend: JSON.parse(localStorage.getItem('v44_vo2')) || [],
+        weight: parseFloat(localStorage.getItem('v44_weight')) || 0,
+        ftp: parseInt(localStorage.getItem('v44_ftp')) || 0,
+        age: parseInt(localStorage.getItem('v44_age')) || 0,
+        thrHr: parseInt(localStorage.getItem('v44_thr_hr')) || 0,
+        restHr: parseInt(localStorage.getItem('v44_rest_hr')) || 0,
+        maxHr: parseInt(localStorage.getItem('v44_max_hr')) || 0,
+        race: JSON.parse(localStorage.getItem('v44_race')) || null
     };
 
     window.onload = () => {
-        document.getElementById('in-weight').value = store.weight || '';
-        document.getElementById('in-ftp').value = store.ftp || '';
-        document.getElementById('in-thr-bpm').value = store.thrBpm || '';
-        document.getElementById('in-max-bpm').value = store.maxBpm || '';
-        document.getElementById('in-rest-bpm').value = store.restBpm || '';
-        document.getElementById('in-vo2').value = store.vo2 || '';
+        ['age', 'weight', 'ftp', 'thr-hr', 'rest-hr', 'max-hr'].forEach(id => {
+            const key = id.replace(/-/g, '').replace('thr', 'thr').replace('in-', ''); // mapping logic
+            document.getElementById('in-' + id).value = store[id.replace(/-/g, '').replace('thr', 'thr')] || '';
+        });
+        if(store.race) {
+            document.getElementById('race-name').value = store.race.name;
+            document.getElementById('race-date').value = store.race.date;
+            document.getElementById('race-priority').value = store.race.priority;
+        }
         refreshApp();
         setupDrop('drop-activities', 'ACT');
-        setupDrop('drop-ftp', 'FTP');
         setupDrop('drop-vo2', 'VO2');
     };
 
+    function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.style.display='block'; setTimeout(()=>t.style.display='none',3000); }
+
     function updateBiometry() {
-        store.weight = parseFloat(document.getElementById('in-weight').value) || 0;
-        store.ftp = parseInt(document.getElementById('in-ftp').value) || 0;
-        store.thrBpm = parseInt(document.getElementById('in-thr-bpm').value) || 0;
-        store.maxBpm = parseInt(document.getElementById('in-max-bpm').value) || 0;
-        store.restBpm = parseInt(document.getElementById('in-rest-bpm').value) || 0;
-        store.vo2 = parseInt(document.getElementById('in-vo2').value) || 0;
+        store.age = parseInt(document.getElementById('in-age').value);
+        store.weight = parseFloat(document.getElementById('in-weight').value);
+        store.ftp = parseInt(document.getElementById('in-ftp').value);
+        store.thrHr = parseInt(document.getElementById('in-thr-hr').value);
+        store.restHr = parseInt(document.getElementById('in-rest-hr').value);
+        store.maxHr = parseInt(document.getElementById('in-max-hr').value);
         saveAll();
         refreshApp();
+        showToast("Biometria zapisana");
     }
 
-    function processSurvey() {
-        store.lastSurvey = {
-            quality: parseInt(document.getElementById('s-quality').value),
-            rpe: parseInt(document.getElementById('s-rpe').value),
-            health: parseInt(document.getElementById('s-health').value),
-            mood: parseInt(document.getElementById('s-mood').value)
+    function saveRace() {
+        store.race = {
+            name: document.getElementById('race-name').value,
+            date: document.getElementById('race-date').value,
+            priority: document.getElementById('race-priority').value
         };
         saveAll();
         refreshApp();
+        showToast("Cel startowy ustawiony!");
     }
 
     function saveAll() {
-        localStorage.setItem('v42_history', JSON.stringify(store.history));
-        localStorage.setItem('v42_weight', store.weight);
-        localStorage.setItem('v42_ftp', store.ftp);
-        localStorage.setItem('v42_vo2', store.vo2);
-        localStorage.setItem('v42_thr_bpm', store.thrBpm);
-        localStorage.setItem('v42_max_bpm', store.maxBpm);
-        localStorage.setItem('v42_rest_bpm', store.restBpm);
-        localStorage.setItem('v42_survey', JSON.stringify(store.lastSurvey));
+        localStorage.setItem('v44_history', JSON.stringify(store.history));
+        localStorage.setItem('v44_vo2', JSON.stringify(store.vo2Trend));
+        localStorage.setItem('v44_weight', store.weight);
+        localStorage.setItem('v44_ftp', store.ftp);
+        localStorage.setItem('v44_age', store.age);
+        localStorage.setItem('v44_thr_hr', store.thrHr);
+        localStorage.setItem('v44_rest_hr', store.restHr);
+        localStorage.setItem('v44_max_hr', store.maxHr);
+        localStorage.setItem('v44_race', JSON.stringify(store.race));
     }
 
     function setupDrop(id, type) {
@@ -222,84 +209,108 @@
     function handleCSV(content, type) {
         const delimiter = content.includes(';') ? ';' : ',';
         const lines = content.split(/\r?\n/).filter(l => l.trim() !== '');
-        const headers = lines[0].toLowerCase().split(delimiter).map(h => h.replace(/"/g, '').trim());
-
+        
         if (type === 'ACT') {
-            const idxDate = headers.findIndex(h => h.includes('dat'));
-            const idxDist = headers.findIndex(h => h.includes('dist') || h.includes('dystans'));
+            const headers = lines[0].split(delimiter).map(h => h.trim());
+            const idxDate = headers.findIndex(h => h === "Data");
+            const idxTss = headers.findIndex(h => h.includes("Training Stress Score"));
             
             store.history = lines.slice(1).map(l => {
-                const c = l.split(delimiter).map(col => col.replace(/"/g, '').trim());
-                // Konwersja przecinka na kropkę dla dystansu
-                const rawDist = c[idxDist] ? c[idxDist].replace(',', '.') : "0";
-                const d = parseFloat(rawDist) || 0;
-                return { date: new Date(c[idxDate]), tss: d * 6 };
-            }).filter(i => !isNaN(i.date.getTime())).sort((a,b) => a.date - b.date);
-        } else {
-            const lastLine = lines[lines.length-1].split(delimiter);
-            const val = parseInt(lastLine.find(v => !isNaN(v.replace(',', '.')) && v.trim() !== ''));
-            if (type === 'FTP') store.ftp = val || store.ftp;
-            if (type === 'VO2') store.vo2 = val || store.vo2;
+                const c = l.split(delimiter);
+                return { date: c[idxDate]?.split(' ')[0], tss: parseFloat(c[idxTss]) || 0 };
+            }).filter(i => i.tss > 0);
+            showToast(`Wczytano ${store.history.length} treningów`);
+        } else if (type === 'VO2') {
+            // Skip first 2 lines for Pułap tlenowy.csv
+            store.vo2Trend = lines.slice(2).map(l => {
+                const c = l.split(delimiter);
+                return { month: c[0], value: parseFloat(c[2]) };
+            }).filter(i => i.value > 0);
+            showToast("Zaktualizowano trend VO2Max");
         }
         saveAll();
         refreshApp();
     }
 
     function refreshApp() {
+        const now = new Date();
+        const history = store.history.map(h => ({...h, date: new Date(h.date)}));
+        
+        // Stats
         if (store.weight > 0 && store.ftp > 0) document.getElementById('val-wkg').innerText = (store.ftp / store.weight).toFixed(2);
-        document.getElementById('val-thr-hr').innerText = store.thrBpm || '--';
-        document.getElementById('val-rest-hr').innerText = store.restBpm || '--';
+        if (store.vo2Trend.length > 0) document.getElementById('val-vo2').innerText = store.vo2Trend[store.vo2Trend.length-1].value;
 
-        if (store.history.length > 0) {
-            const now = new Date();
-            const atl = store.history.filter(a => (now - new Date(a.date))/86400000 <= 7).reduce((s,x)=>s+x.tss,0)/7;
-            const ctl = store.history.filter(a => (now - new Date(a.date))/86400000 <= 28).reduce((s,x)=>s+x.tss,0)/28;
-            const tsb = ctl - atl;
+        let tsb = 0, ctl = 0;
+        if (history.length > 0) {
+            const atl = history.filter(a => (now - a.date)/86400000 <= 7).reduce((s,x)=>s+x.tss,0)/7;
+            ctl = history.filter(a => (now - a.date)/86400000 <= 42).reduce((s,x)=>s+x.tss,0)/42;
+            tsb = ctl - atl;
             document.getElementById('val-tsb').innerText = Math.round(tsb);
-            updateAI(tsb);
-            updateChart();
+            document.getElementById('val-ctl').innerText = Math.round(ctl);
+            updateChart(history);
         }
-        renderZones();
+
+        // Race logic
+        if(store.race && store.race.date) {
+            const rDate = new Date(store.race.date);
+            const daysTo = Math.ceil((rDate - now) / 86400000);
+            document.getElementById('race-countdown').style.display = 'block';
+            document.getElementById('days-to-race').innerText = daysTo;
+            updateAI(tsb, daysTo, ctl);
+        } else {
+            updateAI(tsb, null, ctl);
+        }
+        renderHRZones();
     }
 
-    function renderZones() {
-        const ftp = store.ftp || 0;
-        const zones = [{n:"Z1",p:"55%"},{n:"Z2",p:"75%"},{n:"Z3",p:"90%"},{n:"Z4",p:"105%"},{n:"Z5",p:"120%"}];
-        document.querySelector("#zones-body tbody").innerHTML = zones.map(z => {
-            return `<tr><td><b>${z.n}</b></td><td>do ${Math.round(ftp*(parseInt(z.p)/100))} W</td><td>${z.p}</td></tr>`;
-        }).join('');
+    function renderHRZones() {
+        const thr = store.thrHr || (220 - store.age) * 0.85;
+        const zones = [
+            {n:"Z1", r:`<${Math.round(thr*0.8)}`, d:"Regeneracja"},
+            {n:"Z2", r:`${Math.round(thr*0.81)}-${Math.round(thr*0.89)}`, d:"Tlenowa"},
+            {n:"Z3", r:`${Math.round(thr*0.90)}-${Math.round(thr*0.94)}`, d:"Tempo"},
+            {n:"Z4", r:`${Math.round(thr*0.95)}-${Math.round(thr*1.0)}`, d:"Próg"}
+        ];
+        document.getElementById('hr-zones').querySelector('tbody').innerHTML = zones.map(z => 
+            `<tr><td><b>${z.n}</b></td><td>${z.r}</td><td>${z.d}</td></tr>`
+        ).join('');
     }
 
-    function updateAI(tsb) {
+    function updateAI(tsb, daysToRace, ctl) {
         const title = document.getElementById('ai-title');
         const desc = document.getElementById('ai-desc');
         const work = document.getElementById('ai-workout');
-        const survey = store.lastSurvey;
 
-        if (survey && survey.health >= 5) {
-            title.innerText = "🚨 ALARM: KONTUZJA / BÓL";
-            desc.innerText = "Zgłosiłeś problemy zdrowotne. Odpoczynek jest priorytetem.";
-            work.innerText = "SUGESTIA: Pełna regeneracja.";
-        } else if (tsb < -20) {
-            title.innerText = "STAN: PRZEMĘCZENIE";
-            desc.innerText = "Uważaj na tętno spoczynkowe ("+store.restBpm+"). Twoja forma wymaga świeżości.";
-            work.innerText = "SUGESTIA: Rozjazd Z1 poniżej "+Math.round(store.ftp*0.55)+" W.";
+        if(daysToRace !== null && daysToRace >= 0) {
+            if(daysToRace <= 7) {
+                title.innerText = "TAPER WEEK: PEAKING";
+                desc.innerText = `Masz ${daysToRace} dni do startu. TSB: ${Math.round(tsb)}. Celujemy w +15/+25.`;
+                work.innerText = "Redukcja TSS o 50%. Krótkie pobudzenia (3x30s) w tempie startowym.";
+            } else if(daysToRace <= 14) {
+                title.innerText = "TAPER PHASE: REDUCTION";
+                desc.innerText = "Zaczynamy schodzić z objętości. Zachowaj intensywność, tnij czas trwania.";
+                work.innerText = "Redukcja TSS o 20%. Dziś spokojne rozbieganie + przebieżki.";
+            } else {
+                title.innerText = "BUILD PHASE: " + (store.race.priority === 'A' ? "GOAL A" : "PREP");
+                desc.innerText = `Forma (CTL) na poziomie ${Math.round(ctl)}. Buduj bazę tlenową.`;
+                work.innerText = "Standardowy trening według planu.";
+            }
         } else {
-            title.innerText = "STAN: PRODUKTYWNY";
-            desc.innerText = "Balans zachowany. Twój próg tętna to "+store.thrBpm+".";
-            work.innerText = "SUGESTIA: Tempo Z3 @ "+Math.round(store.ftp * 0.9)+" W.";
+            title.innerText = tsb < -15 ? "ZMĘCZENIE" : "BAZA";
+            desc.innerText = "Brak ustawionych zawodów. Pracuj nad podniesieniem CTL.";
+            work.innerText = "Dziś: Rozbieganie w Z2.";
         }
     }
 
-    function updateChart() {
+    function updateChart(history) {
         const ctx = document.getElementById('mainChart').getContext('2d');
         if (chart) chart.destroy();
-        const last14 = store.history.slice(-14);
+        const last30 = history.slice(-30);
         chart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: last14.map(a => new Date(a.date).toLocaleDateString()),
-                datasets: [{ label: 'TSS', data: last14.map(a=>a.tss), borderColor: '#3b82f6', tension: 0.4 }]
+                labels: last30.map(a => a.date.toLocaleDateString()),
+                datasets: [{ label: 'TSS/Load', data: last30.map(a=>a.tss), borderColor: '#3b82f6', tension: 0.4 }]
             },
             options: { responsive: true, plugins: { legend: { display: false } } }
         });
