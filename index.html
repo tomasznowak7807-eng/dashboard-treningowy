@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro-Coach AI | Adaptive Dashboard</title>
+    <title>ADAPTIVE COACH AI | Pro Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -24,20 +24,10 @@
             box-shadow: 0 10px 15px rgba(0,0,0,0.1);
         }
 
-        /* Sekcja Onboardingu */
-        #onboarding-overlay {
-            position: fixed; top:0; left:0; width:100%; height:100%; 
-            background: rgba(15, 23, 42, 0.95); z-index: 1000; 
-            display: flex; justify-content: center; align-items: center;
-        }
-        .onboarding-card {
-            background: white; padding: 30px; border-radius: 20px; max-width: 500px; width: 90%;
-        }
-        input, select, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
-
-        .btn-main {
-            background: var(--secondary); color: white; border: none; padding: 12px 20px;
-            border-radius: 8px; cursor: pointer; font-weight: 700; width: 100%;
+        #drop-zone {
+            border: 2px dashed var(--secondary); border-radius: 16px; padding: 30px; 
+            text-align: center; margin-bottom: 20px; background: rgba(59, 130, 246, 0.05); 
+            transition: 0.3s; cursor: pointer;
         }
 
         .sync-dashboard {
@@ -57,54 +47,33 @@
 
         .training-card {
             background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0;
-            margin-bottom: 15px; position: relative; transition: 0.3s;
+            margin-bottom: 15px; position: relative;
         }
         .day-tag { background: var(--primary); color: white; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.8rem; }
         
-        .bar-chart {
-            display: flex; align-items: flex-end; gap: 3px; height: 60px; 
-            background: #f1f5f9; padding: 8px; border-radius: 8px; margin: 15px 0;
-        }
-        .bar { flex: 1; border-radius: 2px; }
-        .z1 { background: #94a3b8; } .z2 { background: #3b82f6; } .z4 { background: #f59e0b; } .z6 { background: #ef4444; }
-
-        .trend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+        .trend-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
         .chart-card { background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; }
         
         .subjective-btns { display: flex; gap: 10px; margin-bottom: 20px; }
         .btn-sub { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; background: white; font-weight: 600; }
-
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<div id="onboarding-overlay" class="hidden">
-    <div class="onboarding-card">
-        <h2 style="margin-top:0">Witaj w ACAI 2026</h2>
-        <p style="font-size: 0.9rem; color: #64748b;">Zanim zaczniemy, AI musi zrozumieć Twój kontekst.</p>
-        <label>Twój główny cel:</label>
-        <select id="user-goal">
-            <option value="marathon">Ukończenie Maratonu</option>
-            <option value="weight">Redukcja wagi / Zdrowie</option>
-            <option value="ftp">Zwiększenie mocy (FTP)</option>
-        </select>
-        <label>Poziom wytrenowania (1-10):</label>
-        <input type="number" id="user-level" min="1" max="10" value="5">
-        <label>Największe utrudnienie życiowe:</label>
-        <textarea id="user-stress" placeholder="np. nienormowany czas pracy, małe dziecko..."></textarea>
-        <button class="btn-main" onclick="saveOnboarding()">ROZPOCZNIJ WSPÓŁPRACĘ</button>
-    </div>
-</div>
-
 <div class="container">
     <header>
         <div>
             <h1 style="margin:0">ADAPTIVE COACH AI</h1>
-            <small id="sync-status" style="opacity:0.7">Inicjalizacja systemu...</small>
+            <small id="sync-status" style="opacity:0.7">System gotowy do analizy danych</small>
         </div>
-        <button class="btn-main" style="width:auto; background:none; border: 1px solid white;" onclick="resetAll()">RESET PROFILU</button>
+        <button class="btn-main" style="padding: 8px 15px; background:none; border: 1px solid white; color: white; border-radius: 8px; cursor:pointer;" onclick="location.reload()">ODŚWIEŻ</button>
     </header>
+
+    <div id="drop-zone">
+        <p style="margin: 0; font-weight: 600; color: var(--secondary);">📥 Przeciągnij tutaj plik .csv z Garmin Connect</p>
+        <small style="color: #64748b;">Analiza TSB (Freshness), CTL (Forma) i ATL (Zmęczenie)</small>
+    </div>
 
     <div class="subjective-btns">
         <button class="btn-sub" onclick="logSubjective('bol')">😫 Coś mnie boli</button>
@@ -113,169 +82,147 @@
     </div>
 
     <div class="sync-dashboard">
-        <div class="stat-box"><small>Wellness (HRV)</small><span id="cloud-wellness">--%</span></div>
-        <div class="stat-box"><small>Obciążenie (TSS)</small><span id="cloud-tss">---</span></div>
-        <div class="stat-box"><small>Waga</small><span id="cloud-weight">-- kg</span></div>
-        <div class="stat-box"><small>Moc (W/kg)</small><span id="wkg">--</span></div>
+        <div class="stat-box"><small>Balance (TSB)</small><span id="cloud-wellness">--</span></div>
+        <div class="stat-box"><small>Acute Load (ATL)</small><span id="cloud-tss">--</span></div>
+        <div class="stat-box"><small>Chronic Load (CTL)</small><span id="cloud-ctl">--</span></div>
+        <div class="stat-box"><small>Ostatni Dystans</small><span id="cloud-dist">-- km</span></div>
     </div>
 
     <div id="assistant-box">
-        <div id="warn-msg" style="font-weight: 900; text-transform: uppercase;">Analiza danych...</div>
-        <div id="sugg-msg" style="color: #64748b; margin-top: 5px;">Synchronizacja z Twoim profilem...</div>
+        <div id="warn-msg" style="font-weight: 900; text-transform: uppercase;">Czekam na dane...</div>
+        <div id="sugg-msg" style="color: #64748b; margin-top: 5px;">Wgraj plik CSV, aby asystent mógł przeanalizować Twoją formę.</div>
     </div>
-
-    <div id="dynamic-plan"></div>
 
     <div class="trend-grid">
         <div class="chart-card">
-            <h3 style="margin:0 0 15px 0; font-size: 1rem;">📊 Trend Obciążenia</h3>
+            <h3 style="margin:0 0 15px 0; font-size: 1rem;">📊 Analiza Formy: Obciążenie vs Dystans</h3>
             <canvas id="tssChart"></canvas>
-        </div>
-        <div class="chart-card">
-            <h3 style="margin:0 0 15px 0; font-size: 1rem;">📈 Stosunek W/kg</h3>
-            <canvas id="wkgChart"></canvas>
         </div>
     </div>
 </div>
 
 <script>
-    const CONFIG = {
-        csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRVLylCkxR1sbSnxYdWGCBpgeILRZMa3uTZCz6qPQ47Q5QJsinxI_T2n_KkjxKlbbz6JBadfQLLXxDP/pub?gid=950508224&single=true&output=csv",
-        cacheKey: "acai_v2_data"
-    };
+    let tssChart;
+    const dropZone = document.getElementById('drop-zone');
 
-    const initialPlan = [
-        { id: 1, day: 'Poniedziałek', title: 'Interwały VO2Max', desc: '5x3min Z5 / 3min Z1. Hard!', type: 'hard', chart: 'sprints' },
-        { id: 2, day: 'Wtorek', title: 'Siła Podbiegi', desc: '8x20s sprint pod górę. Skupienie na technice.', type: 'medium' },
-        { id: 3, day: 'Środa', title: 'Regeneracja AI', desc: 'Wolne lub 30 min bardzo lekkiego truchtu.', type: 'rest' },
-        { id: 4, day: 'Czwartek', title: 'Tempo (Sweet Spot)', desc: '2x15min Z4. Budowanie wytrzymałości.', type: 'hard', chart: 'sweet' },
-        { id: 5, day: 'Piątek', title: 'Bieg spokojny', desc: '45 min w 2 strefie. Relaks.', type: 'easy' },
-        { id: 6, day: 'Sobota', title: 'Długie wybieganie', desc: '90-120 min tlenowo.', type: 'medium', chart: 'endurance' },
-        { id: 7, day: 'Niedziela', title: 'Joga / Mobility', desc: 'Praca nad zakresem ruchów.', type: 'rest' }
-    ];
+    // --- DRAG & DROP LOGIC ---
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+    });
 
-    let currentPlan = [...initialPlan];
-    let tssChart, wkgChart;
+    dropZone.addEventListener('dragover', () => dropZone.style.background = "rgba(59, 130, 246, 0.2)");
+    dropZone.addEventListener('dragleave', () => dropZone.style.background = "rgba(59, 130, 246, 0.05)");
 
-    // --- ONBOARDING LOGIC ---
-    function checkOnboarding() {
-        if(!localStorage.getItem('acai_user_profile')) {
-            document.getElementById('onboarding-overlay').classList.remove('hidden');
-        } else {
-            const profile = JSON.parse(localStorage.getItem('acai_user_profile'));
-            document.getElementById('sugg-msg').innerText = "Witaj trenerze! Twój cel: " + profile.goal;
+    dropZone.addEventListener('drop', (e) => {
+        dropZone.style.background = "rgba(59, 130, 246, 0.05)";
+        const file = e.dataTransfer.files[0];
+        if (file && file.name.endsWith('.csv')) {
+            const reader = new FileReader();
+            reader.onload = (event) => parseGarminCSV(event.target.result);
+            reader.readAsText(file);
+            document.getElementById('sync-status').innerText = "Wczytano: " + file.name;
         }
+    });
+
+    // --- PARSER & AI LOGIC ---
+    function parseGarminCSV(csvText) {
+        const delimiter = csvText.includes(';') ? ';' : ',';
+        const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
+        const headers = lines[0].split(delimiter).map(h => h.replace(/"/g, ''));
+        
+        const idxDate = headers.findIndex(h => h.toLowerCase().includes("dat"));
+        const idxDist = headers.findIndex(h => h.toLowerCase().includes("dystans"));
+        const idxTime = headers.findIndex(h => h.toLowerCase().includes("czas"));
+        const idxCal  = headers.findIndex(h => h.toLowerCase().includes("kalorie"));
+
+        const history = lines.slice(1).map(line => {
+            const cols = line.split(delimiter).map(c => c.replace(/"/g, ''));
+            const dist = parseFloat(cols[idxDist]) || 0;
+            // Estymacja TSS: dystans * intensywność (uproszczone)
+            const estimatedTSS = dist * 5 || 40; 
+            return {
+                date: new Date(cols[idxDate]),
+                distance: dist,
+                tss: estimatedTSS
+            };
+        }).filter(item => !isNaN(item.date.getTime())).sort((a,b) => a.date - b.date);
+
+        calculateFreshness(history);
+        updateChartsFromHistory(history);
     }
 
-    function saveOnboarding() {
-        const profile = {
-            goal: document.getElementById('user-goal').value,
-            level: document.getElementById('user-level').value,
-            stress: document.getElementById('user-stress').value
-        };
-        localStorage.setItem('acai_user_profile', JSON.stringify(profile));
-        document.getElementById('onboarding-overlay').classList.add('hidden');
-        sync();
+    function calculateFreshness(history) {
+        const now = new Date();
+        const oneDay = 1000 * 60 * 60 * 24;
+
+        const last7Days = history.filter(h => (now - h.date) / oneDay <= 7);
+        const last28Days = history.filter(h => (now - h.date) / oneDay <= 28);
+
+        const ATL = last7Days.reduce((sum, h) => sum + h.tss, 0) / 7;
+        const CTL = last28Days.reduce((sum, h) => sum + h.tss, 0) / 28;
+        const TSB = CTL - ATL;
+
+        updateUI(TSB, ATL, CTL, history[history.length-1].distance);
     }
 
-    // --- CORE AI LOGIC ---
-    function adaptPlan(wellnessScore) {
-        const restDayIdx = currentPlan.findIndex(t => t.type === 'rest');
-        if (wellnessScore < 50 && restDayIdx !== -1 && currentPlan[0].type !== 'rest') {
-            [currentPlan[0], currentPlan[restDayIdx]] = [currentPlan[restDayIdx], currentPlan[0]];
-            currentPlan[0].title = "🛡️ ADAPTACJA: Regeneracja";
-            currentPlan[0].desc = "Zauważyłem niskie parametry regeneracji. Przesunąłem odpoczynek na dzisiaj.";
-            renderPlan();
-        }
-    }
+    function updateUI(tsb, atl, ctl, lastDist) {
+        document.getElementById('cloud-wellness').innerText = Math.round(tsb);
+        document.getElementById('cloud-tss').innerText = Math.round(atl);
+        document.getElementById('cloud-ctl').innerText = Math.round(ctl);
+        document.getElementById('cloud-dist').innerText = lastDist + " km";
 
-    function logSubjective(status) {
+        const warn = document.getElementById('warn-msg');
+        const sugg = document.getElementById('sugg-msg');
         const box = document.getElementById('assistant-box');
-        if(status === 'bol') {
-            document.getElementById('warn-msg').innerText = "Wykryto zgłoszenie bólu!";
-            document.getElementById('sugg-msg').innerText = "AI sugeruje: Zrezygnuj z dzisiejszej sesji. Skup się na rolowaniu i lodzie.";
-            box.style.background = "#fff1f2";
-        } else if(status === 'ready') {
-            document.getElementById('warn-msg').innerText = "Super samopoczucie!";
-            document.getElementById('sugg-msg').innerText = "Możesz dołożyć 1-2 powtórzenia do dzisiejszego głównego bloku.";
-            box.style.background = "#f0fdf4";
+
+        if (tsb < -20) {
+            warn.innerText = "ALARM: Przeciążenie";
+            warn.style.color = "#ef4444";
+            sugg.innerText = "Twoje zmęczenie jest zbyt wysokie. Zalecana regeneracja.";
+            box.style.borderLeftColor = "#ef4444";
+        } else if (tsb > 5) {
+            warn.innerText = "GOTOWOŚĆ: Fresh";
+            warn.style.color = "#3b82f6";
+            sugg.innerText = "Jesteś wypoczęty. Dobry moment na test progu lub mocny akcent.";
+            box.style.borderLeftColor = "#3b82f6";
+        } else {
+            warn.innerText = "STATUS: Produktywny";
+            warn.style.color = "#10b981";
+            sugg.innerText = "Optymalny poziom trenowania. Kontynuuj plan.";
+            box.style.borderLeftColor = "#10b981";
         }
     }
 
-    // --- RENDER & CHARTS ---
-    function renderPlan() {
-        const container = document.getElementById('dynamic-plan');
-        container.innerHTML = '';
-        currentPlan.forEach((t) => {
-            const card = document.createElement('div');
-            card.className = 'training-card';
-            card.style.opacity = t.type === 'rest' ? '0.6' : '1';
-            card.innerHTML = `
-                <span class="day-tag">${t.day}</span>
-                <h3 style="margin:10px 0 5px 0">${t.title}</h3>
-                <p style="font-size: 0.85rem; color: #64748b; margin: 0;">${t.desc}</p>
-                ${t.chart ? `<div class="bar-chart">${getChartHTML(t.chart)}</div>` : ''}
-            `;
-            container.appendChild(card);
+    function updateChartsFromHistory(history) {
+        const sorted = history.slice(-20); // Ostatnie 20 aktywności
+        const labels = sorted.map(h => h.date.toLocaleDateString('pl-PL', {day:'numeric', month:'short'}));
+        
+        if (tssChart) tssChart.destroy();
+        const ctx = document.getElementById('tssChart').getContext('2d');
+        
+        tssChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'TSS (Obciążenie)', data: sorted.map(h => h.tss), borderColor: '#ef4444', tension: 0.4, yAxisID: 'y' },
+                    { label: 'Dystans (km)', data: sorted.map(h => h.distance), type: 'bar', backgroundColor: 'rgba(59, 130, 246, 0.2)', yAxisID: 'y1' }
+                ]
+            },
+            options: {
+                scales: {
+                    y: { position: 'left', title: { display: true, text: 'TSS' } },
+                    y1: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'km' } }
+                }
+            }
         });
     }
 
-    function getChartHTML(type) {
-        if(type === 'sprints') return '<div class="bar z2" style="height:30%"></div>' + Array(5).fill('<div class="bar z6" style="height:100%"></div><div class="bar z1" style="height:20%"></div>').join('');
-        if(type === 'sweet') return Array(2).fill('<div class="bar z4" style="height:80%"></div><div class="bar z2" style="height:30%"></div>').join('');
-        return '<div class="bar z2" style="height:60%"></div>';
+    function logSubjective(type) {
+        const sugg = document.getElementById('sugg-msg');
+        if(type === 'bol') sugg.innerText = "⚠️ Odnotowano ból. AI sugeruje 48h przerwy od biegania.";
+        if(type === 'ready') sugg.innerText = "🚀 Czujesz moc? Dodaj 10% do dzisiejszej intensywności.";
     }
-
-    async function sync() {
-        try {
-            const r = await fetch(CONFIG.csvUrl + "&t=" + Date.now());
-            const txt = await r.text();
-            const rows = txt.split(/\r?\n/).map(l => l.split(","));
-            let w=70, f=250, t=0, s=80;
-            rows.forEach(([p,v]) => {
-                if(p === "Waga") { document.getElementById('cloud-weight').innerText = v + "kg"; w=parseFloat(v); }
-                if(p === "TSS") { document.getElementById('cloud-tss').innerText = v; t=parseFloat(v); }
-                if(p === "Status_Zmeczenia") { s=parseInt(v); updateWellnessUI(s); }
-            });
-            document.getElementById('wkg').innerText = (f/w).toFixed(2);
-            document.getElementById('sync-status').innerText = "Synchronizacja: " + new Date().toLocaleTimeString();
-            adaptPlan(s);
-        } catch(e) { 
-            console.warn("Brak połączenia z Google Sheets - działam w trybie offline."); 
-            updateWellnessUI(85);
-        }
-    }
-
-    function updateWellnessUI(s) {
-        document.getElementById('cloud-wellness').innerText = s + "%";
-        const box = document.getElementById('assistant-box');
-        const warn = document.getElementById('warn-msg');
-        if(s < 50) { 
-            box.style.borderLeftColor = "#ef4444"; 
-            warn.style.color = "#ef4444"; 
-            warn.innerText = "ALARM REGENERACJI"; 
-        } else { 
-            box.style.borderLeftColor = "#10b981"; 
-            warn.style.color = "#10b981"; 
-            warn.innerText = "ORGANIZM GOTOWY"; 
-        }
-    }
-
-    function initCharts() {
-        const common = { responsive: true, plugins: { legend: { display: false } } };
-        tssChart = new Chart(document.getElementById('tssChart'), { type: 'line', data: { labels: ['P','W','Ś','C','P','S','N'], datasets: [{ data: [40,65,0,85,30,120,45], borderColor: '#ef4444', tension: 0.4 }] }, options: common });
-        wkgChart = new Chart(document.getElementById('wkgChart'), { type: 'line', data: { labels: ['Sty','Lut','Mar'], datasets: [{ data: [3.1, 3.3, 3.5], borderColor: '#10b981', tension: 0.4 }] }, options: common });
-    }
-
-    function resetAll() { localStorage.clear(); location.reload(); }
-
-    window.onload = () => { 
-        checkOnboarding(); 
-        initCharts(); 
-        renderPlan(); 
-        sync(); 
-        setInterval(sync, 30000); 
-    };
 </script>
 </body>
 </html>
