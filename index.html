@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro-Coach AI | Adaptive Dashboard</title>
+    <title>ACAI 2026 | Ultimate Adaptive Coach</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -12,68 +12,50 @@
             --strength: #10b981; --recovery: #f59e0b; --bg: #f8fafc;
             --dark: #1e293b; --text: #334155;
         }
-
         * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         body { margin: 0; padding: 20px; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
-        .container { max-width: 1000px; margin: auto; }
+        .container { max-width: 900px; margin: auto; }
 
         header {
             background: linear-gradient(135deg, var(--primary) 0%, #1e293b 100%);
             color: white; padding: 1.5rem; border-radius: 16px; margin-bottom: 20px;
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
         }
 
-        /* Sekcja Onboardingu */
         #onboarding-overlay {
             position: fixed; top:0; left:0; width:100%; height:100%; 
-            background: rgba(15, 23, 42, 0.95); z-index: 1000; 
+            background: rgba(15, 23, 42, 0.98); z-index: 1000; 
             display: flex; justify-content: center; align-items: center;
         }
         .onboarding-card {
             background: white; padding: 30px; border-radius: 20px; max-width: 500px; width: 90%;
+            max-height: 90vh; overflow-y: auto; color: var(--text);
         }
-        input, select, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
 
         .btn-main {
             background: var(--secondary); color: white; border: none; padding: 12px 20px;
-            border-radius: 8px; cursor: pointer; font-weight: 700; width: 100%;
+            border-radius: 8px; cursor: pointer; font-weight: 700; width: 100%; margin-top: 10px;
         }
 
-        .sync-dashboard {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;
-        }
-        .stat-box {
-            background: var(--dark); color: white; padding: 20px; border-radius: 16px;
-            display: flex; flex-direction: column;
-        }
-        .stat-box small { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; }
-        .stat-box span { font-size: 1.8rem; font-weight: 800; }
+        input, select, textarea { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; }
+
+        .sync-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-box { background: var(--dark); color: white; padding: 15px; border-radius: 16px; text-align: center; }
+        .stat-box small { display: block; font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-box span { font-size: 1.5rem; font-weight: 800; }
 
         #assistant-box {
-            background: white; padding: 25px; border-left: 8px solid #cbd5e1; border-radius: 16px;
+            background: white; padding: 20px; border-left: 8px solid #cbd5e1; border-radius: 16px;
             margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
         .training-card {
-            background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0;
-            margin-bottom: 15px; position: relative; transition: 0.3s;
+            background: white; padding: 15px; border-radius: 16px; border: 1px solid #e2e8f0;
+            margin-bottom: 12px; transition: 0.3s;
         }
-        .day-tag { background: var(--primary); color: white; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.8rem; }
+        .day-tag { background: var(--primary); color: white; padding: 3px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: 700; }
+        .type-tag { font-size: 0.7rem; text-transform: uppercase; font-weight: 900; margin-left: 10px; }
         
-        .bar-chart {
-            display: flex; align-items: flex-end; gap: 3px; height: 60px; 
-            background: #f1f5f9; padding: 8px; border-radius: 8px; margin: 15px 0;
-        }
-        .bar { flex: 1; border-radius: 2px; }
-        .z1 { background: #94a3b8; } .z2 { background: #3b82f6; } .z4 { background: #f59e0b; } .z6 { background: #ef4444; }
-
-        .trend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
-        .chart-card { background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; }
-        
-        .subjective-btns { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn-sub { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; background: white; font-weight: 600; }
-
         .hidden { display: none !important; }
     </style>
 </head>
@@ -81,148 +63,179 @@
 
 <div id="onboarding-overlay" class="hidden">
     <div class="onboarding-card">
-        <h2 style="margin-top:0">Witaj w ACAI 2026</h2>
-        <p style="font-size: 0.9rem; color: #64748b;">Zanim zaczniemy, AI musi zrozumieć Twój kontekst.</p>
-        <label>Twój główny cel:</label>
-        <select id="user-goal">
-            <option value="marathon">Ukończenie Maratonu</option>
-            <option value="weight">Redukcja wagi / Zdrowie</option>
-            <option value="ftp">Zwiększenie mocy (FTP)</option>
+        <h2 style="margin-top:0">Twoja Inteligencja Treningowa</h2>
+        <p style="font-size: 0.85rem; color: #64748b;">Skonfiguruj swój profil, aby AI mogło dopasować plan.</p>
+        
+        <label>Dyscyplina:</label>
+        <select id="user-sport">
+            <option value="run">Bieganie</option>
+            <option value="mtb">Kolarstwo MTB</option>
+            <option value="road">Kolarstwo Szosowe</option>
+            <option value="gravel">Kolarstwo Gravel</option>
+            <option value="triathlon">Triathlon</option>
         </select>
-        <label>Poziom wytrenowania (1-10):</label>
-        <input type="number" id="user-level" min="1" max="10" value="5">
-        <label>Największe utrudnienie życiowe:</label>
-        <textarea id="user-stress" placeholder="np. nienormowany czas pracy, małe dziecko..."></textarea>
-        <button class="btn-main" onclick="saveOnboarding()">ROZPOCZNIJ WSPÓŁPRACĘ</button>
+
+        <label>Ile dni w tygodniu masz na trening? (1-7):</label>
+        <input type="number" id="user-days" min="1" max="7" value="4">
+
+        <label>Wiek:</label>
+        <input type="number" id="user-age" value="35">
+
+        <label>Główny stresor / Ograniczenia:</label>
+        <select id="user-life-stress">
+            <option value="low">Niski stres / Dobry sen</option>
+            <option value="mid">Standard (Praca + Rodzina)</option>
+            <option value="high">Wysoki stres / Praca zmianowa</option>
+        </select>
+
+        <label>Kontuzje / Problemy:</label>
+        <select id="user-injuries">
+            <option value="none">Brak</option>
+            <option value="knees">Bóle kolan</option>
+            <option value="back">Plecy / Lędźwia</option>
+        </select>
+
+        <button class="btn-main" onclick="saveOnboarding()">AKTYWUJ PLAN</button>
     </div>
 </div>
 
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">ADAPTIVE COACH AI</h1>
-            <small id="sync-status" style="opacity:0.7">Inicjalizacja systemu...</small>
+            <h1 style="margin:0; font-size: 1.4rem;">ACAI 2026</h1>
+            <small id="sync-status">Ładowanie...</small>
         </div>
-        <button class="btn-main" style="width:auto;" onclick="resetAll()">RESET PROFILU</button>
+        <button onclick="resetAll()" style="background:none; border:1px solid white; color:white; padding:5px 10px; border-radius:5px; cursor:pointer;">Reset</button>
     </header>
 
-    <div class="subjective-btns">
-        <button class="btn-sub" onclick="logSubjective('bol')">😫 Coś mnie boli</button>
-        <button class="btn-sub" onclick="logSubjective('zmeczenie')">😴 Słaby sen</button>
-        <button class="btn-sub" onclick="logSubjective('ready')">🚀 Czuję moc</button>
-    </div>
-
     <div class="sync-dashboard">
-        <div class="stat-box"><small>Wellness (HRV)</small><span id="cloud-wellness">--%</span></div>
-        <div class="stat-box"><small>Obciążenie (TSS)</small><span id="cloud-tss">---</span></div>
-        <div class="stat-box"><small>Waga</small><span id="cloud-weight">-- kg</span></div>
-        <div class="stat-box"><small>Moc (W/kg)</small><span id="wkg">--</span></div>
+        <div class="stat-box"><small>Wellness</small><span id="cloud-wellness">--%</span></div>
+        <div class="stat-box"><small>TSS</small><span id="cloud-tss">--</span></div>
+        <div class="stat-box"><small>Sport</small><span id="display-sport">--</span></div>
+        <div class="stat-box"><small>Moc W/kg</small><span id="wkg">--</span></div>
     </div>
 
     <div id="assistant-box">
-        <div id="warn-msg" style="font-weight: 900; text-transform: uppercase;">Analiza danych...</div>
-        <div id="sugg-msg" style="color: #64748b; margin-top: 5px;">Synchronizacja z Twoim profilem...</div>
+        <div id="warn-msg" style="font-weight: 900; text-transform: uppercase; color: var(--secondary);">Inicjalizacja AI...</div>
+        <div id="sugg-msg" style="color: #64748b; margin-top: 5px; font-size: 0.9rem;">Analizuję Twój budżet czasu i cele...</div>
     </div>
 
     <div id="dynamic-plan"></div>
-
-    <div class="trend-grid">
-        <div class="chart-card">
-            <h3 style="margin:0 0 15px 0; font-size: 1rem;">📊 Trend Obciążenia</h3>
-            <canvas id="tssChart"></canvas>
-        </div>
-        <div class="chart-card">
-            <h3 style="margin:0 0 15px 0; font-size: 1rem;">📈 Stosunek W/kg</h3>
-            <canvas id="wkgChart"></canvas>
-        </div>
+    
+    <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; margin-top: 20px;">
+        <h3 style="margin-top:0">Trend Formy</h3>
+        <canvas id="formChart" height="100"></canvas>
     </div>
 </div>
 
 <script>
     const CONFIG = {
-        csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRVLylCkxR1sbSnxYdWGCBpgeILRZMa3uTZCz6qPQ47Q5QJsinxI_T2n_KkjxKlbbz6JBadfQLLXxDP/pub?gid=950508224&single=true&output=csv",
-        cacheKey: "acai_v2_data"
+        csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRVLylCkxR1sbSnxYdWGCBpgeILRZMa3uTZCz6qPQ47Q5QJsinxI_T2n_KkjxKlbbz6JBadfQLLXxDP/pub?gid=950508224&single=true&output=csv"
     };
 
-    const initialPlan = [
-        { id: 1, day: 'Poniedziałek', title: 'Interwały VO2Max', desc: '5x3min Z5 / 3min Z1. Hard!', type: 'hard', chart: 'sprints' },
-        { id: 2, day: 'Wtorek', title: 'Siła Podbiegi', desc: '8x20s sprint pod górę. Skupienie na technice.', type: 'medium' },
-        { id: 3, day: 'Środa', title: 'Regeneracja AI', desc: 'Wolne lub 30 min bardzo lekkiego truchtu.', type: 'rest' },
-        { id: 4, day: 'Czwartek', title: 'Tempo (Sweet Spot)', desc: '2x15min Z4. Budowanie wytrzymałości.', type: 'hard', chart: 'sweet' },
-        { id: 5, day: 'Piątek', title: 'Bieg spokojny', desc: '45 min w 2 strefie. Relaks.', type: 'easy' },
-        { id: 6, day: 'Sobota', title: 'Długie wybieganie', desc: '90-120 min tlenowo.', type: 'medium', chart: 'endurance' },
-        { id: 7, day: 'Niedziela', title: 'Joga / Mobility', desc: 'Praca nad zakresem ruchów.', type: 'rest' }
-    ];
+    // Baza treningów zależna od sportu
+    const workoutLibrary = {
+        run: [
+            { day: 'Pn', title: 'Podbiegi Siłowe', desc: '8x20s mocno pod górę.', type: 'priority' },
+            { day: 'Wt', title: 'Bieg spokojny', desc: '40 min Z2 + rozciąganie.', type: 'filler' },
+            { day: 'Śr', title: 'Interwały VO2Max', desc: '5x3min mocno.', type: 'priority' },
+            { day: 'Cz', title: 'Regeneracja', desc: 'Wolne.', type: 'rest' },
+            { day: 'Pt', title: 'Progowy', desc: '20 min w tempie startowym.', type: 'priority' },
+            { day: 'Sb', title: 'Długie wybieganie', desc: '90 min tlenowo.', type: 'priority' },
+            { day: 'Nd', title: 'Spacer / Joga', desc: 'Aktywny wypoczynek.', type: 'rest' }
+        ],
+        bike: [ // Używane dla MTB, Road, Gravel
+            { day: 'Pn', title: 'Siła na niskiej kadencji', desc: '5x4min 50-60 RPM.', type: 'priority' },
+            { day: 'Wt', title: 'Tlen', desc: '60 min lekko.', type: 'filler' },
+            { day: 'Śr', title: 'Sweet Spot', desc: '3x10min Z4.', type: 'priority' },
+            { day: 'Cz', title: 'Wolne', desc: 'Odpoczynek.', type: 'rest' },
+            { day: 'Pt', title: 'Sprinty', desc: '10x15s Max.', type: 'priority' },
+            { day: 'Sb', title: 'Long Ride', desc: '3h w terenie / szosie.', type: 'priority' },
+            { day: 'Nd', title: 'Recovery Ride', desc: '45 min kręcenia nogą.', type: 'rest' }
+        ],
+        triathlon: [
+            { day: 'Pn', title: 'Pływanie - Technika', desc: '1500m z akcentem na chwyt.', type: 'priority' },
+            { day: 'Wt', title: 'Zakładka (Brick)', desc: 'Rower 40m + Bieg 15m.', type: 'priority' },
+            { day: 'Śr', title: 'Bieg Interwałowy', desc: '4x800m mocno.', type: 'priority' },
+            { day: 'Cz', title: 'Regeneracja', desc: 'Wolne.', type: 'rest' },
+            { day: 'Pt', title: 'Pływanie - Wytrzymałość', desc: '10x100m stałe tempo.', type: 'priority' },
+            { day: 'Sb', title: 'Rower - Długi', desc: '2.5h tlenowo.', type: 'priority' },
+            { day: 'Nd', title: 'Bieg spokojny', desc: '45 min Z2.', type: 'filler' }
+        ]
+    };
 
-    let currentPlan = [...initialPlan];
-    let tssChart, wkgChart;
-
-    // --- ONBOARDING LOGIC ---
-    function checkOnboarding() {
-        if(!localStorage.getItem('acai_user_profile')) {
-            document.getElementById('onboarding-overlay').classList.remove('hidden');
-        } else {
-            const profile = JSON.parse(localStorage.getItem('acai_user_profile'));
-            document.getElementById('sugg-msg').innerText = "Witaj trenerze! Twój cel: " + profile.goal;
-        }
-    }
+    let currentPlan = [];
 
     function saveOnboarding() {
         const profile = {
-            goal: document.getElementById('user-goal').value,
-            level: document.getElementById('user-level').value,
-            stress: document.getElementById('user-stress').value
+            sport: document.getElementById('user-sport').value,
+            days: parseInt(document.getElementById('user-days').value),
+            age: parseInt(document.getElementById('user-age').value),
+            stress: document.getElementById('user-life-stress').value,
+            injuries: document.getElementById('user-injuries').value
         };
         localStorage.setItem('acai_user_profile', JSON.stringify(profile));
         document.getElementById('onboarding-overlay').classList.add('hidden');
+        buildPlan(profile);
         sync();
     }
 
-    // --- CORE AI LOGIC ---
-    function adaptPlan(wellnessScore) {
-        const restDayIdx = currentPlan.findIndex(t => t.type === 'rest');
-        if (wellnessScore < 50 && restDayIdx !== -1 && currentPlan[0].type !== 'rest') {
-            [currentPlan[0], currentPlan[restDayIdx]] = [currentPlan[restDayIdx], currentPlan[0]];
-            currentPlan[0].title = "🛡️ ADAPTACJA: Regeneracja";
-            currentPlan[0].desc = "Zauważyłem niskie parametry regeneracji. Przesunąłem odpoczynek na dzisiaj.";
-            renderPlan();
+    // GŁÓWNA LOGIKA BUDOWANIA PLANU
+    function buildPlan(p) {
+        let base = (p.sport === 'run') ? workoutLibrary.run : (p.sport === 'triathlon' ? workoutLibrary.triathlon : workoutLibrary.bike);
+        let activeDays = 0;
+        
+        // Kopiujemy bazę i dostosowujemy do budżetu czasu
+        currentPlan = JSON.parse(JSON.stringify(base));
+
+        // Jeśli użytkownik ma mało czasu, zamieniamy 'filler' na 'rest'
+        currentPlan.forEach(workout => {
+            if(workout.type === 'filler' && activeDays >= p.days) {
+                workout.title = "Wolne (Oszczędzanie energii)";
+                workout.desc = "Dzień wycięty przez AI, aby zmieścić się w Twoim budżecie czasu.";
+                workout.type = 'rest';
+            } else if (workout.type !== 'rest') {
+                activeDays++;
+            }
+        });
+
+        // Dodatkowe ucinanie, jeśli wciąż za dużo dni
+        for(let i=0; i<currentPlan.length; i++) {
+            if(activeDays > p.days && currentPlan[i].type === 'priority') {
+                currentPlan[i].title = "Odpoczynek";
+                currentPlan[i].desc = "Zredukowano objętość dla lepszej regeneracji.";
+                currentPlan[i].type = 'rest';
+                activeDays--;
+            }
         }
+        
+        renderPlan();
+        generateAdvice(p);
     }
 
-    function logSubjective(status) {
-        const box = document.getElementById('assistant-box');
-        if(status === 'bol') {
-            document.getElementById('warn-msg').innerText = "Wykryto zgłoszenie bólu!";
-            document.getElementById('sugg-msg').innerText = "AI sugeruje: Zrezygnuj z dzisiejszej sesji. Skup się na rolowaniu i lodzie.";
-            box.style.background = "#fff1f2";
-        } else if(status === 'ready') {
-            document.getElementById('warn-msg').innerText = "Super samopoczucie!";
-            document.getElementById('sugg-msg').innerText = "Możesz dołożyć 1-2 powtórzenia do dzisiejszego głównego bloku.";
-            box.style.background = "#f0fdf4";
-        }
+    function generateAdvice(p) {
+        let advice = `Dla ${p.sport.toUpperCase()} (Wiek: ${p.age}): `;
+        if(p.stress === 'high') advice += "⚠️ Wysoki stres! Będę ucinać intensywność przy słabym śnie. ";
+        if(p.injuries === 'knees') advice += "🚑 Uwzględniam kolana - unikaj twardych przełożeń/betonu. ";
+        document.getElementById('sugg-msg').innerText = advice;
+        document.getElementById('display-sport').innerText = p.sport.toUpperCase();
     }
 
-    // --- RENDER & CHARTS ---
     function renderPlan() {
         const container = document.getElementById('dynamic-plan');
         container.innerHTML = '';
-        currentPlan.forEach((t) => {
+        currentPlan.forEach(t => {
             const card = document.createElement('div');
             card.className = 'training-card';
+            card.style.opacity = t.type === 'rest' ? '0.6' : '1';
             card.innerHTML = `
                 <span class="day-tag">${t.day}</span>
-                <h3 style="margin:10px 0 5px 0">${t.title}</h3>
-                <p style="font-size: 0.85rem; color: #64748b; margin: 0;">${t.desc}</p>
-                ${t.chart ? `<div class="bar-chart">${getChartHTML(t.chart)}</div>` : ''}
+                <span class="type-tag" style="color:${t.type === 'priority' ? 'var(--accent)' : '#94a3b8'}">${t.type}</span>
+                <h3 style="margin:8px 0 4px 0">${t.title}</h3>
+                <p style="font-size: 0.8rem; color: #64748b; margin: 0;">${t.desc}</p>
             `;
             container.appendChild(card);
         });
-    }
-
-    function getChartHTML(type) {
-        if(type === 'sprints') return '<div class="bar z2" style="height:30%"></div>' + Array(5).fill('<div class="bar z6" style="height:100%"></div><div class="bar z1" style="height:20%"></div>').join('');
-        if(type === 'sweet') return Array(2).fill('<div class="bar z4" style="height:80%"></div><div class="bar z2" style="height:30%"></div>').join('');
-        return '<div class="bar z2" style="height:60%"></div>';
     }
 
     async function sync() {
@@ -230,35 +243,56 @@
             const r = await fetch(CONFIG.csvUrl + "&t=" + Date.now());
             const txt = await r.text();
             const rows = txt.split(/\r?\n/).map(l => l.split(","));
-            let w=70, f=250, t=0, s=80;
             rows.forEach(([p,v]) => {
-                if(p === "Waga") { document.getElementById('cloud-weight').innerText = v + "kg"; w=parseFloat(v); }
-                if(p === "TSS") { document.getElementById('cloud-tss').innerText = v; t=parseFloat(v); }
-                if(p === "Status_Zmeczenia") { s=parseInt(v); updateWellnessUI(s); }
+                if(p === "Status_Zmeczenia") {
+                    const s = parseInt(v);
+                    document.getElementById('cloud-wellness').innerText = s + "%";
+                    handleRecoveryAlert(s);
+                }
+                if(p === "TSS") document.getElementById('cloud-tss').innerText = v;
             });
-            document.getElementById('wkg').innerText = (f/w).toFixed(2);
-            document.getElementById('sync-status').innerText = "Synchronizacja: " + new Date().toLocaleTimeString();
-            adaptPlan(s);
-        } catch(e) { console.warn("Brak połączenia z Google Sheets - działam w trybie offline."); }
+            document.getElementById('sync-status').innerText = "Sync: " + new Date().toLocaleTimeString();
+        } catch(e) { console.warn("Offline mode"); }
     }
 
-    function updateWellnessUI(s) {
-        document.getElementById('cloud-wellness').innerText = s + "%";
-        const box = document.getElementById('assistant-box');
+    function handleRecoveryAlert(s) {
         const warn = document.getElementById('warn-msg');
-        if(s < 50) { box.style.borderLeftColor = "#ef4444"; warn.style.color = "#ef4444"; warn.innerText = "ALARM REGENERACJI"; }
-        else { box.style.borderLeftColor = "#10b981"; warn.style.color = "#10b981"; warn.innerText = "ORGANIZM GOTOWY"; }
+        if(s < 45) {
+            warn.innerText = "🚨 REGENERACJA WYMAGANA";
+            warn.style.color = "var(--accent)";
+            // Dynamiczna zamiana dzisiejszego treningu na odpoczynek (jeśli nie jest)
+            if(currentPlan[0].type !== 'rest') {
+                currentPlan[0].title = "🛡️ AI: STOP";
+                currentPlan[0].desc = "Wellness zbyt niski na trening. Odpocznij!";
+                renderPlan();
+            }
+        } else {
+            warn.innerText = "✅ SYSTEM GOTOWY";
+            warn.style.color = "var(--strength)";
+        }
     }
 
-    function initCharts() {
-        const common = { responsive: true, plugins: { legend: { display: false } } };
-        tssChart = new Chart(document.getElementById('tssChart'), { type: 'line', data: { labels: ['P','W','Ś','C','P','S','N'], datasets: [{ data: [40,65,0,85,30,120,45], borderColor: '#ef4444', tension: 0.4 }] }, options: common });
-        wkgChart = new Chart(document.getElementById('wkgChart'), { type: 'line', data: { labels: ['Sty','Lut','Mar'], datasets: [{ data: [3.1, 3.3, 3.5], borderColor: '#10b981', tension: 0.4 }] }, options: common });
+    function initChart() {
+        new Chart(document.getElementById('formChart'), {
+            type: 'line',
+            data: { labels: ['P','W','Ś','C','P','S','N'], datasets: [{ label:'Forma', data: [10,12,15,14,18,22,20], borderColor: '#3b82f6', tension: 0.3 }] },
+            options: { plugins: { legend: { display: false } }, scales: { y: { display: false } } }
+        });
     }
 
     function resetAll() { localStorage.clear(); location.reload(); }
 
-    window.onload = () => { checkOnboarding(); initCharts(); renderPlan(); sync(); setInterval(sync, 30000); };
+    window.onload = () => {
+        if(!localStorage.getItem('acai_user_profile')) {
+            document.getElementById('onboarding-overlay').classList.remove('hidden');
+        } else {
+            const p = JSON.parse(localStorage.getItem('acai_user_profile'));
+            buildPlan(p);
+            initChart();
+            sync();
+            setInterval(sync, 60000);
+        }
+    };
 </script>
 </body>
 </html>
