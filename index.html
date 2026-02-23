@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v4.0 | Performance Tracker</title>
+    <title>ADAPTIVE COACH AI v4.1 | Pro Performance Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -20,33 +20,46 @@
             background: linear-gradient(135deg, var(--primary) 0%, #1e293b 100%);
             color: white; padding: 1.5rem; border-radius: 16px; margin-bottom: 20px;
             display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
         }
 
-        .drop-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .drop-zone {
-            border: 2px dashed var(--secondary); border-radius: 16px; padding: 20px; 
-            text-align: center; background: rgba(59, 130, 246, 0.05); cursor: pointer;
+        /* Sekcja Drop Zones */
+        .drop-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .drop-box {
+            border: 2px dashed #cbd5e1; border-radius: 12px; padding: 15px; 
+            text-align: center; font-size: 0.8rem; cursor: pointer; transition: 0.3s; background: white;
         }
+        .drop-box:hover { border-color: var(--secondary); background: #f0f7ff; transform: translateY(-2px); }
 
+        /* Statystyki */
         .dashboard-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;
         }
-        .stat-box { background: var(--dark); color: white; padding: 15px; border-radius: 16px; position: relative; overflow: hidden; }
-        .stat-box small { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; display: block; }
-        .stat-box span { font-size: 1.6rem; font-weight: 800; }
-        .stat-box .trend { position: absolute; right: 10px; bottom: 10px; font-size: 0.7rem; font-weight: bold; }
+        .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .stat-box small { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        .stat-box span { font-size: 1.8rem; font-weight: 800; }
 
-        .card { background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+        .card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
         
-        .input-row { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 15px; }
-        .input-group { flex: 1; }
-        label { display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 5px; color: var(--primary); }
-        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; }
+        /* Formularz biometrii */
+        .biometry-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 10px; }
+        .input-group { flex: 1; min-width: 140px; }
+        label { display: block; font-size: 0.75rem; font-weight: 800; margin-bottom: 5px; color: var(--primary); }
+        input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; }
         
-        .btn-save { padding: 10px 20px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-update { padding: 11px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-update:hover { background: var(--secondary); }
 
-        .grid-main { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } }
+        /* Tabela Stref */
+        .zones-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+        .zones-table th { text-align: left; padding: 10px; border-bottom: 2px solid #f1f5f9; color: #64748b; }
+        .zones-table td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-weight: 600; }
+        .z-tag { padding: 3px 8px; border-radius: 4px; color: white; font-size: 0.7rem; font-weight: 900; }
+
+        .grid-main { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        #ai-verdict { border-left: 10px solid var(--secondary); background: #f0f9ff; padding: 20px; border-radius: 12px; }
+
+        @media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } .drop-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -54,180 +67,204 @@
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">ADAPTIVE COACH AI <span style="font-size: 0.6em; opacity: 0.6;">v4.0 Professional</span></h1>
-            <small>Analiza mocy, pułapu tlenowego i biometrii</small>
+            <h1 style="margin:0">ADAPTIVE COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v4.1 Stable</span></h1>
+            <small>Twoja przewaga dzięki danym</small>
         </div>
-        <button onclick="resetApp()" style="background:none; border: 1px solid white; color: white; border-radius: 6px; cursor:pointer;">Reset danych</button>
+        <button onclick="resetApp()" style="background:none; border: 1px solid white; color: white; padding: 5px 12px; border-radius: 6px; cursor:pointer; font-size: 0.8rem;">Wyczyść Lokalną Bazę</button>
     </header>
 
     <div class="drop-grid">
-        <div id="drop-trainings" class="drop-zone">📥 Wrzuć Treningi (Garmin CSV)</div>
-        <div id="drop-vitals" class="drop-zone" style="border-color: var(--strength);">📈 Wrzuć FTP/VO2Max CSV</div>
+        <div class="drop-box" id="drop-activities"><strong>🏃 AKTYWNOŚCI</strong><br>Importuj Garmin (CSV)</div>
+        <div class="drop-box" id="drop-ftp" style="border-color: var(--secondary);"><strong>⚡ HISTORIA FTP</strong><br>Importuj Moc (CSV)</div>
+        <div class="drop-box" id="drop-vo2" style="border-color: var(--strength);"><strong>🫁 PUŁAP TLENOWY</strong><br>Importuj VO2Max (CSV)</div>
     </div>
 
     <div class="card">
-        <div class="input-row">
-            <div class="input-group">
-                <label>Aktualna waga (kg)</label>
-                <input type="number" id="user-weight" step="0.1" placeholder="np. 75.5">
-            </div>
-            <div class="input-group">
-                <label>Aktualne FTP (W)</label>
-                <input type="number" id="user-ftp" placeholder="np. 280">
-            </div>
-            <div class="input-group">
-                <label>VO2Max</label>
-                <input type="number" id="user-vo2" placeholder="np. 52">
-            </div>
-            <button class="btn-save" onclick="saveVitals()">Zapisz Biometrię</button>
+        <div class="biometry-row">
+            <div class="input-group"><label>Waga (kg)</label><input type="number" id="in-weight" step="0.1" placeholder="70.0"></div>
+            <div class="input-group"><label>Manualne FTP (W)</label><input type="number" id="in-ftp" placeholder="250"></div>
+            <div class="input-group"><label>Manualne VO2Max</label><input type="number" id="in-vo2" placeholder="50"></div>
+            <button class="btn-update" onclick="updateBiometry()">Zaktualizuj Profil</button>
         </div>
     </div>
 
     <div class="dashboard-grid">
-        <div class="stat-box"><small>W/kg (Ratio)</small><span id="val-wkg">--</span></div>
-        <div class="stat-box"><small>Balance (TSB)</small><span id="val-tsb">--</span></div>
-        <div class="stat-box"><small>VO2Max</small><span id="val-vo2max">--</span></div>
-        <div class="stat-box"><small>FTP</small><span id="val-ftp-disp">-- W</span></div>
+        <div class="stat-box"><small>Współczynnik W/kg</small><span id="val-wkg">--</span></div>
+        <div class="stat-box"><small>Freshness (TSB)</small><span id="val-tsb">--</span></div>
+        <div class="stat-box"><small>Aktualne FTP</small><span id="val-ftp">-- W</span></div>
+        <div class="stat-box"><small>Aktualny VO2Max</small><span id="val-vo2">--</span></div>
     </div>
 
     <div class="grid-main">
         <div class="card">
-            <h3 style="margin-top:0">📊 Trend Wydolności</h3>
-            <canvas id="performanceChart" height="150"></canvas>
+            <h3 style="margin-top:0">📉 Trend Obciążenia (Ostatnie 14 dni)</h3>
+            <canvas id="mainChart" height="110"></canvas>
+            
+            <h3 style="margin: 30px 0 10px 0;">🚲 Twoje Strefy Treningowe (Power Zones)</h3>
+            <table class="zones-table" id="zones-body">
+                <thead><tr><th>Strefa</th><th>Opis</th><th>Zakres Mocy (W)</th><th>% FTP</th></tr></thead>
+                <tbody></tbody>
+            </table>
         </div>
+
         <div class="card">
-            <h3 style="margin-top:0">🧠 Werdykt AI</h3>
-            <div id="ai-box" style="padding: 15px; border-radius: 12px; border-left: 5px solid #ddd;">
-                <p id="ai-text">Wgraj dane, aby rozpocząć analizę.</p>
-                <div id="training-next" style="font-weight: 800; color: var(--secondary); margin-top: 10px;"></div>
+            <h3 style="margin-top:0">🧠 Sugestia Trenera AI</h3>
+            <div id="ai-verdict">
+                <div id="ai-title" style="font-weight: 900; font-size: 1.1rem; color: var(--primary);">Brak danych aktywności</div>
+                <p id="ai-desc" style="font-size: 0.95rem; margin: 15px 0; line-height: 1.5; color: var(--text);">Wgraj pliki CSV lub uzupełnij biometrię ręcznie.</p>
+                <div id="ai-workout" style="font-weight: 800; color: var(--secondary); border-top: 2px solid #e0f2fe; padding-top: 15px; margin-top: 15px; font-size: 1.1rem;"></div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    let trainingHistory = JSON.parse(localStorage.getItem('acai_history')) || [];
-    let userVitals = JSON.parse(localStorage.getItem('acai_vitals')) || { weight: 0, ftp: 0, vo2: 0 };
-    let chartObj;
-
-    window.onload = () => {
-        document.getElementById('user-weight').value = userVitals.weight;
-        document.getElementById('user-ftp').value = userVitals.ftp;
-        document.getElementById('user-vo2').value = userVitals.vo2;
-        refreshUI();
+    let chart;
+    let dataStore = {
+        history: JSON.parse(localStorage.getItem('v4_history')) || [],
+        weight: parseFloat(localStorage.getItem('v4_weight')) || 0,
+        ftp: parseInt(localStorage.getItem('v4_ftp')) || 0,
+        vo2: parseInt(localStorage.getItem('v4_vo2')) || 0
     };
 
-    function saveVitals() {
-        userVitals = {
-            weight: parseFloat(document.getElementById('user-weight').value) || 0,
-            ftp: parseInt(document.getElementById('user-ftp').value) || 0,
-            vo2: parseInt(document.getElementById('user-vo2').value) || 0
-        };
-        localStorage.setItem('acai_vitals', JSON.stringify(userVitals));
-        refreshUI();
+    window.onload = () => {
+        document.getElementById('in-weight').value = dataStore.weight || '';
+        document.getElementById('in-ftp').value = dataStore.ftp || '';
+        document.getElementById('in-vo2').value = dataStore.vo2 || '';
+        refreshApp();
+        setupDrop('drop-activities', 'ACT');
+        setupDrop('drop-ftp', 'FTP');
+        setupDrop('drop-vo2', 'VO2');
+    };
+
+    function updateBiometry() {
+        dataStore.weight = parseFloat(document.getElementById('in-weight').value) || 0;
+        dataStore.ftp = parseInt(document.getElementById('in-ftp').value) || 0;
+        dataStore.vo2 = parseInt(document.getElementById('in-vo2').value) || 0;
+        syncStorage();
+        refreshApp();
     }
 
-    // --- PARSERY ---
-    function setupDrop(id, callback) {
-        const dz = document.getElementById(id);
-        dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.background = "#e0e7ff"; });
-        dz.addEventListener('dragleave', () => dz.style.background = "");
-        dz.addEventListener('drop', e => {
+    function syncStorage() {
+        localStorage.setItem('v4_history', JSON.stringify(dataStore.history));
+        localStorage.setItem('v4_weight', dataStore.weight);
+        localStorage.setItem('v4_ftp', dataStore.ftp);
+        localStorage.setItem('v4_vo2', dataStore.vo2);
+    }
+
+    function setupDrop(id, type) {
+        const el = document.getElementById(id);
+        el.addEventListener('dragover', e => { e.preventDefault(); el.style.background = "#f0f7ff"; });
+        el.addEventListener('dragleave', () => el.style.background = "white");
+        el.addEventListener('drop', e => {
             e.preventDefault();
-            dz.style.background = "";
-            const file = e.dataTransfer.files[0];
+            el.style.background = "white";
             const reader = new FileReader();
-            reader.onload = (ev) => callback(ev.target.result);
-            reader.readAsText(file);
+            reader.onload = (ev) => handleCSV(ev.target.result, type);
+            reader.readAsText(e.dataTransfer.files[0]);
         });
     }
 
-    setupDrop('drop-trainings', (csv) => {
-        const lines = csv.split('\n').slice(1);
-        trainingHistory = lines.map(l => {
-            const c = l.split(l.includes(';') ? ';' : ',');
-            return { date: new Date(c[0]), dist: parseFloat(c[3]) || 0, tss: (parseFloat(c[3]) * 6) || 40 };
-        }).filter(d => !isNaN(d.date.getTime()));
-        localStorage.setItem('acai_history', JSON.stringify(trainingHistory));
-        refreshUI();
-    });
+    function handleCSV(content, type) {
+        const lines = content.split(/\r?\n/).filter(l => l.trim() !== '');
+        const delimiter = content.includes(';') ? ';' : ',';
 
-    setupDrop('drop-vitals', (csv) => {
-        // Parser dla pliku FTP/VO2: Format oczekiwany Date,FTP,VO2
-        const lines = csv.split('\n').slice(1);
-        const lastData = lines[lines.length - 1].split(',');
-        userVitals.ftp = parseInt(lastData[1]);
-        userVitals.vo2 = parseInt(lastData[2]);
-        saveVitals();
-    });
-
-    function refreshUI() {
-        if (trainingHistory.length === 0) return;
-
-        const now = new Date();
-        const atl = trainingHistory.filter(d => (now - d.date) / 86400000 <= 7).reduce((a,b) => a + b.tss, 0) / 7;
-        const ctl = trainingHistory.filter(d => (now - d.date) / 86400000 <= 28).reduce((a,b) => a + b.tss, 0) / 28;
-        const tsb = ctl - atl;
-
-        document.getElementById('val-tsb').innerText = Math.round(tsb);
-        document.getElementById('val-ctl').innerText = Math.round(ctl);
-        document.getElementById('val-atl').innerText = Math.round(atl);
-        
-        document.getElementById('val-ftp-disp').innerText = userVitals.ftp + " W";
-        document.getElementById('val-vo2max').innerText = userVitals.vo2;
-        
-        if (userVitals.weight > 0 && userVitals.ftp > 0) {
-            const wkg = (userVitals.ftp / userVitals.weight).toFixed(2);
-            document.getElementById('val-wkg').innerText = wkg;
+        if (type === 'ACT') {
+            dataStore.history = lines.slice(1).map(l => {
+                const c = l.split(delimiter);
+                const d = parseFloat(c[3]) || 0;
+                return { date: new Date(c[0]), tss: d * 6, dist: d };
+            }).filter(i => !isNaN(i.date.getTime())).sort((a,b) => a.date - b.date);
+        } else if (type === 'FTP') {
+            const last = lines[lines.length-1].split(delimiter);
+            dataStore.ftp = parseInt(last.find(v => !isNaN(v) && v > 50)) || dataStore.ftp;
+        } else if (type === 'VO2') {
+            const last = lines[lines.length-1].split(delimiter);
+            dataStore.vo2 = parseInt(last.find(v => !isNaN(v) && v > 20)) || dataStore.vo2;
         }
-
-        updateAI(tsb, userVitals);
-        updateChart();
+        syncStorage();
+        refreshApp();
     }
 
-    function updateAI(tsb, vitals) {
-        const aiBox = document.getElementById('ai-box');
-        const text = document.getElementById('ai-text');
-        const next = document.getElementById('training-next');
+    function refreshApp() {
+        if (dataStore.weight > 0 && dataStore.ftp > 0) {
+            document.getElementById('val-wkg').innerText = (dataStore.ftp / dataStore.weight).toFixed(2);
+        }
+        document.getElementById('val-ftp').innerText = dataStore.ftp > 0 ? dataStore.ftp + " W" : "-- W";
+        document.getElementById('val-vo2').innerText = dataStore.vo2 > 0 ? dataStore.vo2 : "--";
+
+        if (dataStore.history.length > 0) {
+            const now = new Date();
+            const atl = dataStore.history.filter(a => (now - new Date(a.date))/86400000 <= 7).reduce((s,x)=>s+x.tss,0)/7;
+            const ctl = dataStore.history.filter(a => (now - new Date(a.date))/86400000 <= 28).reduce((s,x)=>s+x.tss,0)/28;
+            const tsb = ctl - atl;
+            document.getElementById('val-tsb').innerText = Math.round(tsb);
+            updateAI(tsb);
+            updateChart();
+        }
+        renderZones();
+    }
+
+    function renderZones() {
+        const ftp = dataStore.ftp || 0;
+        const zones = [
+            { n: "Z1", name: "Recovery", p: "55%", c: "#94a3b8" },
+            { n: "Z2", name: "Endurance", p: "75%", c: "#10b981" },
+            { n: "Z3", name: "Tempo", p: "90%", c: "#3b82f6" },
+            { n: "Z4", name: "Threshold", p: "105%", c: "#f59e0b" },
+            { n: "Z5", name: "VO2Max", p: "120%", c: "#ef4444" },
+            { n: "Z6", name: "Anaerobic", p: "150%", c: "#7c3aed" },
+            { n: "Z7", name: "Sprint", p: "200%", c: "#000000" }
+        ];
+
+        const tbody = document.querySelector("#zones-body tbody");
+        tbody.innerHTML = zones.map(z => {
+            const val = Math.round(ftp * (parseInt(z.p)/100));
+            return `<tr>
+                <td><span class="z-tag" style="background:${z.c}">${z.n}</span></td>
+                <td>${z.name}</td>
+                <td><strong>do ${ftp > 0 ? val : '--'} W</strong></td>
+                <td style="color:#64748b">${z.p}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    function updateAI(tsb) {
+        const title = document.getElementById('ai-title');
+        const desc = document.getElementById('ai-desc');
+        const work = document.getElementById('ai-workout');
+        const ftp = dataStore.ftp;
 
         if (tsb < -20) {
-            aiBox.style.borderColor = "var(--accent)";
-            text.innerText = "Wykryto wysokie zmęczenie. Twoje VO2Max (" + vitals.vo2 + ") może chwilowo spaść przez brak świeżości.";
-            next.innerText = "DZIŚ: Regeneracja (Z1)";
+            title.innerText = "STATUS: WYSOKIE ZMĘCZENIE";
+            desc.innerText = "Zmęczenie krótkoterminowe przewyższa bazę. Zalecana regeneracja.";
+            work.innerText = "DZISIAJ: Z1 (Recovery) " + (ftp > 0 ? "poniżej " + Math.round(ftp * 0.55) + " W" : "");
         } else if (tsb > 5) {
-            aiBox.style.borderColor = "var(--strength)";
-            text.innerText = "Twoja forma jest stabilna. Przy " + (vitals.ftp / vitals.weight).toFixed(1) + " W/kg jesteś gotowy na mocne podjazdy/interwały.";
-            next.innerText = "DZIŚ: Test FTP lub Interwały VO2Max";
+            title.innerText = "STATUS: ŚWIEŻOŚĆ";
+            desc.innerText = "Jesteś wypoczęty. Idealny czas na mocny akcent.";
+            work.innerText = "DZISIAJ: Sweet Spot 2x20 min " + (ftp > 0 ? "@ " + Math.round(ftp * 0.9) + " W" : "");
         } else {
-            aiBox.style.borderColor = "var(--secondary)";
-            text.innerText = "Balans zachowany. Dobry moment na budowanie bazy tlenowej.";
-            next.innerText = "DZIŚ: 90 min Steady State (Z2)";
+            title.innerText = "STATUS: BAZA";
+            desc.innerText = "Stabilny poziom TSB. Kontynuuj budowanie bazy.";
+            work.innerText = "DZISIAJ: Z2 (Endurance) " + (ftp > 0 ? "@ " + Math.round(ftp * 0.7) + " W" : "");
         }
     }
 
     function updateChart() {
-        const ctx = document.getElementById('performanceChart').getContext('2d');
-        if (chartObj) chartObj.destroy();
-        
-        const last14 = trainingHistory.slice(-14);
-        chartObj = new Chart(ctx, {
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        if (chart) chart.destroy();
+        const last14 = dataStore.history.slice(-14);
+        chart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: last14.map(d => d.date.toLocaleDateString()),
-                datasets: [{
-                    label: 'Obciążenie (TSS)',
-                    data: last14.map(d => d.tss),
-                    borderColor: '#3b82f6',
-                    tension: 0.4,
-                    fill: true,
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)'
-                }]
+                labels: last14.map(a => new Date(a.date).toLocaleDateString()),
+                datasets: [{ label: 'TSS', data: last14.map(a=>a.tss), borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.05)' }]
             },
             options: { responsive: true, plugins: { legend: { display: false } } }
         });
     }
 
-    function resetApp() { localStorage.clear(); location.reload(); }
+    function resetApp() { if(confirm("Czy na pewno wyczyścić dane?")) { localStorage.clear(); location.reload(); } }
 </script>
 </body>
 </html>
