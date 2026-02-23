@@ -1,326 +1,171 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pro-Coach AI | Ultimate Performance System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro-Coach AI 2026 | Ultimate Interactive Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #0f172a; --secondary: #3b82f6; --accent: #ef4444;
+            --strength: #10b981; --recovery: #f59e0b; --bg: #f1f5f9;
+            --dark: #1e293b; --text: #334155;
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        body { margin: 0; padding: 20px; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
+        .container { max-width: 1100px; margin: auto; }
 
-<style>
-:root{
---primary:#0f172a;
---secondary:#3b82f6;
---accent:#ef4444;
---strength:#10b981;
---recovery:#f59e0b;
---bg:#f8fafc;
---dark:#1e293b;
---text:#334155;
-}
-*{box-sizing:border-box}
-body{
-margin:0;
-padding:20px;
-font-family:'Inter',sans-serif;
-background:var(--bg);
-color:var(--text);
-}
-.container{max-width:1100px;margin:auto}
+        /* HEADER */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #1e293b 100%);
+            color: white; padding: 1.5rem; border-radius: 20px; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
 
-/* HEADER */
-header{
-background:linear-gradient(135deg,var(--primary),#1e293b);
-color:white;
-padding:1.5rem;
-border-radius:16px;
-margin-bottom:20px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
+        /* STATS */
+        .sync-dashboard {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;
+        }
+        .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; position: relative; }
+        .stat-box small { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; }
+        .stat-box span { font-size: 1.8rem; font-weight: 800; display: block; }
 
-.btn-reset{
-background:rgba(255,255,255,0.1);
-color:white;
-border:1px solid white;
-padding:8px 16px;
-border-radius:8px;
-cursor:pointer;
-font-weight:700;
-}
+        /* AI COACH & ASSISTANT */
+        .coach-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-bottom: 20px; }
+        #assistant-box { background: white; padding: 25px; border-left: 10px solid #cbd5e1; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .ai-verdict { background: #e0f2fe; border: 1px solid #bae6fd; padding: 15px; border-radius: 12px; font-size: 0.9rem; }
 
-/* STATS */
-.sync-dashboard{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:15px;
-margin-bottom:20px;
-}
-.stat-box{
-background:var(--dark);
-color:white;
-padding:20px;
-border-radius:16px;
-}
-.stat-box small{
-font-size:0.7rem;
-color:#94a3b8;
-text-transform:uppercase;
-font-weight:700;
-}
-.stat-box span{
-font-size:1.8rem;
-font-weight:800;
-}
+        /* DYNAMIC PLAN */
+        .training-card {
+            background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0;
+            margin-bottom: 15px; transition: 0.3s;
+        }
+        .training-card:hover { border-color: var(--secondary); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; }
+        .day-tag { background: var(--primary); color: white; padding: 4px 12px; border-radius: 8px; font-weight: 800; font-size: 0.75rem; }
+        
+        /* EDIT MODAL-LIKE INPUTS */
+        .edit-fields { display: none; margin-top: 10px; }
+        .edit-fields input, .edit-fields textarea { 
+            width: 100%; margin-bottom: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit;
+        }
 
-/* ASSISTANT */
-#assistant-box{
-background:white;
-padding:25px;
-border-left:8px solid #cbd5e1;
-border-radius:16px;
-margin-bottom:20px;
-}
+        /* CHARTS */
+        .bar-chart { display: flex; align-items: flex-end; gap: 3px; height: 60px; background: #f8fafc; padding: 5px; border-radius: 8px; margin: 10px 0; }
+        .bar { flex: 1; border-radius: 2px; }
+        .z1{background:#94a3b8} .z2{background:#3b82f6} .z3{background:#06b6d4} .z4{background:#f59e0b} .z5{background:#f97316} .z6{background:#ef4444}
 
-/* TRAINING */
-.training-card{
-background:white;
-padding:20px;
-border-radius:16px;
-border:1px solid #e2e8f0;
-margin-bottom:15px;
-}
+        /* BUTTONS */
+        .btn { cursor: pointer; border: none; border-radius: 8px; font-weight: 700; transition: 0.2s; }
+        .btn-edit { background: #f1f5f9; color: var(--primary); padding: 5px 10px; font-size: 0.7rem; }
+        .btn-save { background: var(--strength); color: white; padding: 8px 15px; }
+        .btn-reset { background: rgba(255,255,255,0.2); color: white; border: 1px solid white; padding: 8px 15px; }
 
-.day-tag{
-background:var(--primary);
-color:white;
-padding:4px 10px;
-border-radius:6px;
-font-weight:800;
-font-size:0.8rem;
-}
+        /* SUPLEMENTACJA */
+        .suple-card { background: white; padding: 20px; border-radius: 16px; border-top: 5px solid var(--recovery); }
 
-.bar-chart{
-display:flex;
-align-items:flex-end;
-gap:3px;
-height:80px;
-background:#f1f5f9;
-padding:8px;
-border-radius:8px;
-margin:15px 0;
-}
-.bar{flex:1;border-radius:2px}
-.z1{background:#94a3b8}
-.z2{background:#3b82f6}
-.z3{background:#06b6d4}
-.z4{background:#f59e0b}
-.z5{background:#f97316}
-.z6{background:#ef4444}
-
-/* TREND */
-.trend-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(400px,1fr));
-gap:20px;
-margin-top:20px;
-}
-.chart-card{
-background:white;
-padding:20px;
-border-radius:16px;
-border:1px solid #e2e8f0;
-}
-
-/* MODAL */
-#editModal{
-display:none;
-position:fixed;
-inset:0;
-background:rgba(0,0,0,0.4);
-align-items:center;
-justify-content:center;
-}
-.modal-content{
-background:white;
-padding:25px;
-border-radius:16px;
-width:350px;
-}
-.modal-content input,
-.modal-content textarea,
-.modal-content select{
-width:100%;
-margin-bottom:10px;
-padding:6px;
-}
-
-@media(max-width:600px){
-.trend-grid{grid-template-columns:1fr}
-header{flex-direction:column;gap:10px}
-}
-</style>
+        @media(max-width: 768px) { .coach-grid { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
 
 <div class="container">
+    <header>
+        <div>
+            <h1 style="margin:0">PRO-COACH AI <span style="color:var(--secondary)">2.0</span></h1>
+            <small id="sync-status">Status: Gotowy</small>
+        </div>
+        <button class="btn btn-reset" onclick="resetToDefaults()">PRZYWRÓĆ PLAN</button>
+    </header>
 
-<header>
-<div>
-<h1 style="margin:0">PRO-COACH AI 2026</h1>
-<small id="sync-status">Inicjalizacja...</small>
-</div>
-<button class="btn-reset" onclick="resetPlan()">RESET</button>
-</header>
+    <div class="sync-dashboard">
+        <div class="stat-box"><small>Wellness</small><span id="cloud-wellness">--%</span></div>
+        <div class="stat-box"><small>TSS (Live)</small><span id="cloud-tss">---</span></div>
+        <div class="stat-box"><small>Waga</small><span id="cloud-weight">-- kg</span></div>
+        <div class="stat-box"><small>W/kg</small><span id="wkg">--</span></div>
+    </div>
 
-<div class="sync-dashboard">
-<div class="stat-box"><small>Wellness</small><span id="cloud-wellness">--%</span></div>
-<div class="stat-box"><small>TSS</small><span id="cloud-tss">---</span></div>
-<div class="stat-box"><small>Waga</small><span id="cloud-weight">-- kg</span></div>
-<div class="stat-box"><small>W/kg</small><span id="wkg">--</span></div>
-</div>
+    <div class="coach-grid">
+        <div id="assistant-box">
+            <div id="warn-msg" style="font-weight: 900; text-transform: uppercase; font-size: 1.2rem;">Łączenie...</div>
+            <div id="sugg-msg" style="color: #64748b; margin: 10px 0;">Czekam na analizę Google Sheets...</div>
+            <div class="ai-verdict">
+                <strong>🤖 AI COACH VERDICT:</strong> <span id="coach-verdict">Analizuję Twoje ostatnie dane...</span>
+            </div>
+        </div>
+        
+        <div class="suple-card">
+            <h3 style="margin:0 0 10px 0; font-size: 1rem;">💊 Suplementacja Dnia</h3>
+            <ul style="padding-left:15px; font-size: 0.85rem; color: #475569;">
+                <li><strong>Rano:</strong> Wit. D3+K2, Omega-3, Kompleks witamin.</li>
+                <li><strong>Trening:</strong> 60g węgli/h (żele/izotonik) + elektrolity.</li>
+                <li><strong>Po:</strong> 30g izolatu białka + 5g Kreatyny.</li>
+                <li><strong>Wieczór:</strong> Magnez Cytrynian (ułatwia sen).</li>
+            </ul>
+        </div>
+    </div>
 
-<div id="assistant-box">
-<div id="warn-msg" style="font-weight:900;text-transform:uppercase;">Łączenie...</div>
-<div id="sugg-msg" style="margin-top:5px;color:#64748b;"></div>
-</div>
+    <div id="dynamic-plan"></div>
 
-<div id="ai-panel" class="training-card">
-<h3>🤖 AI COACH</h3>
-<div id="ai-msg"></div>
-</div>
-
-<div id="supp-panel" class="training-card">
-<h3>💊 Smart Suplementacja</h3>
-<div id="supp-msg"></div>
-</div>
-
-<div id="dynamic-plan"></div>
-
-<div class="trend-grid">
-<div class="chart-card">
-<h3>Trend TSS</h3>
-<canvas id="tssChart"></canvas>
-</div>
-<div class="chart-card">
-<h3>Trend W/kg</h3>
-<canvas id="wkgChart"></canvas>
-</div>
-</div>
-
-</div>
-
-<div id="editModal">
-<div class="modal-content">
-<h3>Edytuj jednostkę</h3>
-<input id="editTitle" placeholder="Nazwa">
-<textarea id="editDesc" placeholder="Opis"></textarea>
-<input type="number" id="editDuration" placeholder="Czas (min)">
-<select id="editZone">
-<option>Z1</option><option>Z2</option><option>Z3</option>
-<option>Z4</option><option>Z5</option><option>Z6</option>
-</select>
-<button onclick="saveEdit()">Zapisz</button>
-<button onclick="closeModal()">Anuluj</button>
-</div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap:20px; margin-top:30px;">
+        <div style="background:white; padding:20px; border-radius:16px;"><canvas id="tssChart"></canvas></div>
+        <div style="background:white; padding:20px; border-radius:16px;"><canvas id="wkgChart"></canvas></div>
+    </div>
 </div>
 
 <script>
-const CONFIG={
-csvUrl:"https://docs.google.com/spreadsheets/d/e/2PACX-1vRVLylCkxR1sbSnxYdWGCBpgeILRZMa3uTZCz6qPQ47Q5QJsinxI_T2n_KkjxKlbbz6JBadfQLLXxDP/pub?gid=950508224&single=true&output=csv",
-cacheKey:"procoach_v5"
-};
+    const CONFIG = {
+        csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRVLylCkxR1sbSnxYdWGCBpgeILRZMa3uTZCz6qPQ47Q5QJsinxI_T2n_KkjxKlbbz6JBadfQLLXxDP/pub?gid=950508224&single=true&output=csv",
+        storageKey: "procoach_user_plan_v2"
+    };
 
-const initialPlan=[
-{day:"Pon",title:"Siła FBW A",desc:"Przysiad, Podciąganie, Core",type:"gym"},
-{day:"Wt",title:"Sprinty & Tempo",desc:"Interwały Z6",type:"bike"},
-{day:"Śr",title:"Regeneracja",desc:"Mobilność",type:"rest"},
-{day:"Czw",title:"Sweet Spot",desc:"Bloki Z3-Z4",type:"bike"},
-{day:"Pt",title:"Siła FBW B",desc:"Bułgary, Pompki",type:"gym"},
-{day:"Sob",title:"Regeneracja",desc:"Spacer, rolowanie",type:"rest",locked:true},
-{day:"Nie",title:"Tlen + Technika",desc:"Kadencja + Single Leg",type:"bike"}
-];
+    const defaultPlan = [
+        { id: 0, day: 'Poniedziałek', title: 'Siła FBW (Zestaw A)', desc: 'Przysiad 3x8, Podciąganie 3xMax, Core 10\'.', type: 'gym' },
+        { id: 1, day: 'Wtorek', title: 'Sprinty & Tempo', desc: '7x 10s HARD + 3\' Easy. Skupienie na mocy z zatrzymania.', type: 'bike', chart: 'sprints' },
+        { id: 2, day: 'Środa', title: 'Regeneracja Aktywna', desc: 'Spacer lub 30min bardzo lekkiego kręcenia.', type: 'rest' },
+        { id: 3, day: 'Czwartek', title: 'Sweet Spot', desc: 'Bloki 5\' Z3-Z4 / 50s Z2. Budowanie wytrzymałości siłowej.', type: 'bike', chart: 'sweet' },
+        { id: 4, day: 'Piątek', title: 'Siła FBW (Zestaw B)', desc: 'Bułgary 3x10, Pompki 3xMax, Dead Bug 3x12.', type: 'gym' },
+        { id: 5, day: 'Sobota', title: 'REGENERACJA', desc: 'Dzień całkowicie wolny od treningu. Skupienie na śnie.', type: 'rest' },
+        { id: 6, day: 'Niedziela', title: 'Tlen + Technika', desc: 'Spokojne Z2 + 5x1\' Max Kadencja + 5x1\' Single Leg.', type: 'bike', chart: 'endurance' }
+    ];
 
-let currentPlan=JSON.parse(localStorage.getItem("plan"))||initialPlan;
-let editIndex=null;
-let tssChart,wkgChart;
+    let userPlan = JSON.parse(localStorage.getItem(CONFIG.storageKey)) || [...defaultPlan];
 
-function renderPlan(){
-const c=document.getElementById("dynamic-plan");
-c.innerHTML="";
-currentPlan.forEach((t,i)=>{
-const card=document.createElement("div");
-card.className="training-card";
-card.innerHTML=`
-<div style="display:flex;justify-content:space-between">
-<span class="day-tag">${t.day}</span>
-<button onclick="editUnit(${i})">✏</button>
-</div>
-<h3>${t.title}</h3>
-<p>${t.desc}</p>`;
-c.appendChild(card);
-});
-}
+    function renderPlan() {
+        const container = document.getElementById('dynamic-plan');
+        container.innerHTML = '';
+        userPlan.forEach((t, idx) => {
+            const card = document.createElement('div');
+            card.className = 'training-card';
+            card.innerHTML = `
+                <div class="card-header">
+                    <span class="day-tag">${t.day}</span>
+                    <button class="btn btn-edit" onclick="toggleEdit(${idx})">Edytuj</button>
+                </div>
+                <div id="view-${idx}">
+                    <h3 style="margin:10px 0 5px 0">${t.title}</h3>
+                    <p style="font-size: 0.9rem; color: #64748b; margin: 0;">${t.desc}</p>
+                    ${t.chart ? `<div class="bar-chart">${getChart(t.chart)}</div>` : ''}
+                </div>
+                <div id="edit-${idx}" class="edit-fields">
+                    <input type="text" id="input-title-${idx}" value="${t.title}">
+                    <textarea id="input-desc-${idx}">${t.desc}</textarea>
+                    <button class="btn btn-save" onclick="saveEdit(${idx})">Zapisz</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
 
-function editUnit(i){
-if(currentPlan[i].locked){alert("Sobota = regeneracja");return;}
-editIndex=i;
-document.getElementById("editTitle").value=currentPlan[i].title;
-document.getElementById("editDesc").value=currentPlan[i].desc;
-document.getElementById("editModal").style.display="flex";
-}
+    function getChart(type) {
+        if(type === 'sprints') return '<div class="bar z2" style="height:40%"></div>' + Array(7).fill('<div class="bar z6" style="height:100%"></div><div class="bar z1" style="height:20%"></div>').join('');
+        if(type === 'sweet') return Array(5).fill('<div class="bar z4" style="height:80%"></div><div class="bar z2" style="height:30%"></div>').join('');
+        if(type === 'endurance') return '<div class="bar z2" style="height:50%"></div><div class="bar z5" style="height:90%"></div><div class="bar z2" style="height:50%"></div>';
+        return '';
+    }
 
-function saveEdit(){
-currentPlan[editIndex].title=document.getElementById("editTitle").value;
-currentPlan[editIndex].desc=document.getElementById("editDesc").value;
-localStorage.setItem("plan",JSON.stringify(currentPlan));
-closeModal();
-renderPlan();
-}
-function closeModal(){document.getElementById("editModal").style.display="none";}
-
-function initCharts(){
-tssChart=new Chart(document.getElementById("tssChart"),{type:"line",data:{labels:[],datasets:[{data:[],borderColor:"#ef4444",fill:false}]},options:{responsive:true}});
-wkgChart=new Chart(document.getElementById("wkgChart"),{type:"line",data:{labels:[],datasets:[{data:[],borderColor:"#10b981",fill:false}]},options:{responsive:true}});
-}
-
-function updateAI(tss,well){
-let msg="Forma stabilna.";
-if(well<40)msg="Regeneracja wskazana.";
-if(tss>120)msg="Wysokie obciążenie — skróć kolejną jednostkę o 15%.";
-document.getElementById("ai-msg").innerText=msg;
-}
-
-function updateSupp(well){
-let msg="Standard: D3+K2 + Kreatyna 5g.";
-if(well<40)msg="Magnez + Omega 3 + 8h snu.";
-if(well<70&&well>=40)msg="60g węgli/h przy interwałach.";
-document.getElementById("supp-msg").innerText=msg;
-}
-
-async function sync(){
-try{
-const r=await fetch(CONFIG.csvUrl+"&t="+Date.now());
-const txt=await r.text();
-const rows=txt.split(/\r?\n/).map(l=>l.split(","));
-let w=63,f=200,t=0,well=80;
-rows.forEach(([p,v])=>{
-if(p==="Waga"){w=parseFloat(v);document.getElementById("cloud-weight").innerText=v+"kg";}
-if(p==="FTP")f=parseFloat(v);
-if(p==="TSS"){t=parseFloat(v);document.getElementById("cloud-tss").innerText=v;}
-if(p==="Status_Zmeczenia"){well=parseInt(v);document.getElementById("cloud-wellness").innerText=v+"%";}
-});
-const ratio=(f/w).toFixed(2);
-document.getElementById("wkg").innerText=ratio;
-updateAI(t,well);
-updateSupp(well);
-}catch(e){}
-}
-
-window.onload=()=>{initCharts();renderPlan();sync();setInterval(sync,60000);}
-</script>
-
-</body>
-</html>
+    function toggleEdit(idx) {
+        document.getElementById(`view-${idx}`).style.display = 'none
