@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v2.0 | Pro Analysis</title>
+    <title>ADAPTIVE COACH AI v3.0 | Hybrid Athlete Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -12,10 +12,9 @@
             --strength: #10b981; --recovery: #f59e0b; --bg: #f8fafc;
             --dark: #1e293b; --text: #334155;
         }
-
         * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         body { margin: 0; padding: 20px; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
-        .container { max-width: 1000px; margin: auto; }
+        .container { max-width: 1100px; margin: auto; }
 
         header {
             background: linear-gradient(135deg, var(--primary) 0%, #1e293b 100%);
@@ -23,36 +22,38 @@
             display: flex; justify-content: space-between; align-items: center;
         }
 
+        /* Sekcja Drop Zone */
         #drop-zone {
-            border: 2px dashed var(--secondary); border-radius: 16px; padding: 20px; 
+            border: 2px dashed var(--secondary); border-radius: 16px; padding: 25px; 
             text-align: center; margin-bottom: 20px; background: rgba(59, 130, 246, 0.05); 
-            cursor: pointer;
+            transition: 0.3s; cursor: pointer;
         }
+        #drop-zone.hover { background: rgba(59, 130, 246, 0.2); border-color: #1d4ed8; }
 
         .dashboard-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;
         }
-        .stat-box {
-            background: var(--dark); color: white; padding: 20px; border-radius: 16px;
-        }
-        .stat-box small { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; display: block; }
-        .stat-box span { font-size: 1.5rem; font-weight: 800; }
+        .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .stat-box small { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        .stat-box span { font-size: 1.8rem; font-weight: 800; }
 
-        /* Ankieta i Formularz */
-        .card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
-        .survey-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; }
-        select, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 10px; }
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         
-        #ai-analysis-box {
-            border-left: 8px solid var(--secondary); background: #f0f7ff; padding: 20px; border-radius: 12px;
-        }
+        /* Formularze */
+        .survey-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        label { display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: var(--primary); }
+        select, input, range { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 12px; font-family: inherit; }
+        
+        .btn-action { width: 100%; padding: 14px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-action:hover { background: #2563eb; transform: translateY(-1px); }
 
-        .training-suggest {
-            background: #ecfdf5; border: 1px solid #10b981; padding: 15px; border-radius: 12px; margin-top: 15px;
-        }
+        #ai-analysis-box { border-left: 8px solid var(--secondary); background: #f0f7ff; padding: 20px; border-radius: 12px; }
+        .training-suggest { background: #ecfdf5; border: 1px solid #10b981; padding: 18px; border-radius: 12px; margin-top: 15px; }
+        
+        .version-tag { background: #334155; color: #f8fafc; padding: 4px 8px; border-radius: 6px; font-size: 0.65rem; }
 
-        .version-badge { background: var(--accent); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; vertical-align: middle; }
+        @media (max-width: 768px) { .grid-layout { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -60,14 +61,15 @@
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">COACH AI <span class="version-badge">v2.0</span></h1>
-            <small id="sync-status">Status: Lokalna baza danych aktywna</small>
+            <h1 style="margin:0">ADAPTIVE COACH AI <span class="version-tag">v3.0 - Stable</span></h1>
+            <small id="sync-status">Silnik analityczny gotowy</small>
         </div>
-        <button onclick="clearStorage()" style="background:none; border: 1px solid white; color: white; padding: 5px 10px; border-radius: 6px; cursor:pointer;">Resetuj dane</button>
+        <button onclick="resetApp()" style="background:none; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 12px; border-radius: 6px; cursor:pointer; font-size: 0.8rem;">Wyczyść bazę danych</button>
     </header>
 
     <div id="drop-zone">
-        <p style="margin: 0; font-weight: 600; color: var(--secondary);">📥 Wgraj Garmin CSV, aby zsynchronizować historię</p>
+        <p style="margin: 0; font-weight: 700; color: var(--secondary);">📥 PRZECIĄGNIJ PLIK CSV Z GARMIN CONNECT</p>
+        <small style="color: #64748b;">Obsługuje formaty: PL/EN, przecinki i średniki</small>
     </div>
 
     <div class="dashboard-grid">
@@ -77,178 +79,214 @@
         <div class="stat-box"><small>Stan Psychofiz.</small><span id="val-psych">--</span></div>
     </div>
 
-    <div class="grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div class="grid-layout">
         <div class="card">
-            <h3 style="margin-top:0">📋 Ankieta Potreningowa</h3>
+            <h3 style="margin-top:0; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">📋 Raport z treningu</h3>
             <div class="survey-grid">
                 <div>
-                    <label>Jakość treningu</label>
+                    <label>Jakość sesji</label>
                     <select id="s-quality">
-                        <option value="5">Idealna - zgodnie z planem</option>
-                        <option value="3">Średnia - walka o domknięcie</option>
-                        <option value="1">Słaba - przerwana jednostka</option>
+                        <option value="5">Bardzo dobra</option>
+                        <option value="3">Przeciętna</option>
+                        <option value="1">Słaba / Przerwana</option>
                     </select>
                 </div>
                 <div>
-                    <label>Intensywność (RPE)</label>
+                    <label>Odczuwalny wysiłek (RPE)</label>
                     <select id="s-rpe">
-                        <option value="2">Lekko (Z1/Z2)</option>
-                        <option value="5">Mocno (Tempo)</option>
-                        <option value="9">Max (Interwały/Zawody)</option>
+                        <option value="2">Lekki (Z1/Z2)</option>
+                        <option value="5">Umiarkowany (Z3)</option>
+                        <option value="8">Ciężki (Z4/Z5)</option>
+                        <option value="10">Ekstremalny (Zawody)</option>
                     </select>
                 </div>
                 <div>
-                    <label>Samopoczucie PO</label>
+                    <label>Samopoczucie po</label>
                     <select id="s-mood">
-                        <option value="5">Pełen energii</option>
-                        <option value="3">Zmęczony, ale OK</option>
-                        <option value="1">Wyczerpany / Zamulony</option>
+                        <option value="5">Świetne</option>
+                        <option value="3">Normalne</option>
+                        <option value="1">Bardzo złe</option>
                     </select>
                 </div>
                 <div>
-                    <label>Problemy zdrowotne</label>
+                    <label>Bóle / Kontuzje</label>
                     <select id="s-health">
                         <option value="0">Brak</option>
-                        <option value="5">Lekki ból/napięcie</option>
-                        <option value="10">Kontuzja / Choroba</option>
+                        <option value="5">Lekki dyskomfort</option>
+                        <option value="10">Silny ból (Stop)</option>
                     </select>
                 </div>
             </div>
-            <label>Stan psychofizyczny (ogólny)</label>
+            <label>Stan psychofizyczny (1-10)</label>
             <input type="range" id="s-psyche" min="1" max="10" value="7">
-            <button onclick="saveSurvey()" style="width:100%; padding:12px; background:var(--secondary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Analizuj i Zapisz</button>
+            <button class="btn-action" onclick="processDailyAnalysis()">Wyślij raport do AI</button>
         </div>
 
         <div class="card">
-            <h3 style="margin-top:0">🧠 Analiza Asystenta</h3>
+            <h3 style="margin-top:0; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">🧠 Werdykt Trenera AI</h3>
             <div id="ai-analysis-box">
-                <div id="ai-verdict" style="font-weight: 800; font-size: 1.1rem; margin-bottom: 10px;">Czekam na dane z ankiety...</div>
-                <div id="ai-details" style="font-size: 0.9rem; line-height: 1.4;">Wypełnij ankietę po dzisiejszym treningu, aby otrzymać rekomendację.</div>
+                <div id="ai-verdict" style="font-weight: 900; font-size: 1.2rem; margin-bottom: 10px; color: var(--primary);">Analiza danych...</div>
+                <div id="ai-details" style="font-size: 0.95rem; line-height: 1.5; color: var(--text);">Wgraj plik CSV i wypełnij ankietę, aby otrzymać precyzyjne wytyczne.</div>
             </div>
-            <div class="training-suggest" id="next-training">
-                <strong>Trening na jutro:</strong> <span id="suggest-text">Brak danych</span>
+            <div class="training-suggest">
+                <strong style="color: #065f46;">Sugestia na jutro:</strong><br>
+                <span id="suggest-text" style="font-size: 1.1rem; font-weight: 700;">Oczekiwanie na dane...</span>
             </div>
         </div>
     </div>
 
     <div class="card">
-        <canvas id="mainChart" height="120"></canvas>
+        <canvas id="performanceChart" height="100"></canvas>
     </div>
 </div>
 
 <script>
-    let mainChart;
-    let trainingHistory = JSON.parse(localStorage.getItem('trainingHistory')) || [];
-    let lastSurvey = JSON.parse(localStorage.getItem('lastSurvey')) || null;
+    let trainingChart;
+    // Ładowanie z LocalStorage
+    let historyData = JSON.parse(localStorage.getItem('acai_history')) || [];
+    let lastReport = JSON.parse(localStorage.getItem('acai_last_report')) || null;
 
     window.onload = () => {
-        if (trainingHistory.length > 0) processData(trainingHistory);
-        if (lastSurvey) loadLastSurveyUI();
+        if (historyData.length > 0) processPhysicalData(historyData);
+        if (lastReport) applyAnalysis();
     };
 
-    // --- PARSER CSV ---
+    // --- PANCERNY PARSER CSV (v3.0) ---
     const dropZone = document.getElementById('drop-zone');
-    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.background = "#e0e7ff"; });
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => {
+        dropZone.addEventListener(e, (ev) => { ev.preventDefault(); ev.stopPropagation(); });
+    });
+
+    dropZone.addEventListener('dragover', () => dropZone.classList.add('hover'));
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('hover'));
+
     dropZone.addEventListener('drop', e => {
-        e.preventDefault();
+        dropZone.classList.remove('hover');
         const file = e.dataTransfer.files[0];
         const reader = new FileReader();
+        
         reader.onload = (ev) => {
-            const lines = ev.target.result.split('\n').slice(1);
-            trainingHistory = lines.map(l => {
-                const c = l.split(l.includes(';') ? ';' : ',');
-                return { date: new Date(c[0]), dist: parseFloat(c[3]) || 0, tss: (parseFloat(c[3]) * 6) || 50 };
-            }).filter(d => !isNaN(d.date));
-            localStorage.setItem('trainingHistory', JSON.stringify(trainingHistory));
-            processData(trainingHistory);
+            const content = ev.target.result;
+            const delimiter = content.includes(';') ? ';' : ',';
+            const lines = content.split(/\r?\n/).filter(line => line.trim() !== '');
+            
+            // Czyszczenie nagłówków
+            const headers = lines[0].split(delimiter).map(h => h.replace(/"/g, '').trim().toLowerCase());
+            
+            const idxDate = headers.findIndex(h => h.includes('dat'));
+            const idxDist = headers.findIndex(h => h.includes('dystans') || h.includes('distance'));
+            
+            if (idxDate === -1) { alert("Błąd: Nie znaleziono kolumny 'Data'!"); return; }
+
+            historyData = lines.slice(1).map(l => {
+                const c = l.split(delimiter).map(col => col.replace(/"/g, '').trim());
+                const rawDist = c[idxDist] ? c[idxDist].replace(',', '.') : "0";
+                const dist = parseFloat(rawDist) || 0;
+                
+                return {
+                    date: new Date(c[idxDate]),
+                    dist: dist,
+                    tss: dist * 6 // Estymacja: 1km = 6 TSS
+                };
+            }).filter(d => !isNaN(d.date.getTime())).sort((a,b) => a.date - b.date);
+
+            localStorage.setItem('acai_history', JSON.stringify(historyData));
+            processPhysicalData(historyData);
+            alert("Zsynchronizowano " + historyData.length + " aktywności.");
         };
         reader.readAsText(file);
     });
 
-    function processData(data) {
+    function processPhysicalData(data) {
         const now = new Date();
-        const atl = data.filter(d => (now - d.date) / 86400000 <= 7).reduce((a, b) => a + b.tss, 0) / 7;
-        const ctl = data.filter(d => (now - d.date) / 86400000 <= 28).reduce((a, b) => a + b.tss, 0) / 28;
-        const tsb = ctl - atl;
+        const getLoad = (days) => data.filter(d => (now - d.date) / 86400000 <= days).reduce((a,b) => a + b.tss, 0) / days;
+
+        const atl = getLoad(7);   // Short term
+        const ctl = getLoad(28);  // Long term
+        const tsb = ctl - atl;    // Balance
 
         document.getElementById('val-tsb').innerText = Math.round(tsb);
         document.getElementById('val-ctl').innerText = Math.round(ctl);
         document.getElementById('val-atl').innerText = Math.round(atl);
         
         updateChart(data);
-        runAI(tsb, atl, lastSurvey);
+        applyAnalysis(); 
     }
 
-    // --- ANKIETA I LOGIKA AI ---
-    function saveSurvey() {
-        lastSurvey = {
+    // --- LOGIKA ANALIZY HYBRYDOWEJ ---
+    function processDailyAnalysis() {
+        lastReport = {
             quality: parseInt(document.getElementById('s-quality').value),
             rpe: parseInt(document.getElementById('s-rpe').value),
             mood: parseInt(document.getElementById('s-mood').value),
             health: parseInt(document.getElementById('s-health').value),
             psyche: parseInt(document.getElementById('s-psyche').value),
-            date: new Date().toISOString()
+            timestamp: new Date().getTime()
         };
-        localStorage.setItem('lastSurvey', JSON.stringify(lastSurvey));
-        
-        const atl = parseFloat(document.getElementById('val-atl').innerText) || 0;
-        const tsb = parseFloat(document.getElementById('val-tsb').innerText) || 0;
-        
-        runAI(tsb, atl, lastSurvey);
+        localStorage.setItem('acai_last_report', JSON.stringify(lastReport));
+        applyAnalysis();
     }
 
-    function runAI(tsb, atl, survey) {
-        if (!survey) return;
+    function applyAnalysis() {
+        const tsb = parseInt(document.getElementById('val-tsb').innerText) || 0;
+        const psyche = lastReport ? lastReport.psyche : 0;
+        
+        document.getElementById('val-psych').innerText = psyche > 0 ? psyche + "/10" : "--";
 
-        let verdict = "";
-        let details = "";
-        let nextWorkout = "";
-        const psyche = survey.psyche;
-        document.getElementById('val-psych').innerText = psyche + "/10";
+        const v = document.getElementById('ai-verdict');
+        const d = document.getElementById('ai-details');
+        const s = document.getElementById('suggest-text');
 
-        // Kompleksowa logika decyzyjna
-        if (survey.health > 4) {
-            verdict = "STOP 🛑 WYMAGANA REGENERACJA";
-            details = "Zgłosiłeś problemy zdrowotne/ból. Kontynuowanie treningu grozi kontuzją. Odpuść min. 48h.";
-            nextWorkout = "Dzień wolny / Mobilizacja";
-        } else if (tsb < -20 || (survey.mood === 1 && survey.rpe > 7)) {
-            verdict = "REGENERACJA AKTYWNA 🌊";
-            details = "Dane wskazują na głębokie zmęczenie (TSB: " + Math.round(tsb) + "). Twój układ nerwowy potrzebuje odpoczynku.";
-            nextWorkout = "30-40 min Easy Run / Joga";
-        } else if (tsb > 5 && survey.psyche > 7 && survey.quality === 5) {
-            verdict = "SUPERKOMPENSACJA 🚀 ZWIĘKSZ INTENSYWNOŚĆ";
-            details = "Jesteś świeży i masz wysoką motywację. To idealny moment na interwały lub test progu.";
-            nextWorkout = "Interwały VO2Max lub Tempo Run";
+        if (!lastReport) return;
+
+        // SILNIK DECYZYJNY
+        if (lastReport.health >= 5) {
+            v.innerText = "🛑 STOP: REGENERACJA KONIECZNA";
+            v.style.color = "var(--accent)";
+            d.innerText = "Zgłoszony ból lub kontuzja. Twój organizm wysyła sygnały ostrzegawcze. Kontynuowanie treningu zwiększa ryzyko urazu o 80%.";
+            s.innerText = "Wolne / Delikatne rolowanie i lód.";
+        } else if (tsb < -25) {
+            v.innerText = "⚠️ UWAGA: GŁĘBOKIE ZMĘCZENIE";
+            v.style.color = "var(--recovery)";
+            d.innerText = "Twoje obciążenie krótkoterminowe drastycznie wzrosło. Nawet jeśli psyche jest wysokie, układ krążenia wymaga adaptacji.";
+            s.innerText = "Bieg regeneracyjny (Z1) - max 30 min.";
+        } else if (tsb > 10 && psyche >= 8) {
+            v.innerText = "🚀 PEAK PERFORMANCE: CZAS NA MOC";
+            v.style.color = "var(--strength)";
+            d.innerText = "Wysoka świeżość (TSB: " + tsb + ") oraz świetny stan psychiczny. To najlepszy moment na interwały lub test mocy.";
+            s.innerText = "Trening główny: Interwały VO2Max lub Progi.";
         } else {
-            verdict = "TRENING PRODUKTYWNY ✅";
-            details = "Balans zachowany. Możesz kontynuować standardowy plan. Monitoruj tętno spoczynkowe.";
-            nextWorkout = "Standardowa jednostka tlenowa (Z2)";
+            v.innerText = "📈 KONTYNUACJA: BUDOWANIE BAZY";
+            v.style.color = "var(--secondary)";
+            d.innerText = "Parametry stabilne. Skup się na objętości w drugiej strefie. Pamiętaj o nawodnieniu.";
+            s.innerText = "Rozbieganie 60-90 min (Z2).";
         }
-
-        document.getElementById('ai-verdict').innerText = verdict;
-        document.getElementById('ai-details').innerText = details;
-        document.getElementById('suggest-text').innerText = nextWorkout;
     }
 
     function updateChart(data) {
-        const sorted = data.slice(-15);
-        const labels = sorted.map(d => new Date(d.date).toLocaleDateString());
-        if (mainChart) mainChart.destroy();
-        mainChart = new Chart(document.getElementById('mainChart'), {
+        const last15 = data.slice(-15);
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        if (trainingChart) trainingChart.destroy();
+        
+        trainingChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: labels,
-                datasets: [{ label: 'Obciążenie TSS', data: sorted.map(d => d.tss), borderColor: '#ef4444', tension: 0.3 }]
-            }
+                labels: last15.map(d => d.date.toLocaleDateString()),
+                datasets: [{
+                    label: 'Obciążenie (TSS)',
+                    data: last15.map(d => d.tss),
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
         });
     }
 
-    function clearStorage() { localStorage.clear(); location.reload(); }
-    
-    function loadLastSurveyUI() {
-        document.getElementById('s-psyche').value = lastSurvey.psyche;
-        // Wypełnianie reszty pól można dodać analogicznie
-    }
+    function resetApp() { if(confirm("Czy na pewno wyczyścić wszystkie dane?")) { localStorage.clear(); location.reload(); } }
 </script>
 </body>
 </html>
