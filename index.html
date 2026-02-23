@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v4.1 | Pro Performance Dashboard</title>
+    <title>ADAPTIVE COACH AI v4.1 | Stable Parser</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -20,37 +20,31 @@
             background: linear-gradient(135deg, var(--primary) 0%, #1e293b 100%);
             color: white; padding: 1.5rem; border-radius: 16px; margin-bottom: 20px;
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
         }
 
-        /* Sekcja Drop Zones */
         .drop-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .drop-box {
             border: 2px dashed #cbd5e1; border-radius: 12px; padding: 15px; 
             text-align: center; font-size: 0.8rem; cursor: pointer; transition: 0.3s; background: white;
         }
-        .drop-box:hover { border-color: var(--secondary); background: #f0f7ff; transform: translateY(-2px); }
+        .drop-box:hover { border-color: var(--secondary); background: #f0f7ff; }
 
-        /* Statystyki */
         .dashboard-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;
         }
-        .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; }
         .stat-box small { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 5px; }
         .stat-box span { font-size: 1.8rem; font-weight: 800; }
 
         .card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
         
-        /* Formularz biometrii */
         .biometry-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 10px; }
         .input-group { flex: 1; min-width: 140px; }
         label { display: block; font-size: 0.75rem; font-weight: 800; margin-bottom: 5px; color: var(--primary); }
         input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; }
         
-        .btn-update { padding: 11px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn-update:hover { background: var(--secondary); }
+        .btn-update { padding: 11px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        /* Tabela Stref */
         .zones-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
         .zones-table th { text-align: left; padding: 10px; border-bottom: 2px solid #f1f5f9; color: #64748b; }
         .zones-table td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-weight: 600; }
@@ -58,8 +52,6 @@
 
         .grid-main { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
         #ai-verdict { border-left: 10px solid var(--secondary); background: #f0f9ff; padding: 20px; border-radius: 12px; }
-
-        @media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } .drop-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -68,22 +60,22 @@
     <header>
         <div>
             <h1 style="margin:0">ADAPTIVE COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v4.1 Stable</span></h1>
-            <small>Twoja przewaga dzięki danym</small>
+            <small>Poprawiony parser danych CSV</small>
         </div>
-        <button onclick="resetApp()" style="background:none; border: 1px solid white; color: white; padding: 5px 12px; border-radius: 6px; cursor:pointer; font-size: 0.8rem;">Wyczyść Lokalną Bazę</button>
+        <button onclick="resetApp()" style="background:none; border: 1px solid white; color: white; padding: 5px 12px; border-radius: 6px; cursor:pointer;">Resetuj Bazę</button>
     </header>
 
     <div class="drop-grid">
         <div class="drop-box" id="drop-activities"><strong>🏃 AKTYWNOŚCI</strong><br>Importuj Garmin (CSV)</div>
-        <div class="drop-box" id="drop-ftp" style="border-color: var(--secondary);"><strong>⚡ HISTORIA FTP</strong><br>Importuj Moc (CSV)</div>
-        <div class="drop-box" id="drop-vo2" style="border-color: var(--strength);"><strong>🫁 PUŁAP TLENOWY</strong><br>Importuj VO2Max (CSV)</div>
+        <div class="drop-box" id="drop-ftp"><strong>⚡ HISTORIA FTP</strong><br>Importuj Moc (CSV)</div>
+        <div class="drop-box" id="drop-vo2"><strong>🫁 PUŁAP TLENOWY</strong><br>Importuj VO2Max (CSV)</div>
     </div>
 
     <div class="card">
         <div class="biometry-row">
-            <div class="input-group"><label>Waga (kg)</label><input type="number" id="in-weight" step="0.1" placeholder="70.0"></div>
-            <div class="input-group"><label>Manualne FTP (W)</label><input type="number" id="in-ftp" placeholder="250"></div>
-            <div class="input-group"><label>Manualne VO2Max</label><input type="number" id="in-vo2" placeholder="50"></div>
+            <div class="input-group"><label>Waga (kg)</label><input type="number" id="in-weight" step="0.1"></div>
+            <div class="input-group"><label>FTP (W)</label><input type="number" id="in-ftp"></div>
+            <div class="input-group"><label>VO2Max</label><input type="number" id="in-vo2"></div>
             <button class="btn-update" onclick="updateBiometry()">Zaktualizuj Profil</button>
         </div>
     </div>
@@ -97,10 +89,10 @@
 
     <div class="grid-main">
         <div class="card">
-            <h3 style="margin-top:0">📉 Trend Obciążenia (Ostatnie 14 dni)</h3>
+            <h3 style="margin-top:0">📉 Obciążenie Treningowe (TSS)</h3>
             <canvas id="mainChart" height="110"></canvas>
             
-            <h3 style="margin: 30px 0 10px 0;">🚲 Twoje Strefy Treningowe (Power Zones)</h3>
+            <h3 style="margin: 30px 0 10px 0;">🚲 Strefy Treningowe</h3>
             <table class="zones-table" id="zones-body">
                 <thead><tr><th>Strefa</th><th>Opis</th><th>Zakres Mocy (W)</th><th>% FTP</th></tr></thead>
                 <tbody></tbody>
@@ -110,8 +102,8 @@
         <div class="card">
             <h3 style="margin-top:0">🧠 Sugestia Trenera AI</h3>
             <div id="ai-verdict">
-                <div id="ai-title" style="font-weight: 900; font-size: 1.1rem; color: var(--primary);">Brak danych aktywności</div>
-                <p id="ai-desc" style="font-size: 0.95rem; margin: 15px 0; line-height: 1.5; color: var(--text);">Wgraj pliki CSV lub uzupełnij biometrię ręcznie.</p>
+                <div id="ai-title" style="font-weight: 900; font-size: 1.1rem; color: var(--primary);">Czekam na dane...</div>
+                <p id="ai-desc" style="font-size: 0.95rem; margin: 15px 0; line-height: 1.5; color: var(--text);">Przeciągnij plik CSV do odpowiedniej strefy.</p>
                 <div id="ai-workout" style="font-weight: 800; color: var(--secondary); border-top: 2px solid #e0f2fe; padding-top: 15px; margin-top: 15px; font-size: 1.1rem;"></div>
             </div>
         </div>
@@ -132,9 +124,10 @@
         document.getElementById('in-ftp').value = dataStore.ftp || '';
         document.getElementById('in-vo2').value = dataStore.vo2 || '';
         refreshApp();
-        setupDrop('drop-activities', 'ACT');
-        setupDrop('drop-ftp', 'FTP');
-        setupDrop('drop-vo2', 'VO2');
+        ['drop-activities', 'drop-ftp', 'drop-vo2'].forEach(id => {
+            const type = id.split('-')[1].toUpperCase();
+            setupDrop(id, type === 'ACTIVITIES' ? 'ACT' : type);
+        });
     };
 
     function updateBiometry() {
@@ -159,31 +152,38 @@
         el.addEventListener('drop', e => {
             e.preventDefault();
             el.style.background = "white";
+            const file = e.dataTransfer.files[0];
             const reader = new FileReader();
             reader.onload = (ev) => handleCSV(ev.target.result, type);
-            reader.readAsText(e.dataTransfer.files[0]);
+            reader.readAsText(file);
         });
     }
 
     function handleCSV(content, type) {
-        const lines = content.split(/\r?\n/).filter(l => l.trim() !== '');
         const delimiter = content.includes(';') ? ';' : ',';
+        const lines = content.split(/\r?\n/).filter(l => l.trim() !== '');
+        const headers = lines[0].toLowerCase().split(delimiter).map(h => h.replace(/"/g, '').trim());
 
         if (type === 'ACT') {
+            const idxDate = headers.findIndex(h => h.includes('dat'));
+            const idxDist = headers.findIndex(h => h.includes('dystans') || h.includes('distance'));
+            
             dataStore.history = lines.slice(1).map(l => {
-                const c = l.split(delimiter);
-                const d = parseFloat(c[3]) || 0;
-                return { date: new Date(c[0]), tss: d * 6, dist: d };
+                const c = l.split(delimiter).map(col => col.replace(/"/g, '').trim());
+                const dStr = c[idxDist] ? c[idxDist].replace(',', '.') : "0";
+                const d = parseFloat(dStr) || 0;
+                return { date: new Date(c[idxDate]), tss: d * 6 };
             }).filter(i => !isNaN(i.date.getTime())).sort((a,b) => a.date - b.date);
-        } else if (type === 'FTP') {
-            const last = lines[lines.length-1].split(delimiter);
-            dataStore.ftp = parseInt(last.find(v => !isNaN(v) && v > 50)) || dataStore.ftp;
-        } else if (type === 'VO2') {
-            const last = lines[lines.length-1].split(delimiter);
-            dataStore.vo2 = parseInt(last.find(v => !isNaN(v) && v > 20)) || dataStore.vo2;
+        } else {
+            // Logika dla FTP i VO2 - szuka pierwszej sensownej liczby
+            const lastLine = lines[lines.length-1].split(delimiter);
+            const val = parseInt(lastLine.find(v => !isNaN(v.replace(',', '.')) && v.trim() !== ''));
+            if (type === 'FTP') dataStore.ftp = val || dataStore.ftp;
+            if (type === 'VO2') dataStore.vo2 = val || dataStore.vo2;
         }
         syncStorage();
         refreshApp();
+        alert("Pomyślnie wczytano dane " + type);
     }
 
     function refreshApp() {
@@ -212,20 +212,12 @@
             { n: "Z2", name: "Endurance", p: "75%", c: "#10b981" },
             { n: "Z3", name: "Tempo", p: "90%", c: "#3b82f6" },
             { n: "Z4", name: "Threshold", p: "105%", c: "#f59e0b" },
-            { n: "Z5", name: "VO2Max", p: "120%", c: "#ef4444" },
-            { n: "Z6", name: "Anaerobic", p: "150%", c: "#7c3aed" },
-            { n: "Z7", name: "Sprint", p: "200%", c: "#000000" }
+            { n: "Z5", name: "VO2Max", p: "120%", c: "#ef4444" }
         ];
-
         const tbody = document.querySelector("#zones-body tbody");
         tbody.innerHTML = zones.map(z => {
             const val = Math.round(ftp * (parseInt(z.p)/100));
-            return `<tr>
-                <td><span class="z-tag" style="background:${z.c}">${z.n}</span></td>
-                <td>${z.name}</td>
-                <td><strong>do ${ftp > 0 ? val : '--'} W</strong></td>
-                <td style="color:#64748b">${z.p}</td>
-            </tr>`;
+            return `<tr><td><span class="z-tag" style="background:${z.c}">${z.n}</span></td><td>${z.name}</td><td>do ${ftp > 0 ? val : '--'} W</td><td>${z.p}</td></tr>`;
         }).join('');
     }
 
@@ -233,20 +225,14 @@
         const title = document.getElementById('ai-title');
         const desc = document.getElementById('ai-desc');
         const work = document.getElementById('ai-workout');
-        const ftp = dataStore.ftp;
-
         if (tsb < -20) {
-            title.innerText = "STATUS: WYSOKIE ZMĘCZENIE";
-            desc.innerText = "Zmęczenie krótkoterminowe przewyższa bazę. Zalecana regeneracja.";
-            work.innerText = "DZISIAJ: Z1 (Recovery) " + (ftp > 0 ? "poniżej " + Math.round(ftp * 0.55) + " W" : "");
-        } else if (tsb > 5) {
-            title.innerText = "STATUS: ŚWIEŻOŚĆ";
-            desc.innerText = "Jesteś wypoczęty. Idealny czas na mocny akcent.";
-            work.innerText = "DZISIAJ: Sweet Spot 2x20 min " + (ftp > 0 ? "@ " + Math.round(ftp * 0.9) + " W" : "");
+            title.innerText = "STAN: ZMĘCZENIE";
+            desc.innerText = "Wysokie obciążenie krótkoterminowe. Twoje ciało potrzebuje adaptacji.";
+            work.innerText = "DZISIAJ: Z1 (Recovery) poniżej " + Math.round(dataStore.ftp * 0.55) + " W";
         } else {
-            title.innerText = "STATUS: BAZA";
-            desc.innerText = "Stabilny poziom TSB. Kontynuuj budowanie bazy.";
-            work.innerText = "DZISIAJ: Z2 (Endurance) " + (ftp > 0 ? "@ " + Math.round(ftp * 0.7) + " W" : "");
+            title.innerText = "STAN: GOTOWOŚĆ";
+            desc.innerText = "Balans zachowany. Możesz wykonać mocniejszy trening.";
+            work.innerText = "DZISIAJ: Z3 (Tempo) @ " + Math.round(dataStore.ftp * 0.9) + " W";
         }
     }
 
@@ -264,7 +250,7 @@
         });
     }
 
-    function resetApp() { if(confirm("Czy na pewno wyczyścić dane?")) { localStorage.clear(); location.reload(); } }
+    function resetApp() { if(confirm("Czyścić dane?")) { localStorage.clear(); location.reload(); } }
 </script>
 </body>
 </html>
