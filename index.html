@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v5.7 | Powered by Google Gemini</title>
+    <title>ADAPTIVE COACH AI v5.8 | Advanced Microcycle Planning</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -35,7 +35,7 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.96); display: none; justify-content: center; align-items: center; z-index: 3000;
         }
-        .popup-card { background: white; padding: 30px; border-radius: 24px; max-width: 950px; width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .popup-card { background: white; padding: 30px; border-radius: 24px; max-width: 950px; width: 95%; max-height: 90vh; overflow-y: auto; }
         
         .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
         label { display: block; font-size: 0.7rem; font-weight: 800; margin-bottom: 4px; color: var(--primary); text-transform: uppercase; }
@@ -58,6 +58,9 @@
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 15px; }
         .cal-day { padding: 12px 5px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; text-align: center; font-size: 0.75rem; }
         .cal-today { border: 2px solid var(--secondary); background: #f0f9ff; font-weight: 700; }
+
+        .microcycle-info { background: #1e293b; color: #94a3b8; padding: 15px; border-radius: 12px; font-size: 0.8rem; margin-top: 15px; border-left: 4px solid var(--warning); }
+        .microcycle-info b { color: white; display: block; margin-bottom: 5px; }
 
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 12px 30px; border-radius: 30px; display: none; z-index: 4000; font-weight: 600; }
         
@@ -82,14 +85,14 @@
         </div>
 
         <div class="input-grid">
-            <div><label title="Twój wiek">Wiek</label><input type="number" id="p-age"></div>
-            <div><label title="Waga do wyliczania W/kg">Waga (kg)</label><input type="number" id="p-weight" step="0.1"></div>
-            <div><label title="Functional Threshold Power">FTP (W)</label><input type="number" id="p-ftp"></div>
-            <div><label title="Próg tętna mleczanowego">Próg HR</label><input type="number" id="p-thr-hr"></div>
-            <div><label title="Data docelowego startu">Data Zawodów</label><input type="date" id="p-race-date"></div>
+            <div><label>Wiek</label><input type="number" id="p-age"></div>
+            <div><label>Waga (kg)</label><input type="number" id="p-weight" step="0.1"></div>
+            <div><label>FTP (W)</label><input type="number" id="p-ftp"></div>
+            <div><label>Próg HR</label><input type="number" id="p-thr-hr"></div>
+            <div><label>Data Zawodów</label><input type="date" id="p-race-date"></div>
         </div>
 
-        <label>Harmonogram Mikrocyklu</label>
+        <label>Harmonogram Mikrocyklu (Plan Tygodniowy)</label>
         <div class="week-planner" id="planner-container"></div>
 
         <label>Import Garmin Connect (CSV)</label>
@@ -109,28 +112,28 @@
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v5.7 ELITE</span></h1>
-            <small>AI-Driven Performance Analytics</small>
+            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v5.8 ELITE</span></h1>
+            <small>Microcycle Planning & AI Strategy</small>
         </div>
         <button class="btn-main btn-outline" onclick="document.getElementById('profile-overlay').style.display='flex'">USTAWIENIA</button>
     </header>
 
     <div class="dashboard-grid">
         <div class="stat-box">
-            <small title="Chronic Training Load - Twoja aktualna baza formy (średnia 42 dni)">Forma (CTL)</small>
+            <small title="Forma (średnia 42 dni)">Forma (CTL)</small>
             <span id="val-ctl">--</span>
             <div id="ramp-rate" class="trend-indicator"></div>
         </div>
         <div class="stat-box">
-            <small title="Acute Training Load - Twoje zmęczenie z ostatnich 7 dni">Zmęczenie (ATL)</small>
+            <small title="Zmęczenie (średnia 7 dni)">Zmęczenie (ATL)</small>
             <span id="val-atl">--</span>
         </div>
         <div class="stat-box">
-            <small title="Training Stress Balance - Różnica między CTL a ATL. Wskazuje na świeżość lub zmęczenie.">Świeżość (TSB)</small>
+            <small title="Freshness (CTL - ATL)">Świeżość (TSB)</small>
             <span id="val-tsb">--</span>
         </div>
         <div class="stat-box">
-            <small title="Moc w stosunku do wagi - kluczowy parametr podjazdów">Moc (W/kg)</small>
+            <small title="Moc w stosunku do wagi">Moc (W/kg)</small>
             <span id="val-wkg">--</span>
         </div>
     </div>
@@ -138,9 +141,14 @@
     <div style="display:grid; grid-template-columns: 1.4fr 1fr; gap:20px;" class="grid-main">
         <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h3 style="margin:0">📋 Raport Dnia</h3>
-                <span id="current-plan-badge" style="font-size: 0.7rem; font-weight: 800; color: var(--secondary);">CEL: --</span>
+                <h3 style="margin:0">📋 Dzisiejsza Jednostka</h3>
+                <span id="current-plan-badge" style="font-size: 0.75rem; font-weight: 800; background: var(--primary); color: white; padding: 4px 12px; border-radius: 4px;">--</span>
             </div>
+            
+            <div id="unit-description" style="background: #f8fafc; padding: 15px; border-radius: 12px; font-size: 0.85rem; border: 1px solid #e2e8f0; margin-bottom: 20px; line-height: 1.4;">
+                Wybierz plan treningowy w ustawieniach, aby zobaczyć szczegóły.
+            </div>
+
             <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
                 <div><label>RPE (Wysiłek 1-10)</label><input type="number" id="s-rpe" min="1" max="10" value="5"></div>
                 <div><label>Jakość Snu</label>
@@ -163,15 +171,19 @@
             </div>
             <button class="btn-main" style="width:100%; background: var(--strength);" onclick="updateDailyStatus()">AKTUALIZUJ RAPORT</button>
             
-            <h3 style="margin: 25px 0 10px 0; font-size: 0.9rem;">Kalendarz Tygodniowy</h3>
             <div class="calendar-grid" id="calendar-container"></div>
+            
+            <div id="microcycle-coach-info" class="microcycle-info">
+                <b>💡 Strategia Mikrocyklu (AI):</b>
+                <span id="cycle-prediction">Wczytaj dane, aby otrzymać plan blokowy.</span>
+            </div>
         </div>
 
         <div class="card">
             <div class="ai-badge">NAPĘDZANE PRZEZ GOOGLE GEMINI 1.5 PRO</div>
             <div class="ai-verdict">
-                <p id="ai-status" style="font-weight: 900; font-size: 1.2rem; color: var(--primary); margin-top:0;">Oczekiwanie na dane...</p>
-                <div id="ai-desc" style="font-size: 0.95rem; margin: 12px 0; line-height: 1.5; color: #475569;">Wgraj pliki CSV i zaktualizuj swój status, aby asystent AI mógł przygotować rekomendację.</div>
+                <p id="ai-status" style="font-weight: 900; font-size: 1.2rem; color: var(--primary); margin-top:0;">Analiza w toku...</p>
+                <div id="ai-desc" style="font-size: 0.95rem; margin: 12px 0; line-height: 1.5; color: #475569;">Zaktualizuj profil i wgraj CSV.</div>
                 <div id="ai-action" style="font-weight: 800; color: var(--secondary); border-top: 1px solid #cbd5e1; padding-top: 15px; margin-top: 15px;"></div>
             </div>
             <div style="margin-top:20px; height: 180px;">
@@ -181,7 +193,7 @@
     </div>
 
     <div class="card" style="margin-top:20px; border-left: 8px solid var(--secondary);">
-        <h3 style="margin:0 0 15px 0; font-size: 1rem;">🔍 Ostatnia zarejestrowana aktywność</h3>
+        <h3 style="margin:0 0 15px 0; font-size: 1rem;">🔍 Ostatnia Aktywność</h3>
         <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; text-align:center;">
             <div><small>Tytuł</small><b id="last-title" style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">--</b></div>
             <div><small>TSS</small><b id="last-tss" style="display:block;">--</b></div>
@@ -191,26 +203,27 @@
     </div>
 
     <footer>
-        © 2024 Adaptive Coach AI. Wszystkie wyliczenia oparte o model CTL/ATL/TSB. <br>
-        <strong>Uwaga:</strong> Rekomendacje AI są generowane automatycznie. Konsultuj ciężkie treningi z lekarzem.
+        System napędzany przez model Gemini 1.5 Pro. Analiza bazuje na modelu periodyzacji mikrocykli 3:1.
     </footer>
 </div>
 
 <script>
     const trainingDictionary = {
-        'Z1 Recovery': 'Regeneracja aktywna, tętno <55%',
-        'Z2 Endurance': 'Baza tlenowa, metabolizm tłuszczu',
-        'Sweet Spot': 'Budowa FTP, 88-94% mocy progowej',
-        'VO2Max': 'Interwały wysokiej intensywności',
-        'Siła FBW': 'Trening siłowy ogólnorozwojowy',
-        'Wolne': 'Odpoczynek pasywny'
+        'Z1 Recovery': '<b>Regeneracja aktywna:</b> Bardzo lekka jazda/bieg, tętno <55% FTP. Cel: Przepływ krwi i usuwanie metabolitów. <br><i>Przykład: 30-45 min swobodnego ruchu bez zadyszki.</i>',
+        'Z2 Endurance': '<b>Baza tlenowa:</b> 56-75% FTP. Fundament wydolności, spalanie tłuszczów. <br><i>Przykład: 90-180 min stałym tempem, swobodna rozmowa możliwa.</i>',
+        'Sweet Spot': '<b>Sweet Spot:</b> 88-94% FTP. Budowa mocy progowej przy mniejszym obciążeniu niż interwały progowe. <br><i>Przykład: 2 x 20 min na 90% FTP, przerwa 5 min.</i>',
+        'VO2Max': '<b>Pułap tlenowy:</b> 106-120% FTP. Krótkie, bardzo intensywne powtórzenia. <br><i>Przykład: 5 x 4 min na 115% FTP, przerwa 4 min w Z1.</i>',
+        'Sprinty': '<b>Moc beztlenowa:</b> >150% FTP. Maksymalne uderzenia mocy. <br><i>Przykład: 8 x 15 sek "all-out", przerwa 3-5 min pełnego odpoczynku.</i>',
+        'Siła GÓRA': '<b>Górne partie:</b> Core, stabilizacja, plecy, klatka. <br><i>Przykład: Podciąganie, pompki, plank, wyciskanie hantli. 3 serie po 10-12 powt.</i>',
+        'Siła DÓŁ': '<b>Dolne partie:</b> Moc w nogach. <br><i>Przykład: Przysiady ze sztangą, wykroki, martwy ciąg. 4 serie po 6-8 powt. (budowa siły absolutnej).</i>',
+        'Wolne': '<b>Odpoczynek pasywny:</b> Całkowity brak treningu fizycznego. Cel: Odbudowa glikogenu i regeneracja układu nerwowego.'
     };
 
     let chart;
     let store = {
-        history: JSON.parse(localStorage.getItem('ac_v57_history')) || [],
-        config: JSON.parse(localStorage.getItem('ac_v57_config')) || { plan: Array(7).fill('Z2 Endurance'), weight: 0, ftp: 0 },
-        today: JSON.parse(localStorage.getItem('ac_v57_today')) || { rpe: 5, sleep: 3, health: 'zdrowy' }
+        history: JSON.parse(localStorage.getItem('ac_v58_history')) || [],
+        config: JSON.parse(localStorage.getItem('ac_v58_config')) || { plan: Array(7).fill('Z2 Endurance'), weight: 0, ftp: 0 },
+        today: JSON.parse(localStorage.getItem('ac_v58_today')) || { rpe: 5, sleep: 3, health: 'zdrowy' }
     };
 
     window.onload = () => {
@@ -223,6 +236,7 @@
     function initUI() {
         const container = document.getElementById('planner-container');
         const days = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nie'];
+        container.innerHTML = '';
         days.forEach((d, i) => {
             const div = document.createElement('div');
             div.className = 'day-box';
@@ -244,9 +258,6 @@
             document.getElementById('p-thr-hr').value = c.thrHr;
             document.getElementById('p-race-date').value = c.raceDate;
         }
-        document.getElementById('s-rpe').value = store.today.rpe;
-        document.getElementById('s-sleep').value = store.today.sleep;
-        document.getElementById('s-health').value = store.today.health;
     }
 
     function saveCompleteProfile() {
@@ -258,7 +269,7 @@
             raceDate: document.getElementById('p-race-date').value,
             plan: Array.from({length:7}, (_, i) => document.getElementById(`p-day-${i}`).value)
         };
-        localStorage.setItem('ac_v57_config', JSON.stringify(store.config));
+        localStorage.setItem('ac_v58_config', JSON.stringify(store.config));
         toast("✅ Dane zapisane");
         refresh();
         closeConfig();
@@ -270,7 +281,7 @@
             sleep: parseInt(document.getElementById('s-sleep').value),
             health: document.getElementById('s-health').value
         };
-        localStorage.setItem('ac_v57_today', JSON.stringify(store.today));
+        localStorage.setItem('ac_v58_today', JSON.stringify(store.today));
         toast("🚀 Status zaktualizowany");
         refresh();
     }
@@ -313,7 +324,7 @@
                     title: c[idx.title] || 'Trening'
                 };
             }).filter(x => x.tss > 0).sort((a,b) => new Date(b.date) - new Date(a.date));
-            localStorage.setItem('ac_v57_history', JSON.stringify(store.history));
+            localStorage.setItem('ac_v58_history', JSON.stringify(store.history));
         }
         refresh();
     }
@@ -331,7 +342,6 @@
             const atl = h.slice(0, 7).reduce((a,b)=>a+b.tss, 0) / 7;
             const tsb = ctl - atl;
             
-            // Ramp Rate (Zmiana CTL w skali tygodnia)
             const prevCtl = h.slice(7, 49).reduce((a,b)=>a+b.tss, 0) / 42;
             const ramp = ctl - prevCtl;
 
@@ -349,37 +359,56 @@
             const tsbEl = document.getElementById('val-tsb');
             tsbEl.className = tsb < -20 ? 'tsb-danger' : (tsb > 5 ? 'tsb-fresh' : 'tsb-optimal');
 
-            renderVerdict(tsb, ramp);
+            renderVerdict(tsb, ramp, ctl);
             updateChart(ctl, atl);
         }
         renderCalendar();
     }
 
-    function renderVerdict(tsb, ramp) {
+    function renderVerdict(tsb, ramp, ctl) {
         const st = document.getElementById('ai-status');
         const ds = document.getElementById('ai-desc');
         const ac = document.getElementById('ai-action');
         const todayIdx = (new Date().getDay() + 6) % 7;
         const planKey = store.config.plan[todayIdx];
         
-        document.getElementById('current-plan-badge').innerText = `CEL: ${planKey}`;
+        document.getElementById('current-plan-badge').innerText = planKey;
+        document.getElementById('unit-description').innerHTML = trainingDictionary[planKey];
 
+        // LOGIKA PERIODYZACJI AI
+        let cyclePrediction = "";
+        const raceDate = store.config.raceDate ? new Date(store.config.raceDate) : null;
+        const daysToRace = raceDate ? Math.ceil((raceDate - new Date()) / (1000 * 60 * 60 * 24)) : null;
+
+        if (daysToRace !== null) {
+            if (daysToRace < 10) {
+                cyclePrediction = `<b>Faza: OSTRZENIE (Tapering).</b> Jesteś tuż przed zawodami. Mikrocykl powinien być krótki (7 dni) z niską objętością, ale wysoką intensywnością. Przerwa (Wolne) na 2 dni przed startem.`;
+            } else if (daysToRace < 40) {
+                cyclePrediction = `<b>Faza: BUDOWA (Build).</b> Czas na najcięższe jednostki. Zalecany mikrocykl 3:1 (3 tyg. ciężkie, 1 tydz. regeneracji). Kolejny tydzień powinien zwiększyć TSS o 5-10%.`;
+            } else {
+                cyclePrediction = `<b>Faza: BAZA (Base).</b> Budujemy fundament. Mikrocykl 4-tygodniowy. W następnym tygodniu skup się na wydłużeniu jednostek Z2.`;
+            }
+        } else {
+            cyclePrediction = "Ustaw datę zawodów, aby AI wyliczyło fazę mikrocyklu.";
+        }
+
+        if (ramp > 7) cyclePrediction += " <br>⚠️ <b>Uwaga:</b> Twój Ramp Rate jest bardzo wysoki. Sugeruję tydzień regeneracyjny (Deload) już teraz.";
+
+        document.getElementById('cycle-prediction').innerHTML = cyclePrediction;
+
+        // Werdykt dnia
         if(store.today.health !== 'zdrowy') {
-            st.innerText = "🚩 ALERT ZDROWOTNY";
-            ds.innerText = `Twoje zdrowie jest priorytetem. Status: ${store.today.health.replace('_',' ')}. Gemini sugeruje natychmiastowe przerwanie bloku treningowego.`;
-            ac.innerText = "ZALECENIE: Dzień wolny / Pełna regeneracja.";
-        } else if (ramp > 6) {
-            st.innerText = "⚠️ RAMP RATE ALARM";
-            ds.innerText = `Twoja forma rośnie zbyt szybko (+${ramp.toFixed(1)}/wk). Ryzyko kontuzji przeciążeniowej jest wysokie mimo dobrego samopoczucia.`;
-            ac.innerText = `ZALECENIE: Zredukuj intensywność ${planKey} o 30%.`;
+            st.innerText = "🚩 STOP: REGENERACJA";
+            ds.innerText = `Status: ${store.today.health}. Gemini blokuje trening.`;
+            ac.innerText = "Dzień wolny.";
         } else if (tsb < -25) {
             st.innerText = "📉 WYSOKIE ZMĘCZENIE";
-            ds.innerText = `Balans TSB (${Math.round(tsb)}) wskazuje na głębokie zmęczenie. Jakość treningu ${planKey} może być niska.`;
-            ac.innerText = "ZALECENIE: Zamień plan na Z1 Recovery lub Wolne.";
+            ds.innerText = `TSB: ${Math.round(tsb)}. Organizm jest przeciążony.`;
+            ac.innerText = `Zmień ${planKey} na Z1 lub Wolne.`;
         } else {
             st.innerText = "🚀 STREFA OPTYMALNA";
-            ds.innerText = `Parametry fizjologiczne są idealne. TSB: ${Math.round(tsb)}. Adaptacja przebiega prawidłowo.`;
-            ac.innerText = `ZADANIE: Realizuj ${planKey} - ${trainingDictionary[planKey]}`;
+            ds.innerText = `Świetne parametry adaptacyjne.`;
+            ac.innerText = `Realizuj: ${planKey}`;
         }
     }
 
