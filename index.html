@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v7.3.7 | Ultra Parser</title>
+    <title>ADAPTIVE COACH AI v7.4 | VO2Max Engine</title>
     
     <script type="module">
         import FitParser from 'https://esm.sh/fit-file-parser@1.9.0';
@@ -21,11 +21,14 @@
         body { margin: 0; padding: 20px; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 60px; }
         .container { max-width: 1200px; margin: auto; }
         header { background: linear-gradient(135deg, var(--primary) 0%, #1e293b 100%); color: white; padding: 1.5rem; border-radius: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        
+        /* Zmieniono minmax na 180px, aby zmieścić 5 kafelków */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; position: relative; border: 1px solid rgba(255,255,255,0.05); }
         .stat-box small { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 5px; cursor: help; }
         .stat-box span { font-size: 1.8rem; font-weight: 800; }
         .stat-box .trend-indicator { font-size: 0.75rem; margin-left: 8px; font-weight: 600; }
+        
         .card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
         #profile-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.96); display: none; justify-content: center; align-items: center; z-index: 3000; }
         .popup-card { background: white; padding: 30px; border-radius: 24px; max-width: 950px; width: 95%; max-height: 90vh; overflow-y: auto; }
@@ -52,6 +55,7 @@
         .forecast-box { background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 12px; padding: 15px; margin-top: 15px; }
         .forecast-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 15px; }
         .forecast-input { width: 100%; padding: 8px 4px; border-radius: 8px; border: 1px solid #c4b5fd; text-align: center; font-size: 0.75rem; font-weight: bold; color: var(--forecast); background: #fff; cursor: pointer; outline: none; }
+        .forecast-input:hover { border-color: var(--forecast); }
         .microcycle-info { background: #1e293b; color: #94a3b8; padding: 15px; border-radius: 12px; font-size: 0.85rem; margin-top: 15px; border-left: 4px solid var(--warning); line-height: 1.5; }
         .microcycle-info b { color: white; display: block; margin-bottom: 5px; }
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 12px 30px; border-radius: 30px; display: none; z-index: 4000; font-weight: 600; }
@@ -76,7 +80,7 @@
             <div><label>Waga (kg)</label><input type="number" id="p-weight" step="0.1"></div>
             <div><label>FTP (W)</label><input type="number" id="p-ftp"></div>
             <div><label>Próg HR</label><input type="number" id="p-thr-hr"></div>
-            <div><label>VO2Max</label><input type="number" id="p-vo2" step="0.1" title="Zaczytywane z pliku lub edytowalne ręcznie"></div>
+            <div><label>VO2Max</label><input type="number" id="p-vo2" step="0.1" title="Możesz wpisać z ręki lub wgrać plik CSV z Garmina"></div>
             <div><label>Data Zawodów</label><input type="date" id="p-race-date"></div>
         </div>
 
@@ -86,7 +90,7 @@
         <label>Uniwersalny Import Danych (.CSV & .FIT)</label>
         <div class="drop-zone" id="drop-universal">
             📥 Upuść pliki tutaj <b>LUB KLIKNIJ</b> aby wybrać z dysku.<br>
-            <span style="font-size: 0.75rem; font-weight: 400; color: #64748b; margin-top: 5px; display: block;">Obsługuje: Aktywności CSV, FTP CSV, VO2Max CSV oraz pliki .FIT z zegarka.</span>
+            <span style="font-size: 0.75rem; font-weight: 400; color: #64748b; margin-top: 5px; display: block;">Obsługuje: Aktywności CSV, FTP CSV, VO2Max CSV oraz oryginalne pliki .FIT z zegarka.</span>
         </div>
 
         <div style="display:flex; justify-content: space-between; align-items: center; margin-top:20px;">
@@ -99,7 +103,7 @@
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v7.3.7 ULTRA</span></h1>
+            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v7.4 VO2-AI</span></h1>
             <small>Omni-Format Forecasting & Human AI Coaching</small>
         </div>
         <button class="btn-main btn-outline" onclick="document.getElementById('profile-overlay').style.display='flex'">USTAWIENIA</button>
@@ -118,6 +122,10 @@
         <div class="stat-box">
             <small title="Świeżość - Balance Twojego organizmu">Świeżość (TSB)</small>
             <span id="val-tsb">--</span>
+        </div>
+        <div class="stat-box">
+            <small title="Twój aktualny pułap tlenowy">VO2Max</small>
+            <span id="val-vo2">--</span>
         </div>
         <div class="stat-box">
             <small title="Stosunek mocy do masy ciała">Moc (W/kg)</small>
@@ -322,7 +330,7 @@
                 age: document.getElementById('p-age')?.value || '',
                 weight: parseFloat(document.getElementById('p-weight')?.value) || 0,
                 ftp: parseInt(document.getElementById('p-ftp')?.value) || 0,
-                vo2max: parseFloat(document.getElementById('p-vo2')?.value) || store.config.vo2max || 0,
+                vo2max: parseFloat(document.getElementById('p-vo2')?.value) || 0, // Teraz priorytetyzuje wpis ręczny
                 thrHr: parseInt(document.getElementById('p-thr-hr')?.value) || 0,
                 raceDate: document.getElementById('p-race-date')?.value || '',
                 plan: Array.from({length:7}, (_, i) => document.getElementById(`p-day-${i}`) ? document.getElementById(`p-day-${i}`).value : 'Z2 Endurance')
@@ -396,7 +404,6 @@
         });
     }
 
-    // Niezawodny Parser FIT
     function parseFITData(u8array, fileName) {
         const fitParser = new window.FitParser({ force: true, speedUnit: 'km/h', lengthUnit: 'km' });
         
@@ -423,11 +430,8 @@
             
             const np = session && session.normalized_power ? Math.round(session.normalized_power) : '--';
             
-            // Poprawka nazwy FIT (priorytet: sport z zegarka, rezerwa: nazwa pliku z dysku)
             let sportStr = '';
-            if (session && session.sport) {
-                sportStr = String(session.sport).toUpperCase();
-            }
+            if (session && session.sport) sportStr = String(session.sport).toUpperCase();
             const finalTitle = sportStr ? `[FIT] ${sportStr}` : `[FIT] ${fileName.replace(/\.fit$/i, '')}`;
 
             const newAct = {
@@ -442,7 +446,6 @@
         });
     }
 
-    // Niezawodny Parser CSV
     function parseUniversalCSV(content, fileName) {
         try {
             const lines = content.split(/\r?\n/).filter(l => l.trim().length > 0);
@@ -489,31 +492,27 @@
                     toast(`⚡ Aktualizacja FTP: ${val}W`);
                 }
             
-            // 3. VO2MAX (PANCERNY ODCZYT)
+            // 3. VO2MAX (PANCERNY ODCZYT - odporny na formaty dat)
             } else if (head.includes('vo2') || head.includes('pułap') || fileName.toLowerCase().includes('pułap') || fileName.toLowerCase().includes('vo2')) {
                 let vo2val = 0;
                 
-                // Szukamy od dołu (najnowsze wpisy)
                 for(let i = lines.length - 1; i >= 0; i--) {
                     const lineStr = lines[i].toLowerCase();
-                    // Ignorujemy wiersze nagłówkowe
                     if(lineStr.includes('data') || lineStr.includes('pułap') || lineStr.trim() === '') continue;
                     
                     const cols = lines[i].split(sep);
                     for(let c = cols.length - 1; c >= 0; c--) {
-                        let cleanStr = cols[c].replace(/["']/g, '').trim().replace(',', '.');
+                        let cleanStr = cols[c].replace(/["']/g, '').trim();
+                        // Upewniamy się, że nie jest to data (nie ma myślników i max 1 kropka)
+                        if (cleanStr.includes('-') || cleanStr.split('.').length > 2) continue;
                         
-                        // Omijamy komórki, które wyglądają jak data (np. 30.10.2023 lub 2023-10-30)
-                        if (cleanStr.split('.').length > 2 || cleanStr.includes('-')) continue;
-                        
-                        let parsed = parseFloat(cleanStr);
-                        // Sensowny zakres dla ludzkiego VO2Max to od 20 do 95
-                        if(!isNaN(parsed) && parsed >= 20 && parsed <= 95) {
+                        let parsed = parseFloat(cleanStr.replace(',', '.'));
+                        if(!isNaN(parsed) && parsed >= 25 && parsed <= 85) {
                             vo2val = parsed;
                             break;
                         }
                     }
-                    if(vo2val > 0) break; // Znaleziono, przerywamy skanowanie
+                    if(vo2val > 0) break; 
                 }
                 
                 if(vo2val > 0) {
@@ -580,6 +579,9 @@
         const h = store.history;
         const pmcData = calculatePMC();
         
+        // Zaktualizowanie panelu VO2Max
+        document.getElementById('val-vo2').innerText = store.config.vo2max > 0 ? store.config.vo2max : "--";
+        
         if(h.length > 0 && pmcData.length > 0) {
             const last = h[0];
             document.getElementById('last-title').innerText = last.title || '--';
@@ -605,7 +607,7 @@
             const ramp = ctl - prevCtl;
 
             document.getElementById('val-ctl').innerText = ctl;
-            document.getElementById('val-atl').innerText = atl;
+            document.getElementById('val-atl').innerText = Math.round(atl);
             document.getElementById('val-tsb').innerText = tsb;
             
             const wkg = (store.config.ftp / store.config.weight) || 0;
@@ -655,6 +657,21 @@
             actionText = "ZALECENIE: Skróć dzisiejszą jednostkę o połowę.";
         }
 
+        // --- Logika VO2Max AI ---
+        let vo2insight = "";
+        if (store.config.vo2max > 0) {
+            const hasVO2inPlan = store.config.plan.some(p => p.includes('VO2Max'));
+            if (ctl > 50 && !hasVO2inPlan) {
+                vo2insight = `<br><br><span style="color:var(--primary);">🫁 <b>ANALIZA VO2MAX (${store.config.vo2max}):</b> Forma (CTL: ${Math.round(ctl)}) jest wysoka, ale w planie na ten tydzień brakuje bodźców w 5 strefie. Aby podnieść swój pułap tlenowy, rozważ zastąpienie jednego z treningów jednostką VO2Max.</span>`;
+            } else if (ctl > 50 && hasVO2inPlan) {
+                vo2insight = `<br><br><span style="color:var(--primary);">🫁 <b>ANALIZA VO2MAX (${store.config.vo2max}):</b> Masz mocną bazę i interwały VO2Max w planie. To idealny układ do przesuwania swoich limitów i budowy silnika.</span>`;
+            } else {
+                vo2insight = `<br><br><span style="color:var(--primary);">🫁 <b>ANALIZA VO2MAX (${store.config.vo2max}):</b> Widzę Twój wynik, ale na razie skupmy się na budowaniu formy bazowej (zwiększaniu CTL pow. 50), zanim zaczniesz agresywnie podbijać pułap tlenowy.</span>`;
+            }
+        }
+        actionText += vo2insight;
+
+        // --- Logika Symulatora ---
         if (forecastEndPMC && forecastEndPMC.tsb < -35 && store.today.health === 'zdrowy') {
             actionText += ` <br><br><span style="color:var(--forecast);">🔮 <b>WIDOK Z SYMULATORA:</b> Uważaj! Twój zaplanowany tydzień zrzuci Twoje TSB do ${forecastEndPMC.tsb}. Zaplanuj mocny sen!</span>`;
         } else if (forecastEndPMC && forecastEndPMC.tsb > 10 && store.today.health === 'zdrowy') {
@@ -717,7 +734,8 @@
 
     function toast(m) {
         const t = document.getElementById('toast');
-        t.innerText = m; t.style.display = 'block';
+        t.innerText = m;
+        t.style.display = 'block';
         setTimeout(() => t.style.display = 'none', 3000);
     }
 
