@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v7.1 | Elite Predictor</title>
+    <title>ADAPTIVE COACH AI v7.2 | Elite Predictor</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -64,9 +64,11 @@
         .cal-today { border: 2px solid var(--secondary); box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); transform: scale(1.05); z-index: 2; }
         .cal-today::after { content: "DZISIAJ"; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--secondary); color: white; font-size: 0.5rem; padding: 2px 6px; border-radius: 4px; font-weight: 900; }
 
+        /* Uproszczony Symulator */
         .forecast-box { background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 12px; padding: 15px; margin-top: 15px; }
-        .forecast-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 10px; }
-        .forecast-input { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #c4b5fd; text-align: center; font-size: 0.8rem; font-weight: bold; color: var(--forecast); }
+        .forecast-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 15px; }
+        .forecast-input { width: 100%; padding: 8px 4px; border-radius: 8px; border: 1px solid #c4b5fd; text-align: center; font-size: 0.75rem; font-weight: bold; color: var(--forecast); background: #fff; cursor: pointer; outline: none; }
+        .forecast-input:hover { border-color: var(--forecast); }
 
         .microcycle-info { background: #1e293b; color: #94a3b8; padding: 15px; border-radius: 12px; font-size: 0.85rem; margin-top: 15px; border-left: 4px solid var(--warning); line-height: 1.5; }
         .microcycle-info b { color: white; display: block; margin-bottom: 5px; }
@@ -116,8 +118,8 @@
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v7.1 ELITE</span></h1>
-            <small>Predictive PMC & Human AI Coaching</small>
+            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v7.2 ELITE</span></h1>
+            <small>Intuitive Forecasting & Human AI Coaching</small>
         </div>
         <button class="btn-main btn-outline" onclick="document.getElementById('profile-overlay').style.display='flex'">USTAWIENIA</button>
     </header>
@@ -196,9 +198,11 @@
             </div>
 
             <div class="forecast-box">
-                <b style="color: var(--forecast); font-size: 0.85rem; display: block;">🔮 Symulator (Planowany TSS na 7 dni w przód)</b>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <b style="color: var(--forecast); font-size: 0.85rem;">🔮 Symulator (Zbuduj przyszły tydzień)</b>
+                </div>
                 <div class="forecast-grid" id="forecast-inputs"></div>
-                <button class="btn-main" style="width:100%; margin-top:10px; background: var(--forecast); padding: 8px;" onclick="refresh()">SYMULUJ FORMĘ NA WYKRESIE</button>
+                <button class="btn-main" style="width:100%; margin-top:15px; background: var(--forecast); padding: 10px;" onclick="refresh()">RYSUJ PROGNOZĘ NA WYKRESIE</button>
             </div>
 
         </div>
@@ -262,13 +266,39 @@
         });
     }
 
+    // --- Intuicyjny Symulator ---
     function initForecastUI() {
         const container = document.getElementById('forecast-inputs');
         container.innerHTML = '';
+        const dayNames = ['Ndz', 'Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob'];
+        const today = new Date();
+
         for(let i=0; i<7; i++) {
+            const targetDate = new Date(today);
+            targetDate.setDate(today.getDate() + i + 1);
+            const dayName = dayNames[targetDate.getDay()];
+            const label = i === 0 ? "Jutro" : dayName;
+
+            const savedVal = store.forecast[i] || 0;
+            let sel0="", sel50="", sel90="", sel140="", sel200="";
+            
+            if(savedVal <= 25) sel0 = "selected";
+            else if(savedVal <= 70) sel50 = "selected";
+            else if(savedVal <= 110) sel90 = "selected";
+            else if(savedVal <= 170) sel140 = "selected";
+            else sel200 = "selected";
+
             const div = document.createElement('div');
-            div.innerHTML = `<span style="font-size:0.6rem; color:#64748b; display:block; text-align:center;">Dzień +${i+1}</span>
-                             <input type="number" class="forecast-input" id="f-tss-${i}" value="${store.forecast[i]}" onchange="updateForecast(${i}, this.value)">`;
+            div.innerHTML = `
+                <span style="font-size:0.65rem; color:#64748b; display:block; text-align:center; font-weight:bold; margin-bottom:4px;">${label}</span>
+                <select class="forecast-input" id="f-tss-${i}" onchange="updateForecast(${i}, this.value)">
+                    <option value="0" ${sel0}>Wolne</option>
+                    <option value="50" ${sel50}>Lekki</option>
+                    <option value="90" ${sel90}>Średni</option>
+                    <option value="140" ${sel140}>Ciężki</option>
+                    <option value="200" ${sel200}>Zawody</option>
+                </select>
+            `;
             container.appendChild(div);
         }
     }
@@ -335,7 +365,6 @@
         };
     }
 
-    // Inteligentny parser rozpoznający zawartość po nagłówkach
     function parseUniversalCSV(content, fileName) {
         const lines = content.split('\n').filter(l => l.length > 5);
         if(lines.length === 0) return;
@@ -343,9 +372,7 @@
         const sep = content.includes(';') ? ';' : ',';
         const head = lines[0].toLowerCase();
         
-        // Detekcja typu pliku
         if(head.includes('tss') || head.includes('stress') || head.includes('dystans')) {
-            // To są Aktywności (Garmin)
             const headersArr = lines[0].split(sep).map(h => h.replace(/"/g, '').trim().toLowerCase());
             const idx = {
                 d: headersArr.findIndex(h => h.includes('data') || h.includes('date')),
@@ -364,7 +391,6 @@
                 };
             }).filter(x => x.tss > 0);
 
-            // Połączenie bez duplikatów
             store.history = [...newActs, ...store.history]
                 .filter((v, i, a) => a.findIndex(t => t.date === v.date && t.tss === v.tss) === i)
                 .sort((a,b) => new Date(b.date) - new Date(a.date));
@@ -373,7 +399,6 @@
             toast(`✅ Dodano Aktywności!`);
             
         } else if (head.includes('ftp') || head.includes('moc progowa')) {
-            // Historia FTP - bierzemy ostatnią (najnowszą) wartość, upewnij się, że nie bierzemy nagłówka
             const lastRow = lines[lines.length-1].split(sep);
             const val = parseInt(lastRow.find(v => !isNaN(v) && v > 50));
             if(val) {
@@ -383,8 +408,7 @@
                 toast(`⚡ Zaktualizowano FTP: ${val}W`);
             }
         } else {
-            // Prawdopodobnie VO2Max lub inny nierozpoznany plik
-            toast(`ℹ️ Plik ${fileName} wczytany (wymaga rozszerzenia logiki dla tego formatu)`);
+            toast(`ℹ️ Plik ${fileName} wczytany`);
         }
         refresh();
     }
@@ -399,16 +423,15 @@
         let ctl = 0, atl = 0;
         
         const now = new Date();
-        now.setHours(0,0,0,0); // Normalizujemy czas do północy
+        now.setHours(0,0,0,0);
         
-        const start = new Date(now); start.setDate(now.getDate() - 30); // 30 dni wstecz
-        const end = new Date(now); end.setDate(now.getDate() + 7); // 7 dni w przód (prognoza)
+        const start = new Date(now); start.setDate(now.getDate() - 30);
+        const end = new Date(now); end.setDate(now.getDate() + 7);
 
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
             const dateStr = d.toISOString().split('T')[0];
             let dayTss = dataMap[dateStr] || 0;
             
-            // Jeśli dzień to przyszłość, pobieramy dane z symulatora
             const isForecast = d > now;
             if (isForecast) {
                 const diffDays = Math.floor((d - now) / (1000 * 60 * 60 * 24)) - 1;
@@ -434,12 +457,10 @@
             document.getElementById('last-np').innerText = last.np + (last.np !== '--' ? ' W' : '');
             document.getElementById('last-date').innerText = last.date.split(' ')[0];
 
-            // Szukamy dzisiejszego dnia w wyliczonym modelu PMC
             const todayStr = new Date().toISOString().split('T')[0];
             const currentPMC = pmcData.find(p => p.date === todayStr) || pmcData[pmcData.length - 8];
             const forecastEndPMC = pmcData[pmcData.length - 1];
 
-            // Ramp Rate (historyczny, nie prognozowany)
             const ctl = currentPMC.ctl;
             const atl = pmcData.find(p => p.date === todayStr)?.atl || 0;
             const tsb = currentPMC.tsb;
@@ -449,7 +470,7 @@
             const ramp = ctl - prevCtl;
 
             document.getElementById('val-ctl').innerText = ctl;
-            document.getElementById('val-atl').innerText = Math.round(atl); // Przybliżony wyciąg z arraya
+            document.getElementById('val-atl').innerText = Math.round(atl);
             document.getElementById('val-tsb').innerText = tsb;
             
             const wkg = (store.config.ftp / store.config.weight) || 0;
@@ -479,7 +500,6 @@
         let descText = "Twoje parametry są w idealnej równowadze. Organizm dobrze adaptuje się do obciążeń.";
         let actionText = `Dzisiaj w planie masz ${planKey}. To dobry dzień, by wykonać go z pełnym skupieniem.`;
 
-        // Logika reagująca na zdrowie i przeszłość
         if(store.today.health !== 'zdrowy') {
             statusText = "Słuchaj swojego ciała!";
             descText = `Zgłosiłeś status: ${store.today.health.replace('_', ' ')}. W sporcie amatorskim zdrowie to podstawa. Nawet Gemini wie, że forsowanie treningu w tym stanie to krok w stronę kontuzji.`;
@@ -498,8 +518,6 @@
             actionText = "ZALECENIE: Skróć dzisiejszą jednostkę o połowę.";
         }
 
-        // --- Logika reagująca na Symulator (Przyszłość) ---
-        // Sprawdzamy czy symulator przewiduje niebezpieczny zjazd TSB za 7 dni
         if (forecastEndPMC && forecastEndPMC.tsb < -35 && store.today.health === 'zdrowy') {
             actionText += ` <br><br><span style="color:var(--forecast);">🔮 <b>WIDOK Z SYMULATORA:</b> Uważaj! Twój zaplanowany tydzień zrzuci Twoje TSB do ${forecastEndPMC.tsb}. Zaplanuj mocny sen!</span>`;
         } else if (forecastEndPMC && forecastEndPMC.tsb > 10 && store.today.health === 'zdrowy') {
@@ -510,7 +528,6 @@
         ds.innerHTML = `<i>"${descText}"</i>`;
         ac.innerHTML = actionText;
 
-        // Strategia Mikrocyklu
         const raceDate = store.config.raceDate ? new Date(store.config.raceDate) : null;
         const daysToRace = raceDate ? Math.ceil((raceDate - new Date()) / (1000 * 60 * 60 * 24)) : null;
         let cyclePrediction = "Brak daty zawodów do analizy fazy.";
@@ -540,7 +557,6 @@
         const ctx = document.getElementById('mainChart').getContext('2d');
         if(chart) chart.destroy();
         
-        // Funkcja do rysowania linii przerywanej dla dni w przyszłości
         const segmentLine = { borderDash: ctx => data[ctx.p0DataIndex]?.isForecast ? [5, 5] : undefined };
 
         chart = new Chart(ctx, {
