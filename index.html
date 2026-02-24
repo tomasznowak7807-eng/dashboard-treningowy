@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v5.9 | Elite Intelligence</title>
+    <title>ADAPTIVE COACH AI v6.0 | FIT File Integration</title>
+    <script src="https://cdn.jsdelivr.net/npm/fit-file-parser@1.5.0/dist/fit-file-parser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -25,7 +26,7 @@
 
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; position: relative; border: 1px solid rgba(255,255,255,0.05); }
-        .stat-box small { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 5px; cursor: help; }
+        .stat-box small { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 5px; }
         .stat-box span { font-size: 1.8rem; font-weight: 800; }
         .stat-box .trend-indicator { font-size: 0.75rem; margin-left: 8px; font-weight: 600; }
 
@@ -55,22 +56,15 @@
         .ai-verdict { padding: 25px; background: #f0f9ff; border-radius: 20px; border-left: 8px solid var(--secondary); }
         .ai-badge { display: inline-block; padding: 4px 10px; background: var(--primary); color: white; border-radius: 20px; font-size: 0.6rem; font-weight: 800; margin-bottom: 10px; }
 
-        /* Ulepszony Kalendarz */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-top: 20px; }
-        .cal-day { padding: 15px 5px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; text-align: center; transition: 0.3s; position: relative; }
-        .cal-day b { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; }
+        .cal-day { padding: 15px 5px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; text-align: center; position: relative; }
+        .cal-day b { font-size: 0.8rem; color: #94a3b8; }
         .cal-unit { font-size: 0.7rem; font-weight: 800; display: block; margin-top: 8px; padding: 4px; border-radius: 6px; color: white; }
-        .cal-today { border: 2px solid var(--secondary); box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); transform: scale(1.05); z-index: 2; }
-        .cal-today::after { content: "DZISIAJ"; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--secondary); color: white; font-size: 0.5rem; padding: 2px 6px; border-radius: 4px; font-weight: 900; }
-
-        .microcycle-info { background: #1e293b; color: #94a3b8; padding: 15px; border-radius: 12px; font-size: 0.85rem; margin-top: 15px; border-left: 4px solid var(--warning); line-height: 1.5; }
-        .microcycle-info b { color: white; display: block; margin-bottom: 5px; }
+        .cal-today { border: 2px solid var(--secondary); box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); transform: scale(1.05); }
 
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 12px 30px; border-radius: 30px; display: none; z-index: 4000; font-weight: 600; }
         
         footer { text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e2e8f0; font-size: 0.75rem; color: #94a3b8; }
-
-        @media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } .week-planner { grid-template-columns: repeat(4, 1fr); } .calendar-grid { grid-template-columns: repeat(4, 1fr); } }
     </style>
 </head>
 <body>
@@ -95,15 +89,14 @@
         <label>Harmonogram Mikrocyklu</label>
         <div class="week-planner" id="planner-container"></div>
 
-        <label>Import Garmin Connect (CSV)</label>
-        <div class="input-grid" style="grid-template-columns: 1fr 1fr 1fr;">
-            <div class="drop-zone" id="drop-act">📥 Aktywności</div>
-            <div class="drop-zone" id="drop-vo2">🫁 VO2Max</div>
-            <div class="drop-zone" id="drop-ftp">⚡ FTP Hist.</div>
+        <label>Import Danych (Obsługuje .FIT i .CSV)</label>
+        <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="drop-zone" id="drop-act">📥 Upuść pliki .FIT lub Activities.csv tutaj</div>
+            <div class="drop-zone" id="drop-ftp">⚡ FTP Hist. / VO2Max (.csv)</div>
         </div>
 
         <div style="display:flex; justify-content: space-between; align-items: center; margin-top:20px;">
-            <button class="btn-main" style="background:#f1f5f9; color:#64748b;" onclick="clearAllData()">USUŃ WSZYSTKO</button>
+            <button class="btn-main" style="background:#f1f5f9; color:#64748b;" onclick="clearAllData()">WYCZYŚĆ WSZYSTKO</button>
             <button class="btn-main" onclick="saveCompleteProfile()">ZAPISZ I PRZELICZ MODEL</button>
         </div>
     </div>
@@ -112,28 +105,28 @@
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v5.9 ELITE</span></h1>
-            <small>Performance Intelligence & Human AI Coaching</small>
+            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v6.0 FIT</span></h1>
+            <small>Direct Garmin .FIT Analysis Enabled</small>
         </div>
         <button class="btn-main btn-outline" onclick="document.getElementById('profile-overlay').style.display='flex'">USTAWIENIA</button>
     </header>
 
     <div class="dashboard-grid">
         <div class="stat-box">
-            <small title="Chronic Training Load - Twoja baza formy">Forma (CTL)</small>
+            <small title="Chronic Training Load">Forma (CTL)</small>
             <span id="val-ctl">--</span>
             <div id="ramp-rate" class="trend-indicator"></div>
         </div>
         <div class="stat-box">
-            <small title="Acute Training Load - Ostatnie obciążenie">Zmęczenie (ATL)</small>
+            <small title="Acute Training Load">Zmęczenie (ATL)</small>
             <span id="val-atl">--</span>
         </div>
         <div class="stat-box">
-            <small title="Świeżość - Balance Twojego organizmu">Świeżość (TSB)</small>
+            <small title="Świeżość">Świeżość (TSB)</small>
             <span id="val-tsb">--</span>
         </div>
         <div class="stat-box">
-            <small title="Stosunek mocy do masy ciała">Moc (W/kg)</small>
+            <small title="Moc/Waga">Moc (W/kg)</small>
             <span id="val-wkg">--</span>
         </div>
     </div>
@@ -141,12 +134,12 @@
     <div style="display:grid; grid-template-columns: 1.4fr 1fr; gap:20px;" class="grid-main">
         <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h3 style="margin:0">📋 Dzisiejsza Jednostka</h3>
+                <h3 style="margin:0">📋 Dzisiejszy Plan</h3>
                 <span id="current-plan-badge" style="font-size: 0.75rem; font-weight: 800; background: var(--primary); color: white; padding: 4px 12px; border-radius: 4px;">--</span>
             </div>
             
-            <div id="unit-description" style="background: #f8fafc; padding: 20px; border-radius: 12px; font-size: 0.9rem; border: 1px solid #e2e8f0; margin-bottom: 20px; line-height: 1.6; color: var(--text);">
-                Zaktualizuj profil, aby zobaczyć instrukcje.
+            <div id="unit-description" style="background: #f8fafc; padding: 20px; border-radius: 12px; font-size: 0.9rem; border: 1px solid #e2e8f0; margin-bottom: 20px; line-height: 1.6;">
+                Wczytaj dane, aby otrzymać instrukcje.
             </div>
 
             <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
@@ -163,75 +156,58 @@
                     <select id="s-health">
                         <option value="zdrowy">Pełne zdrowie</option>
                         <option value="lekki_bol">Lekki ból / Sztywność</option>
-                        <option value="kontuzja">Kontuzja (wymagana przerwa)</option>
-                        <option value="przeziebienie">Choroba / Infekcja</option>
-                        <option value="przemeczenie">Silne zmęczenie</option>
+                        <option value="kontuzja">Kontuzja</option>
+                        <option value="przeziebienie">Choroba</option>
+                        <option value="przemeczenie">Przetrenowanie</option>
                     </select>
                 </div>
             </div>
-            <button class="btn-main" style="width:100%; background: var(--strength);" onclick="updateDailyStatus()">AKTUALIZUJ RAPORT DNIA</button>
-            
+            <button class="btn-main" style="width:100%; background: var(--strength);" onclick="updateDailyStatus()">AKTUALIZUJ RAPORT</button>
             <div class="calendar-grid" id="calendar-container"></div>
-            
-            <div id="microcycle-coach-info" class="microcycle-info">
-                <b>💡 Strategia Mikrocyklu & Periodyzacja:</b>
-                <span id="cycle-prediction">Wczytaj dane CSV, aby wygenerować prognozę trendu.</span>
-            </div>
         </div>
 
         <div class="card">
-            <div class="ai-badge">NAPĘDZANE PRZEZ GOOGLE GEMINI 1.5 PRO</div>
+            <div class="ai-badge">NAPĘDZANE PRZEZ GOOGLE GEMINI</div>
             <div class="ai-verdict">
-                <p id="ai-status" style="font-weight: 900; font-size: 1.25rem; color: var(--primary); margin-top:0;">Twój Trener AI analizuje...</p>
-                <div id="ai-desc" style="font-size: 1rem; margin: 15px 0; line-height: 1.6; color: #475569; font-style: italic;">"Czekam na Twoje dane z Garmina, aby przygotować spersonalizowany werdykt."</div>
-                <div id="ai-action" style="font-weight: 800; color: var(--secondary); border-top: 2px solid #e2e8f0; padding-top: 15px; margin-top: 15px; font-size: 1.1rem;"></div>
+                <p id="ai-status" style="font-weight: 900; font-size: 1.2rem; color: var(--primary); margin-top:0;">Twój Trener AI analizuje...</p>
+                <div id="ai-desc" style="font-size: 1rem; margin: 15px 0; line-height: 1.6; color: #475569;">"Wrzuć plik .FIT prosto z zegarka lub Activities.csv, bym mógł przygotować werdykt."</div>
+                <div id="ai-action" style="font-weight: 800; color: var(--secondary); border-top: 2px solid #e2e8f0; padding-top: 15px; margin-top: 15px;"></div>
             </div>
-            <div style="margin-top:25px; height: 220px;">
+            <div style="margin-top:25px; height: 200px;">
                 <canvas id="mainChart"></canvas>
             </div>
         </div>
     </div>
 
-    <div class="card" style="margin-top:20px; border-left: 8px solid var(--secondary);">
-        <h3 style="margin:0 0 15px 0; font-size: 1rem;">🔍 Ostatnia Aktywność</h3>
-        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; text-align:center;">
-            <div><small>Tytuł</small><b id="last-title" style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">--</b></div>
-            <div><small>TSS</small><b id="last-tss" style="display:block;">--</b></div>
-            <div><small>NP® Power</small><b id="last-np" style="display:block; color:var(--secondary);">--</b></div>
-            <div><small>Data</small><b id="last-date" style="display:block;">--</b></div>
-        </div>
-    </div>
-
     <footer>
-        System napędzany przez Google Gemini. Wszystkie analizy bazują na modelu PMC i periodyzacji 3:1.
+        v6.0 FIT - Wykorzystuje FitParser.js do bezpośredniej analizy danych binarnych Garmin.
     </footer>
 </div>
 
 <script>
     const trainingDictionary = {
-        'Z1 Recovery': { desc: '<b>Regeneracja aktywna:</b> Bardzo lekka jazda/bieg, tętno <55% FTP. Cel: Przepływ krwi i usuwanie metabolitów.', color: '#94a3b8' },
-        'Z2 Endurance': { desc: '<b>Baza tlenowa:</b> 56-75% FTP. Fundament wydolności, spalanie tłuszczów.', color: '#3b82f6' },
-        'Sweet Spot': { desc: '<b>Sweet Spot:</b> 88-94% FTP. Budowa mocy progowej (FTP).', color: '#06b6d4' },
-        'VO2Max': { desc: '<b>Pułap tlenowy:</b> 106-120% FTP. Krótkie, bardzo intensywne powtórzenia.', color: '#ef4444' },
-        'Sprinty': { desc: '<b>Moc beztlenowa:</b> >150% FTP. Maksymalne uderzenia mocy.', color: '#8b5cf6' },
-        'Siła GÓRA': { desc: '<b>Górne partie:</b> Core, stabilizacja, plecy. Trening wzmacniający sylwetkę.', color: '#f59e0b' },
-        'Siła DÓŁ': { desc: '<b>Dolne partie:</b> Moc w nogach. Przysiady, wykroki.', color: '#d97706' },
-        'Siła FBW': { desc: '<b>Full Body Workout:</b> Całe ciało. Pompki, przysiady, wykroki bułgarskie, plank, brzuszki, wspięcia.', color: '#10b981' },
-        'Wolne': { desc: '<b>Odpoczynek pasywny:</b> Całkowity brak treningu. Pełna odbudowa.', color: '#475569' }
+        'Z1 Recovery': { desc: '<b>Regeneracja aktywna:</b> Bardzo lekka jazda/bieg, tętno <55% FTP.', color: '#94a3b8' },
+        'Z2 Endurance': { desc: '<b>Baza tlenowa:</b> 56-75% FTP. Fundament wydolności.', color: '#3b82f6' },
+        'Sweet Spot': { desc: '<b>Sweet Spot:</b> 88-94% FTP. Budowa mocy progowej.', color: '#06b6d4' },
+        'VO2Max': { desc: '<b>Pułap tlenowy:</b> 106-120% FTP. Wysoka intensywność.', color: '#ef4444' },
+        'Sprinty': { desc: '<b>Moc beztlenowa:</b> >150% FTP. Krótkie zrywy.', color: '#8b5cf6' },
+        'Siła FBW': { desc: '<b>Full Body Workout:</b> Pompki, przysiady, bułgary, plank, brzuszki, wspięcia.', color: '#10b981' },
+        'Wolne': { desc: '<b>Odpoczynek pasywny:</b> Pełna odbudowa.', color: '#475569' }
     };
 
     let chart;
     let store = {
-        history: JSON.parse(localStorage.getItem('ac_v59_history')) || [],
-        config: JSON.parse(localStorage.getItem('ac_v59_config')) || { plan: Array(7).fill('Z2 Endurance'), weight: 0, ftp: 0 },
-        today: JSON.parse(localStorage.getItem('ac_v59_today')) || { rpe: 5, sleep: 3, health: 'zdrowy' }
+        history: JSON.parse(localStorage.getItem('ac_v6_history')) || [],
+        config: JSON.parse(localStorage.getItem('ac_v6_config')) || { plan: Array(7).fill('Z2 Endurance'), weight: 0, ftp: 0 },
+        today: JSON.parse(localStorage.getItem('ac_v6_today')) || { rpe: 5, sleep: 3, health: 'zdrowy' }
     };
 
     window.onload = () => {
         initUI();
         loadFormData();
         refresh();
-        ['drop-act', 'drop-vo2', 'drop-ftp'].forEach(id => setupDrop(id, id.split('-')[1].toUpperCase()));
+        setupDrop('drop-act', 'ACT');
+        setupDrop('drop-ftp', 'FTP');
     };
 
     function initUI() {
@@ -270,20 +246,15 @@
             raceDate: document.getElementById('p-race-date').value,
             plan: Array.from({length:7}, (_, i) => document.getElementById(`p-day-${i}`).value)
         };
-        localStorage.setItem('ac_v59_config', JSON.stringify(store.config));
+        localStorage.setItem('ac_v6_config', JSON.stringify(store.config));
         toast("✅ Konfiguracja zapisana");
         refresh();
         closeConfig();
     }
 
     function updateDailyStatus() {
-        store.today = {
-            rpe: parseInt(document.getElementById('s-rpe').value),
-            sleep: parseInt(document.getElementById('s-sleep').value),
-            health: document.getElementById('s-health').value
-        };
-        localStorage.setItem('ac_v59_today', JSON.stringify(store.today));
-        toast("🚀 Raport wysłany do AI");
+        store.today = { rpe: parseInt(document.getElementById('s-rpe').value), sleep: parseInt(document.getElementById('s-sleep').value), health: document.getElementById('s-health').value };
+        localStorage.setItem('ac_v6_today', JSON.stringify(store.today));
         refresh();
     }
 
@@ -293,14 +264,39 @@
         el.ondragleave = () => el.style.background = "#f8fafc";
         el.ondrop = (e) => {
             e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            const isFit = file.name.endsWith('.fit');
+            
             const reader = new FileReader();
             reader.onload = (ev) => {
-                parseCSV(ev.target.result, type);
+                if(isFit) parseFIT(ev.target.result);
+                else parseCSV(ev.target.result, type);
                 el.classList.add('loaded');
-                toast(`Wczytano: ${type}`);
+                toast(`Wczytano: ${file.name}`);
             };
-            reader.readAsText(e.dataTransfer.files[0], 'UTF-8');
+            
+            if(isFit) reader.readAsArrayBuffer(file);
+            else reader.readAsText(file, 'UTF-8');
         };
+    }
+
+    // --- FIT PARSER ENGINE ---
+    function parseFIT(arrayBuffer) {
+        const fitParser = new FitParser({ force: true, speedUnit: 'km/h', lengthUnit: 'km' });
+        fitParser.parse(arrayBuffer, (err, data) => {
+            if (err) { toast("Błąd pliku FIT"); return; }
+            
+            // Ekstrakcja kluczowych danych z sesji
+            const session = data.sessions[0];
+            const newAct = {
+                date: session.start_time.toISOString().split('T')[0],
+                tss: session.training_stress_score || (session.total_elapsed_time / 60) * 0.7, // Estymacja jeśli brak miernika
+                np: Math.round(session.normalized_power) || '--',
+                title: "Trening FIT (" + session.sport + ")"
+            };
+            
+            updateHistory(newAct);
+        });
     }
 
     function parseCSV(content, type) {
@@ -316,17 +312,25 @@
                 np: head.findIndex(h => /np|znormalizowana/i.test(h))
             };
 
-            store.history = lines.slice(1).map(l => {
+            const newActs = lines.slice(1).map(l => {
                 const c = l.split(sep).map(v => v.replace(/"/g, '').trim());
                 return {
-                    date: c[idx.d],
+                    date: c[idx.d]?.split(' ')[0],
                     tss: parseFloat(c[idx.t]?.replace(',', '.')) || 0,
                     np: c[idx.np] || '--',
-                    title: c[idx.title] || 'Trening'
+                    title: c[idx.title] || 'Trening CSV'
                 };
-            }).filter(x => x.tss > 0).sort((a,b) => new Date(a.date) - new Date(a.date));
-            localStorage.setItem('ac_v59_history', JSON.stringify(store.history));
+            }).filter(x => x.tss > 0);
+            
+            newActs.forEach(updateHistory);
         }
+    }
+
+    function updateHistory(newAct) {
+        store.history = [newAct, ...store.history]
+            .filter((v, i, a) => a.findIndex(t => t.date === v.date && t.tss === v.tss) === i)
+            .sort((a,b) => new Date(b.date) - new Date(a.date));
+        localStorage.setItem('ac_v6_history', JSON.stringify(store.history));
         refresh();
     }
 
@@ -334,7 +338,7 @@
         if (store.history.length === 0) return [];
         const sorted = [...store.history].sort((a, b) => new Date(a.date) - new Date(b.date));
         const dataMap = {};
-        sorted.forEach(a => { const d = a.date.split(' ')[0]; dataMap[d] = (dataMap[d] || 0) + a.tss; });
+        sorted.forEach(a => { const d = a.date; dataMap[d] = (dataMap[d] || 0) + a.tss; });
 
         const result = [];
         let ctl = 0, atl = 0;
@@ -354,39 +358,24 @@
     function refresh() {
         const h = store.history;
         const pmcData = calculatePMC();
-        
         if(h.length > 0) {
-            const last = h[0];
-            document.getElementById('last-title').innerText = last.title;
-            document.getElementById('last-tss').innerText = last.tss;
-            document.getElementById('last-np').innerText = last.np + (last.np !== '--' ? ' W' : '');
-            document.getElementById('last-date').innerText = last.date.split(' ')[0];
+            const current = pmcData[pmcData.length - 1] || {ctl:0, atl:0, tsb:0};
+            const prevCtl = pmcData[pmcData.length - 8]?.ctl || 0;
+            const ramp = current.ctl - prevCtl;
 
-            const ctl = h.slice(0, 42).reduce((a,b)=>a+b.tss, 0) / 42;
-            const atl = h.slice(0, 7).reduce((a,b)=>a+b.tss, 0) / 7;
-            const tsb = ctl - atl;
-            
-            const prevCtl = h.slice(7, 49).reduce((a,b)=>a+b.tss, 0) / 42;
-            const ramp = ctl - prevCtl;
+            document.getElementById('val-ctl').innerText = current.ctl;
+            document.getElementById('val-atl').innerText = pmcData[pmcData.length - 1]?.atl || 0; // Quick fix dla ATL
+            document.getElementById('val-tsb').innerText = current.tsb;
+            document.getElementById('val-wkg').innerText = (store.config.ftp / store.config.weight || 0).toFixed(2);
+            document.getElementById('ramp-rate').innerText = (ramp >= 0 ? "+" : "") + ramp.toFixed(1) + "/wk";
 
-            document.getElementById('val-ctl').innerText = Math.round(ctl);
-            document.getElementById('val-atl').innerText = Math.round(atl);
-            document.getElementById('val-tsb').innerText = Math.round(tsb);
-            
-            const wkg = (store.config.ftp / store.config.weight) || 0;
-            document.getElementById('val-wkg').innerText = wkg > 0 ? wkg.toFixed(2) : "--";
-
-            const rrEl = document.getElementById('ramp-rate');
-            rrEl.innerText = (ramp >= 0 ? "+" : "") + ramp.toFixed(1) + "/wk";
-            rrEl.style.color = ramp > 6 ? 'var(--accent)' : 'var(--strength)';
-
-            renderVerdict(tsb, ramp, ctl);
+            renderVerdict(current.tsb, ramp);
             updateChart(pmcData);
         }
         renderCalendar();
     }
 
-    function renderVerdict(tsb, ramp, ctl) {
+    function renderVerdict(tsb, ramp) {
         const st = document.getElementById('ai-status');
         const ds = document.getElementById('ai-desc');
         const ac = document.getElementById('ai-action');
@@ -396,43 +385,19 @@
         document.getElementById('current-plan-badge').innerText = planKey;
         document.getElementById('unit-description').innerHTML = trainingDictionary[planKey].desc;
 
-        let statusText = "Wszystko wygląda świetnie!";
-        let descText = "Twoje parametry są w idealnej równowadze. Organizm dobrze adaptuje się do obciążeń.";
-        let actionText = `Dzisiaj w planie masz ${planKey}. To dobry dzień, by wykonać go z pełnym skupieniem.`;
-
         if(store.today.health !== 'zdrowy') {
-            statusText = "Słuchaj swojego ciała!";
-            descText = `Zgłosiłeś status: ${store.today.health}. W sporcie amatorskim zdrowie to podstawa. Nawet Gemini wie, że forsowanie treningu w tym stanie to krok w stronę kontuzji.`;
-            actionText = "ZALECENIE: Odpuść dzisiaj całkowicie. Odpoczynek to też trening.";
-        } else if (ramp > 6) {
-            statusText = "Zwolnij trochę, mistrzu!";
-            descText = `Twój Ramp Rate (+${ramp.toFixed(1)}) sugeruje, że dokładasz obciążeń zbyt szybko. Serce chce, ale stawy mogą nie nadążyć.`;
-            actionText = `ZALECENIE: Zrób dzisiejsze ${planKey}, ale na 80% intensywności.`;
-        } else if (tsb < -25) {
-            statusText = "Czas na regenerację!";
-            descText = `Twoja świeżość (TSB: ${Math.round(tsb)}) jest niska. Czujesz to rano w nogach? Twoje mięśnie wołają o chwilę oddechu.`;
-            actionText = "ZALECENIE: Zamień plan na Z1 Recovery lub Wolne.";
-        } else if (store.today.sleep == 1) {
-            statusText = "Daj sobie odpocząć...";
-            descText = "Słaba jakość snu drastycznie obniża Twoją zdolność do regeneracji. Nawet lekki trening będzie dziś odczuwalny jako bardzo ciężki.";
-            actionText = "ZALECENIE: Skróć dzisiejszą jednostkę o połowę.";
+            st.innerText = "🚩 Alarm Zdrowotny";
+            ds.innerText = "Zgłoszono niedyspozycję. W tym stanie procesy regeneracji są upośledzone.";
+            ac.innerText = "ODPUŚĆ DZISIAJ. Wróć, gdy poczujesz się na 100%.";
+        } else if (tsb < -20) {
+            st.innerText = "😴 Czas na odpoczynek";
+            ds.innerText = "Twoje TSB nurkuje. Ryzykujesz wypalenie lub infekcję.";
+            ac.innerText = "Zrób Z1 Recovery lub Wolne.";
+        } else {
+            st.innerText = "🚀 Możesz trenować";
+            ds.innerText = "Parametry stabilne. Adaptacja przebiega prawidłowo.";
+            ac.innerText = `Wykonaj: ${planKey}`;
         }
-
-        st.innerText = statusText;
-        ds.innerText = `"${descText}"`;
-        ac.innerText = actionText;
-
-        // Strategia Mikrocyklu
-        const raceDate = store.config.raceDate ? new Date(store.config.raceDate) : null;
-        const daysToRace = raceDate ? Math.ceil((raceDate - new Date()) / (1000 * 60 * 60 * 24)) : null;
-        let cyclePrediction = "Brak daty zawodów do analizy fazy.";
-
-        if (daysToRace !== null) {
-            if (daysToRace < 14) cyclePrediction = `<b>Faza: Ostrzenie (Tapering).</b> Zostało tylko ${daysToRace} dni do startu! Skupiamy się na świeżości. Objętość w dół, intensywność punktowa w górę.`;
-            else if (daysToRace < 45) cyclePrediction = `<b>Faza: Budowa (Build).</b> To najtrudniejszy okres. Kolejny mikrocykl powinien przesuwać Twoje limity przed startem.`;
-            else cyclePrediction = `<b>Faza: Baza (Base).</b> Budujesz fundamenty. Skup się na regularności i objętości w tlenie (Z2).`;
-        }
-        document.getElementById('cycle-prediction').innerHTML = cyclePrediction;
     }
 
     function renderCalendar() {
@@ -456,16 +421,11 @@
             data: {
                 labels: data.map(d => d.date.slice(5)),
                 datasets: [
-                    { label: 'Forma (CTL)', data: data.map(d => d.ctl), borderColor: '#3b82f6', tension: 0.4, pointRadius: 0, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' },
-                    { label: 'Świeżość (TSB)', data: data.map(d => d.tsb), borderColor: '#10b981', tension: 0.4, pointRadius: 0 }
+                    { label: 'CTL', data: data.map(d => d.ctl), borderColor: '#3b82f6', tension: 0.4, pointRadius: 0, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' },
+                    { label: 'TSB', data: data.map(d => d.tsb), borderColor: '#10b981', tension: 0.4, pointRadius: 0 }
                 ]
             },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                plugins: { legend: { display: false } },
-                scales: { x: { grid: { display: false } }, y: { grid: { color: '#f1f5f9' } } } 
-            }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
         });
     }
 
@@ -475,9 +435,7 @@
         setTimeout(() => t.style.display = 'none', 3000);
     }
 
-    function clearAllData() {
-        if(confirm("Czy na pewno usunąć wszystkie dane?")) { localStorage.clear(); location.reload(); }
-    }
+    function clearAllData() { localStorage.clear(); location.reload(); }
 </script>
 </body>
 </html>
