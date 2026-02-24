@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v5.0 | AI Chat Integration</title>
+    <title>ADAPTIVE COACH AI v5.1 | Elite Intelligence</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -13,16 +13,16 @@
             --dark: #1e293b; --text: #334155;
         }
         * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
-        body { margin: 0; padding: 20px; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 100px; }
+        body { margin: 0; padding: 20px; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 120px; }
         .container { max-width: 1200px; margin: auto; }
 
         header {
             background: linear-gradient(135deg, var(--primary) 0%, #1e293b 100%);
             color: white; padding: 1.5rem; border-radius: 16px; margin-bottom: 20px;
             display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
         }
 
-        /* Dashboard Stat Boxy */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .stat-box small { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 5px; }
@@ -30,96 +30,114 @@
 
         .card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
         
-        /* Styl Chatu AI */
-        #ai-chat-container {
-            position: fixed; bottom: 20px; right: 20px; width: 350px; height: 450px;
-            background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            display: flex; flex-direction: column; border: 1px solid var(--secondary); overflow: hidden; z-index: 2000;
+        /* AI COACH CHAT */
+        #ai-chat {
+            position: fixed; bottom: 20px; right: 20px; width: 380px; height: 500px;
+            background: white; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            display: flex; flex-direction: column; border: 1px solid #e2e8f0; z-index: 2000; transition: 0.3s;
         }
-        #chat-header { background: var(--secondary); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; }
-        #chat-messages { flex: 1; padding: 15px; overflow-y: auto; font-size: 0.9rem; background: #f8fafc; }
-        .msg { margin-bottom: 10px; padding: 10px; border-radius: 10px; max-width: 85%; }
-        .msg-bot { background: #e2e8f0; align-self: flex-start; }
-        .msg-user { background: var(--secondary); color: white; align-self: flex-end; margin-left: auto; }
-        #chat-input-area { padding: 10px; display: flex; gap: 5px; border-top: 1px solid #eee; }
-        #chat-input { flex: 1; border: 1px solid #ddd; padding: 8px; border-radius: 8px; }
+        #chat-header { background: var(--primary); color: white; padding: 15px; border-radius: 20px 20px 0 0; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+        #chat-window { flex: 1; padding: 15px; overflow-y: auto; background: #fdfdfd; display: flex; flex-direction: column; gap: 10px; }
+        .chat-bubble { padding: 10px 14px; border-radius: 15px; max-width: 85%; font-size: 0.85rem; line-height: 1.4; }
+        .bot { background: #f1f5f9; align-self: flex-start; border-bottom-left-radius: 2px; color: var(--primary); }
+        .user { background: var(--secondary); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .chat-input-area { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 10px; }
+        input#user-input { flex: 1; border: 1px solid #ddd; padding: 10px; border-radius: 10px; outline: none; }
 
-        /* Popup */
+        /* Popup Profile */
         #profile-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; z-index: 3000;
         }
-        .popup-card { background: white; padding: 30px; border-radius: 20px; max-width: 800px; width: 95%; max-height: 90vh; overflow-y: auto; }
-        
+        .popup-card { background: white; padding: 30px; border-radius: 20px; max-width: 900px; width: 95%; max-height: 90vh; overflow-y: auto; }
         .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        .week-planner { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 20px 0; }
+        .day-col { background: #f1f5f9; padding: 10px; border-radius: 8px; text-align: center; font-size: 0.7rem; }
         .btn-main { padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        
         .drop-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; background: #f8fafc; font-size: 0.75rem; }
+        
+        .grid-main { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+        @media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } #ai-chat { width: 90%; left: 5%; } }
     </style>
 </head>
 <body>
 
 <div id="profile-overlay">
     <div class="popup-card">
-        <h2 style="margin:0 0 15px 0">⚙️ Konfiguracja Trenera & Zawodnika</h2>
+        <h2 style="margin-top:0">⚙️ Elite Coach Configuration</h2>
         <div class="input-grid">
+            <div><label>Wiek</label><input type="number" id="p-age"></div>
             <div><label>Waga (kg)</label><input type="number" id="p-weight" step="0.1"></div>
             <div><label>FTP (W)</label><input type="number" id="p-ftp"></div>
+            <div><label>Threshold HR</label><input type="number" id="p-thr-hr"></div>
             <div><label>Max HR</label><input type="number" id="p-max-hr"></div>
             <div><label>Data Startu</label><input type="date" id="p-race-date"></div>
         </div>
+        <label>📅 Twój Plan Tygodniowy:</label>
+        <div class="week-planner" id="week-inputs"></div>
         <div class="input-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-            <div class="drop-zone" id="drop-act">📦 Activities.csv</div>
+            <div class="drop-zone" id="drop-act">📦 Activities (8).csv</div>
             <div class="drop-zone" id="drop-ftp">⚡ FTP History.csv</div>
-            <div class="drop-zone" id="drop-vo2">🫁 VO2Max.csv</div>
+            <div class="drop-zone" id="drop-vo2">🫁 Pułap tlenowy.csv</div>
         </div>
-        <button class="btn-main" style="width:100%" onclick="saveProfile()">Zapisz i Zaktualizuj Kontekst AI</button>
+        <button class="btn-main" style="width:100%" onclick="saveProfile()">ZAPISZ I SYNCHRONIZUJ AI</button>
     </div>
 </div>
 
-<div id="ai-chat-container">
-    <div id="chat-header">
-        <span>🤖 COACH AI BOT</span>
-        <button onclick="clearChat()" style="background:none; border:none; color:white; cursor:pointer; font-size:0.7rem;">Czyść</button>
+<div id="ai-chat">
+    <div id="chat-header">🤖 Coach AI Intelligence <span style="font-size:0.6rem; opacity:0.6;">v5.1</span></div>
+    <div id="chat-window">
+        <div class="chat-bubble bot">Witaj! Przeanalizowałem Twoje ostatnie pliki z Garmina. Twoje TSB wynosi <span id="chat-tsb">--</span>. O co chcesz zapytać w kontekście dzisiejszego treningu?</div>
     </div>
-    <div id="chat-messages">
-        <div class="msg msg-bot">Cześć! Jestem Twoim wirtualnym trenerem. Przeanalizowałem Twoje dane. O co chcesz zapytać?</div>
-    </div>
-    <div id="chat-input-area">
-        <input type="text" id="chat-input" placeholder="Zadaj pytanie trenerowi...">
-        <button onclick="sendMessage()" style="background:var(--secondary); color:white; border:none; border-radius:8px; padding:5px 15px; cursor:pointer;">➔</button>
+    <div class="chat-input-area">
+        <input type="text" id="user-input" placeholder="Zadaj pytanie trenerowi...">
+        <button onclick="handleChat()" style="background:var(--secondary); color:white; border:none; border-radius:10px; padding:0 15px; cursor:pointer;">➔</button>
     </div>
 </div>
 
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v5.0 PRO</span></h1>
-            <small>Twój inteligentny asystent treningowy</small>
+            <h1 style="margin:0">ADAPTIVE COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v5.1</span></h1>
+            <small id="sync-status">Status: Context-Aware Intelligence Active</small>
         </div>
-        <button class="btn-main" style="padding: 10px 25px; border: 1px solid white;" onclick="document.getElementById('profile-overlay').style.display='flex'">PROFIL I DANE</button>
+        <button class="btn-main" style="padding: 10px 25px;" onclick="document.getElementById('profile-overlay').style.display='flex'">KONFIGURUJ PROFIL</button>
     </header>
 
     <div class="dashboard-grid">
         <div class="stat-box"><small>Freshness (TSB)</small><span id="val-tsb">--</span></div>
+        <div class="stat-box"><small>W/kg Ratio</small><span id="val-wkg">--</span></div>
         <div class="stat-box"><small>Forma (CTL)</small><span id="val-ctl">--</span></div>
-        <div class="stat-box"><small>Moc wzgl. (W/kg)</small><span id="val-wkg">--</span></div>
-        <div class="stat-box"><small>Dni do Startu</small><span id="val-days">--</span></div>
+        <div class="stat-box"><small>VO2Max</small><span id="val-vo2">--</span></div>
     </div>
 
-    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
+    <div class="grid-main">
         <div class="card">
-            <h3 style="margin-top:0">📈 Trend PMC (Performance Management)</h3>
-            <canvas id="performanceChart" height="120"></canvas>
+            <h3 style="margin-top:0">📋 Ostatnia Aktywność & Analiza</h3>
+            <div id="last-act-box" style="padding:15px; background:#f8fafc; border-radius:12px; border-left:6px solid var(--secondary);">
+                <b id="last-title">---</b> <small id="last-date" style="float:right"></small><br>
+                <div class="input-grid" style="margin-top:10px;">
+                    <div><small>TSS</small><br><b id="last-tss">--</b></div>
+                    <div><small>NP® Power</small><br><b id="last-np">--</b></div>
+                    <div><small>Dystans</small><br><b id="last-dist">--</b></div>
+                </div>
+            </div>
+            <h3 style="margin-top:20px">📉 Trend Wytrenowania</h3>
+            <canvas id="performanceChart" height="150"></canvas>
         </div>
+
         <div class="card">
-            <h3 style="margin-top:0">📢 Ostatnia Aktywność</h3>
-            <div id="last-activity-info" style="font-size:0.9rem;">
-                <b id="last-title">Wgraj dane...</b><br>
-                TSS: <span id="last-tss">--</span><br>
-                NP: <span id="last-np">--</span><br>
-                <hr>
-                <p id="last-analysis" style="font-style:italic; color:var(--secondary)"></p>
+            <h3 style="margin-top:0">📋 Raport Dnia (Ankieta)</h3>
+            <div class="input-grid">
+                <div><label>RPE (1-10)</label><input type="number" id="s-rpe" value="5"></div>
+                <div><label>Sen</label><select id="s-sleep"><option value="5">B.Dobry</option><option value="1">Słaby</option></select></div>
+            </div>
+            <label>Bóle / Zdrowie</label>
+            <input type="text" id="s-pains" placeholder="Wpisz 'brak' lub opis">
+            <button class="btn-main" style="width:100%; background:var(--strength); margin-top:15px;" onclick="processDaily()">Analizuj i Daj Sugestię</button>
+            
+            <div id="ai-suggestion-box" style="margin-top:20px; padding:15px; background:rgba(16, 185, 129, 0.1); border-radius:12px; font-weight:600;">
+                Werdykt: <span id="ai-verdict-text">---</span>
             </div>
         </div>
     </div>
@@ -127,115 +145,91 @@
 
 <script>
     let chart;
+    const daysArr = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Niedz'];
     let store = {
-        history: JSON.parse(localStorage.getItem('v5_history')) || [],
-        config: JSON.parse(localStorage.getItem('v5_config')) || { weight: 0, ftp: 0 },
-        vo2: localStorage.getItem('v5_vo2') || "--"
+        history: JSON.parse(localStorage.getItem('v51_history')) || [],
+        config: JSON.parse(localStorage.getItem('v51_config')) || { plan: Array(7).fill('Kolarstwo Z2'), weight: 0, ftp: 0 },
+        vo2: localStorage.getItem('v51_vo2') || "--"
     };
 
     window.onload = () => {
+        initPlanner();
+        loadConfig();
         refreshUI();
         setupDrop('drop-act', 'ACT');
         setupDrop('drop-ftp', 'FTP');
         setupDrop('drop-vo2', 'VO2');
-
-        // Obsługa klawisza Enter w czacie
-        document.getElementById('chat-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
+        document.getElementById('user-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') handleChat(); });
     };
+
+    function initPlanner() {
+        const container = document.getElementById('week-inputs');
+        daysArr.forEach((day, i) => {
+            container.innerHTML += `<div class="day-col"><b>${day}</b><select id="plan-${i}"><option value="Kolarstwo Z2">🚴 Z2</option><option value="Interwały">🚴 Int</option><option value="Siła">🏋️ Siła</option><option value="Wolne">🛌 Wolne</option></select></div>`;
+        });
+    }
+
+    function loadConfig() {
+        const c = store.config;
+        if(c.weight) {
+            document.getElementById('p-age').value = c.age;
+            document.getElementById('p-weight').value = c.weight;
+            document.getElementById('p-ftp').value = c.ftp;
+            document.getElementById('p-thr-hr').value = c.thrHr;
+            document.getElementById('p-max-hr').value = c.maxHr;
+            document.getElementById('p-race-date').value = c.raceDate;
+            daysArr.forEach((_, i) => document.getElementById(`plan-${i}`).value = c.plan[i]);
+        }
+    }
 
     function saveProfile() {
         store.config = {
-            weight: parseFloat(document.getElementById('p-weight').value) || 0,
-            ftp: parseInt(document.getElementById('p-ftp').value) || 0,
+            age: document.getElementById('p-age').value,
+            weight: parseFloat(document.getElementById('p-weight').value),
+            ftp: parseInt(document.getElementById('p-ftp').value),
+            thrHr: document.getElementById('p-thr-hr').value,
             maxHr: document.getElementById('p-max-hr').value,
-            raceDate: document.getElementById('p-race-date').value
+            raceDate: document.getElementById('p-race-date').value,
+            plan: daysArr.map((_, i) => document.getElementById(`plan-${i}`).value)
         };
-        localStorage.setItem('v5_config', JSON.stringify(store.config));
+        localStorage.setItem('v51_config', JSON.stringify(store.config));
         document.getElementById('profile-overlay').style.display = 'none';
         refreshUI();
     }
 
-    // --- LOGIKA CZATU (WIRTUALNY COACH) ---
-    function sendMessage() {
-        const input = document.getElementById('chat-input');
-        const text = input.value.trim();
-        if (!text) return;
-
-        addMessage(text, 'user');
-        input.value = '';
-
-        // "Mózg" bota - analiza kontekstowa
-        setTimeout(() => {
-            const tsb = parseInt(document.getElementById('val-tsb').innerText) || 0;
-            const ctl = parseInt(document.getElementById('val-ctl').innerText) || 0;
-            const wkg = document.getElementById('val-wkg').innerText;
-            const days = document.getElementById('val-days').innerText;
-
-            let response = "";
-            const q = text.toLowerCase();
-
-            if (q.includes("form") || q.includes("status")) {
-                response = `Twoja aktualna forma (CTL) to ${ctl}. TSB wynosi ${tsb}. `;
-                if (tsb < -20) response += "Jesteś mocno zmęczony, sugeruję dzień wolny.";
-                else if (tsb > 5) response += "Jesteś wypoczęty, to świetny czas na mocny akcent!";
-                else response += "Jesteś w dobrym cyklu treningowym.";
-            } else if (q.includes("w/kg") || q.includes("moc")) {
-                response = `Twój współczynnik mocy to ${wkg} W/kg. Przy FTP ${store.config.ftp}W wyglądasz solidnie. Aby go poprawić, skup się na interwałach Sweet Spot.`;
-            } else if (q.includes("zawod") || q.includes("start")) {
-                response = `Do zawodów zostało ${days} dni. Pamiętaj, aby na 10 dni przed startem zacząć Tapering, by podnieść TSB powyżej +15.`;
-            } else if (q.includes("cześć") || q.includes("siema")) {
-                response = "Witaj! Jestem gotowy. Czy chcesz analizę ostatniego treningu, czy prognozę świeżości na zawody?";
-            } else {
-                response = "Ciekawe pytanie. Jako Twój Coach AI widzę, że Twoje obciążenie (CTL) jest stabilne. Skup się na regeneracji po mocnych blokach. Czy chcesz, abym sprawdził Twoje TSB?";
-            }
-
-            addMessage(response, 'bot');
-        }, 600);
-    }
-
-    function addMessage(text, side) {
-        const container = document.getElementById('chat-messages');
-        const div = document.createElement('div');
-        div.className = `msg msg-${side}`;
-        div.innerText = text;
-        container.appendChild(div);
-        container.scrollTop = container.scrollHeight;
-    }
-
-    function clearChat() {
-        document.getElementById('chat-messages').innerHTML = '<div class="msg msg-bot">Czat wyczyszczony. W czym mogę pomóc?</div>';
-    }
-
-    // --- PARSERY I UI ---
     function setupDrop(id, type) {
         const el = document.getElementById(id);
         el.addEventListener('dragover', e => { e.preventDefault(); el.style.background = "#e0f2fe"; });
-        el.addEventListener('dragleave', () => el.style.background = "#f8fafc");
         el.addEventListener('drop', e => {
             e.preventDefault();
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                const lines = ev.target.result.split('\n').filter(l => l.trim() !== '');
-                const delimiter = ev.target.result.includes(';') ? ';' : ',';
-                if (type === 'ACT') {
-                    const headers = lines[0].split(delimiter).map(h => h.trim().replace(/"/g, ''));
-                    const idxDate = headers.indexOf('Data');
-                    const idxTss = headers.findIndex(h => h.includes('Training Stress Score'));
-                    const idxTitle = headers.indexOf('Tytuł');
-                    const idxNp = headers.findIndex(h => h.includes('Normalized Power'));
-
-                    store.history = lines.slice(1).map(l => {
-                        const c = l.split(delimiter).map(v => v.replace(/"/g, ''));
-                        return { date: c[idxDate], tss: parseFloat(c[idxTss]) || 0, title: c[idxTitle], np: c[idxNp] };
-                    }).filter(i => i.tss > 0);
-                    localStorage.setItem('v5_history', JSON.stringify(store.history));
-                }
-                refreshUI();
-            };
+            reader.onload = (ev) => parseCSV(ev.target.result, type);
             reader.readAsText(e.dataTransfer.files[0]);
         });
+    }
+
+    function parseCSV(content, type) {
+        const d = content.includes(';') ? ';' : ',';
+        const lines = content.split(/\r?\n/).filter(l => l.trim() !== '');
+        if (type === 'ACT') {
+            const h = lines[0].split(d).map(v => v.trim().replace(/"/g,''));
+            const idxDate = h.indexOf('Data');
+            const idxTss = h.findIndex(v => v.includes('Training Stress Score'));
+            const idxTitle = h.indexOf('Tytuł');
+            const idxNp = h.findIndex(v => v.includes('Normalized Power'));
+            const idxDist = h.indexOf('Dystans');
+
+            store.history = lines.slice(1).map(l => {
+                const c = l.split(d).map(v => v.replace(/"/g,''));
+                return { date: c[idxDate], tss: parseFloat(c[idxTss]) || 0, title: c[idxTitle], np: c[idxNp], dist: c[idxDist] };
+            }).filter(i => i.tss > 0);
+            localStorage.setItem('v51_history', JSON.stringify(store.history));
+        } else if (type === 'VO2') {
+            const last = lines[lines.length-1].split(d);
+            store.vo2 = last[2] || "--";
+            localStorage.setItem('v51_vo2', store.vo2);
+        }
+        refreshUI();
     }
 
     function refreshUI() {
@@ -245,33 +239,65 @@
             document.getElementById('last-title').innerText = last.title;
             document.getElementById('last-tss').innerText = last.tss;
             document.getElementById('last-np').innerText = (last.np || '--') + " W";
-            document.getElementById('last-analysis').innerText = last.tss > 100 ? "To była bardzo ciężka sesja. Zadbaj o sen!" : "Dobra jednostka podtrzymująca.";
+            document.getElementById('last-dist').innerText = last.dist + " km";
 
             const atl = h.filter(x => (new Date() - x.date)/86400000 <= 7).reduce((s,i)=>s+i.tss,0)/7;
             const ctl = h.filter(x => (new Date() - x.date)/86400000 <= 42).reduce((s,i)=>s+i.tss,0)/42;
             const tsb = ctl - atl;
             
             document.getElementById('val-tsb').innerText = Math.round(tsb);
+            document.getElementById('chat-tsb').innerText = Math.round(tsb);
             document.getElementById('val-ctl').innerText = Math.round(ctl);
             document.getElementById('val-wkg').innerText = store.config.weight > 0 ? (store.config.ftp / store.config.weight).toFixed(2) : "--";
-            
-            if(store.config.raceDate) {
-                const days = Math.ceil((new Date(store.config.raceDate) - new Date())/86400000);
-                document.getElementById('val-days').innerText = days > 0 ? days : "Dziś!";
-            }
+            document.getElementById('val-vo2').innerText = store.vo2;
+
             updateChart(h.slice(0, 30).reverse());
         }
     }
 
-    function updateChart(data) {
+    function handleChat() {
+        const input = document.getElementById('user-input');
+        const chatWindow = document.getElementById('chat-window');
+        const q = input.value.toLowerCase();
+        if(!q) return;
+
+        chatWindow.innerHTML += `<div class="chat-bubble user">${input.value}</div>`;
+        input.value = '';
+
+        const tsb = parseInt(document.getElementById('val-tsb').innerText);
+        const ctl = parseInt(document.getElementById('val-ctl').innerText);
+        const ftp = store.config.ftp;
+        
+        let response = "Interesujące pytanie. Patrząc na Twoje dane: ";
+        if(q.includes("trening") || q.includes("robić")) {
+            if(tsb < -20) response = `Twoje TSB wynosi ${tsb}. To strefa dużego zmęczenia. Zdecydowanie sugeruję regenerację lub Z1. Nie rób dziś interwałów.`;
+            else if(tsb < 0) response = `Jesteś w strefie produktywnej (TSB: ${tsb}). Możesz zrealizować plan, ale monitoruj tętno.`;
+            else response = `Jesteś świeży (TSB: ${tsb})! To idealny moment na test FTP lub mocny akcent.`;
+        } else if(q.includes("w/kg") || q.includes("form")) {
+            response = `Twoja aktualna forma (CTL) to ${ctl}. Współczynnik W/kg wynosi ${document.getElementById('val-wkg').innerText}. Przy pułapie VO2Max ${store.vo2} masz solidną bazę.`;
+        } else {
+            response = "Jako Twój Coach AI sugeruję skupienie się na dzisiejszym planie. Czy chcesz, abym przeanalizował Twój ostatni trening?";
+        }
+
+        setTimeout(() => {
+            chatWindow.innerHTML += `<div class="chat-bubble bot">${response}</div>`;
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }, 600);
+    }
+
+    function processDaily() {
+        const tsb = parseInt(document.getElementById('val-tsb').innerText);
+        const pains = document.getElementById('s-pains').value;
+        const verdict = (tsb < -20 || pains.length > 3) ? "REGENERACJA (TSB niskie lub ból)" : "MOŻESZ TRENOWAĆ";
+        document.getElementById('ai-verdict-text').innerText = verdict;
+    }
+
+    function updateChart(h) {
         const ctx = document.getElementById('performanceChart').getContext('2d');
         if (chart) chart.destroy();
         chart = new Chart(ctx, {
             type: 'line',
-            data: {
-                labels: data.map(d => d.date.toLocaleDateString()),
-                datasets: [{ label: 'TSS/Load', data: data.map(d=>d.tss), borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' }]
-            },
+            data: { labels: h.map(x=>x.date.toLocaleDateString()), datasets: [{ label: 'TSS', data: h.map(x=>x.tss), borderColor: '#3b82f6', tension: 0.4 }] },
             options: { responsive: true, plugins: { legend: { display: false } } }
         });
     }
