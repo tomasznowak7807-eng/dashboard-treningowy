@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v7.3.5 | Solid Parser</title>
+    <title>ADAPTIVE COACH AI v7.3.6 | Rock-Solid Elite</title>
     
     <script type="module">
         import FitParser from 'https://esm.sh/fit-file-parser@1.9.0';
@@ -52,6 +52,7 @@
         .forecast-box { background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 12px; padding: 15px; margin-top: 15px; }
         .forecast-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 15px; }
         .forecast-input { width: 100%; padding: 8px 4px; border-radius: 8px; border: 1px solid #c4b5fd; text-align: center; font-size: 0.75rem; font-weight: bold; color: var(--forecast); background: #fff; cursor: pointer; outline: none; }
+        .forecast-input:hover { border-color: var(--forecast); }
         .microcycle-info { background: #1e293b; color: #94a3b8; padding: 15px; border-radius: 12px; font-size: 0.85rem; margin-top: 15px; border-left: 4px solid var(--warning); line-height: 1.5; }
         .microcycle-info b { color: white; display: block; margin-bottom: 5px; }
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 12px 30px; border-radius: 30px; display: none; z-index: 4000; font-weight: 600; }
@@ -62,6 +63,7 @@
 <body>
 
 <div id="toast" class="toast"></div>
+
 <input type="file" id="file-input" multiple accept=".csv,.fit" style="display: none;">
 
 <div id="profile-overlay">
@@ -75,6 +77,7 @@
             <div><label>Wiek</label><input type="number" id="p-age"></div>
             <div><label>Waga (kg)</label><input type="number" id="p-weight" step="0.1"></div>
             <div><label>FTP (W)</label><input type="number" id="p-ftp"></div>
+            <div><label>Próg HR</label><input type="number" id="p-thr-hr"></div>
             <div><label>VO2Max</label><input type="number" id="p-vo2" step="0.1" title="Zaczytywane z pliku lub edytowalne ręcznie"></div>
             <div><label>Data Zawodów</label><input type="date" id="p-race-date"></div>
         </div>
@@ -85,7 +88,7 @@
         <label>Uniwersalny Import Danych (.CSV & .FIT)</label>
         <div class="drop-zone" id="drop-universal">
             📥 Upuść pliki tutaj <b>LUB KLIKNIJ</b> aby wybrać z dysku.<br>
-            <span style="font-size: 0.75rem; font-weight: 400; color: #64748b; margin-top: 5px; display: block;">Obsługuje: Aktywności CSV, FTP CSV, VO2Max CSV oraz pliki .FIT z zegarka.</span>
+            <span style="font-size: 0.75rem; font-weight: 400; color: #64748b; margin-top: 5px; display: block;">Obsługuje: Aktywności CSV, FTP CSV, VO2Max CSV oraz oryginalne pliki z zegarka (.FIT).</span>
         </div>
 
         <div style="display:flex; justify-content: space-between; align-items: center; margin-top:20px;">
@@ -98,7 +101,7 @@
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v7.3.5 SOLID</span></h1>
+            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v7.3.6 STABLE</span></h1>
             <small>Omni-Format Forecasting & Human AI Coaching</small>
         </div>
         <button class="btn-main btn-outline" onclick="document.getElementById('profile-overlay').style.display='flex'">USTAWIENIA</button>
@@ -212,8 +215,8 @@
         'Sprinty': { desc: '<b>Moc beztlenowa:</b> >150% FTP. Maksymalne uderzenia mocy.', color: '#8b5cf6' },
         'Siła GÓRA': { desc: '<b>Górne partie:</b> Core, stabilizacja, plecy. Wzmacnianie sylwetki.', color: '#f59e0b' },
         'Siła DÓŁ': { desc: '<b>Dolne partie:</b> Moc w nogach. Przysiady, wykroki.', color: '#d97706' },
-        'Siła FBW': { desc: '<b>Full Body Workout:</b> Pompki, przysiady, wykroki, wyciskanie, plank, brzuszki, wspięcia.', color: '#10b981' },
-        'Wolne': { desc: '<b>Odpoczynek pasywny:</b> Całkowity brak treningu. Pełna odbudowa.', color: '#475569' }
+        'Siła FBW': { desc: '<b>Full Body Workout:</b> Ogólnorozwojowy trening siłowy. <br><i>Przykład: Pompki, przysiady, wykroki bułgarskie, wyciskanie hantli, trening CORE (Plank 45s + brzuszki), wspięcia na palcach.</i>', color: '#10b981' },
+        'Wolne': { desc: '<b>Odpoczynek pasywny:</b> Całkowity brak treningu. Pełna odbudowa organizmu.', color: '#475569' }
     };
 
     let chart;
@@ -307,22 +310,24 @@
 
     function loadFormData() {
         const c = store.config;
-        document.getElementById('p-age').value = c.age || '';
-        document.getElementById('p-weight').value = c.weight || '';
-        document.getElementById('p-ftp').value = c.ftp || '';
-        document.getElementById('p-vo2').value = c.vo2max || '';
-        document.getElementById('p-race-date').value = c.raceDate || '';
+        if(document.getElementById('p-age')) document.getElementById('p-age').value = c.age || '';
+        if(document.getElementById('p-weight')) document.getElementById('p-weight').value = c.weight || '';
+        if(document.getElementById('p-ftp')) document.getElementById('p-ftp').value = c.ftp || '';
+        if(document.getElementById('p-thr-hr')) document.getElementById('p-thr-hr').value = c.thrHr || '';
+        if(document.getElementById('p-vo2')) document.getElementById('p-vo2').value = c.vo2max || '';
+        if(document.getElementById('p-race-date')) document.getElementById('p-race-date').value = c.raceDate || '';
     }
 
     function saveCompleteProfile() {
         try {
+            // DEFENSIVE PARSING: Znak zapytania zabezpiecza przed błędem jeśli pole nie istnieje
             store.config = {
-                age: document.getElementById('p-age').value,
-                weight: parseFloat(document.getElementById('p-weight').value) || 0,
-                ftp: parseInt(document.getElementById('p-ftp').value) || 0,
-                vo2max: parseFloat(document.getElementById('p-vo2').value) || store.config.vo2max || 0,
-                thrHr: parseInt(document.getElementById('p-thr-hr').value) || 0,
-                raceDate: document.getElementById('p-race-date').value,
+                age: document.getElementById('p-age')?.value || '',
+                weight: parseFloat(document.getElementById('p-weight')?.value) || 0,
+                ftp: parseInt(document.getElementById('p-ftp')?.value) || 0,
+                vo2max: parseFloat(document.getElementById('p-vo2')?.value) || store.config.vo2max || 0,
+                thrHr: parseInt(document.getElementById('p-thr-hr')?.value) || 0,
+                raceDate: document.getElementById('p-race-date')?.value || '',
                 plan: Array.from({length:7}, (_, i) => document.getElementById(`p-day-${i}`) ? document.getElementById(`p-day-${i}`).value : 'Z2 Endurance')
             };
             localStorage.setItem('ac_v7_config', JSON.stringify(store.config));
@@ -330,16 +335,16 @@
             closeConfig();
             toast("✅ Zapisano pomyślnie");
         } catch(e) {
-            console.error(e);
-            toast("❌ Błąd zapisu.");
+            console.error("Save Error:", e);
+            toast("❌ Błąd zapisu formularza.");
         }
     }
 
     function updateDailyStatus() {
         store.today = {
-            rpe: parseInt(document.getElementById('s-rpe').value) || 5,
-            sleep: parseInt(document.getElementById('s-sleep').value) || 3,
-            health: document.getElementById('s-health').value || 'zdrowy'
+            rpe: parseInt(document.getElementById('s-rpe')?.value) || 5,
+            sleep: parseInt(document.getElementById('s-sleep')?.value) || 3,
+            health: document.getElementById('s-health')?.value || 'zdrowy'
         };
         localStorage.setItem('ac_v7_today', JSON.stringify(store.today));
         toast("🚀 Raport zaktualizowany");
@@ -376,7 +381,6 @@
                         const u8array = new Uint8Array(ev.target.result);
                         parseFITData(u8array, file.name);
                     } else {
-                        // Oczyszczamy BOM jeśli występuje w plikach tekstowych
                         let text = ev.target.result.replace(/^\uFEFF/, '');
                         parseUniversalCSV(text, file.name);
                     }
@@ -386,7 +390,7 @@
                     }
                 } catch(err) {
                     console.error("Błąd przetwarzania pliku:", err);
-                    toast(`❌ Błąd: ${file.name}`);
+                    toast(`❌ Błąd w pliku: ${file.name}`);
                 }
             };
             
@@ -444,11 +448,10 @@
             if(lines.length === 0) { toast(`ℹ️ Plik jest pusty`); return; }
             
             const sep = content.includes(';') ? ';' : ',';
-            // Pobieramy pierwsze linie z pliku żeby odgadnąć jego cel
             const headRaw = lines[0] + (lines[1] || '');
             const head = headRaw.toLowerCase();
             
-            // LOGIKA AKTYWNOŚCI
+            // AKTYWNOŚCI
             if(head.includes('tss') || head.includes('stress') || head.includes('dystans')) {
                 const headersArr = lines[0].split(sep).map(h => h.replace(/["']/g, '').trim().toLowerCase());
                 const idx = {
@@ -474,34 +477,27 @@
                     toast(`✅ Załadowano aktywności z CSV`);
                 }
                 
-            // LOGIKA FTP
+            // FTP
             } else if (head.includes('ftp') || head.includes('moc progowa')) {
                 const lastRow = lines[lines.length-1].split(sep);
                 const val = parseInt(lastRow.find(v => !isNaN(v) && parseInt(v) > 50));
                 if(val) {
                     store.config.ftp = val;
-                    document.getElementById('p-ftp').value = val;
+                    if(document.getElementById('p-ftp')) document.getElementById('p-ftp').value = val;
                     saveCompleteProfile();
                     toast(`⚡ Zaktualizowano FTP: ${val}W`);
                 }
             
-            // ULEPSZONA LOGIKA VO2MAX (PANCERNA)
+            // VO2MAX
             } else if (head.includes('vo2') || head.includes('pułap') || fileName.toLowerCase().includes('pułap') || fileName.toLowerCase().includes('vo2')) {
                 let vo2val = 0;
                 
-                // Przeszukujemy plik od początku do końca, żeby złapać NAJNOWSZY wpis (zazwyczaj na dole pliku)
                 for(let i = 0; i < lines.length; i++) {
-                    // Pomijamy nagłówki
                     if(lines[i].toLowerCase().includes('data') || lines[i].toLowerCase().includes('pułap')) continue;
-                    
                     const cols = lines[i].split(sep);
-                    // Skanujemy komórki w linii od prawej do lewej
                     for(let c = cols.length - 1; c >= 0; c--) {
                         let cleanStr = cols[c].replace(/["']/g, '').trim().replace(',', '.');
                         let parsed = parseFloat(cleanStr);
-                        
-                        // Zabezpieczenie: VO2Max to liczba od ~25 do 85. 
-                        // Zabezpieczamy się przed złapaniem dat (np. "30.10" = 30.1) ograniczając długość tekstu (VO2Max to zwykle np. "55", "56.5" max 4 znaki).
                         if(!isNaN(parsed) && parsed >= 25 && parsed <= 85 && cleanStr.length <= 4) {
                             vo2val = parsed;
                             break;
@@ -511,8 +507,7 @@
                 
                 if(vo2val > 0) {
                     store.config.vo2max = vo2val;
-                    const vo2Input = document.getElementById('p-vo2');
-                    if(vo2Input) vo2Input.value = vo2val;
+                    if(document.getElementById('p-vo2')) document.getElementById('p-vo2').value = vo2val;
                     saveCompleteProfile();
                     toast(`🫁 Zaktualizowano VO2Max: ${vo2val}`);
                 } else {
@@ -522,7 +517,7 @@
                 toast(`ℹ️ Nierozpoznany plik CSV: ${fileName}`);
             }
         } catch(e) {
-            console.error("Błąd podczas analizy CSV:", e);
+            console.error("Błąd analizy CSV:", e);
             toast(`❌ Błąd zawartości: ${fileName}`);
         }
     }
