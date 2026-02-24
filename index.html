@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v7.3.4 | Stable FIT Module</title>
+    <title>ADAPTIVE COACH AI v7.3.5 | Solid Parser</title>
     
     <script type="module">
         import FitParser from 'https://esm.sh/fit-file-parser@1.9.0';
         window.FitParser = FitParser;
     </script>
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
@@ -63,7 +62,6 @@
 <body>
 
 <div id="toast" class="toast"></div>
-
 <input type="file" id="file-input" multiple accept=".csv,.fit" style="display: none;">
 
 <div id="profile-overlay">
@@ -87,7 +85,7 @@
         <label>Uniwersalny Import Danych (.CSV & .FIT)</label>
         <div class="drop-zone" id="drop-universal">
             📥 Upuść pliki tutaj <b>LUB KLIKNIJ</b> aby wybrać z dysku.<br>
-            <span style="font-size: 0.75rem; font-weight: 400; color: #64748b; margin-top: 5px; display: block;">Obsługuje: Aktywności CSV, FTP CSV, VO2Max CSV oraz oryginalne pliki z zegarka (.FIT).</span>
+            <span style="font-size: 0.75rem; font-weight: 400; color: #64748b; margin-top: 5px; display: block;">Obsługuje: Aktywności CSV, FTP CSV, VO2Max CSV oraz pliki .FIT z zegarka.</span>
         </div>
 
         <div style="display:flex; justify-content: space-between; align-items: center; margin-top:20px;">
@@ -100,7 +98,7 @@
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v7.3.4 FIT-READY</span></h1>
+            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v7.3.5 SOLID</span></h1>
             <small>Omni-Format Forecasting & Human AI Coaching</small>
         </div>
         <button class="btn-main btn-outline" onclick="document.getElementById('profile-overlay').style.display='flex'">USTAWIENIA</button>
@@ -207,8 +205,8 @@
     }
 
     const trainingDictionary = {
-        'Z1 Recovery': { desc: '<b>Regeneracja aktywna:</b> Bardzo lekka jazda/bieg, tętno <55% FTP.', color: '#94a3b8' },
-        'Z2 Endurance': { desc: '<b>Baza tlenowa:</b> 56-75% FTP. Fundament wydolności.', color: '#3b82f6' },
+        'Z1 Recovery': { desc: '<b>Regeneracja aktywna:</b> Bardzo lekka jazda/bieg, tętno <55% FTP. Cel: Przepływ krwi i usuwanie metabolitów.', color: '#94a3b8' },
+        'Z2 Endurance': { desc: '<b>Baza tlenowa:</b> 56-75% FTP. Fundament wydolności, spalanie tłuszczów.', color: '#3b82f6' },
         'Sweet Spot': { desc: '<b>Sweet Spot:</b> 88-94% FTP. Budowa mocy progowej (FTP).', color: '#06b6d4' },
         'VO2Max': { desc: '<b>Pułap tlenowy:</b> 106-120% FTP. Krótkie, bardzo intensywne powtórzenia.', color: '#ef4444' },
         'Sprinty': { desc: '<b>Moc beztlenowa:</b> >150% FTP. Maksymalne uderzenia mocy.', color: '#8b5cf6' },
@@ -371,23 +369,24 @@
             reader.onload = (ev) => {
                 try {
                     if(isFit) {
-                        // Biblioteka ESM ładuje moduł pod window.FitParser
                         if (typeof window.FitParser === 'undefined') {
-                            toast("⏳ Inicjowanie silnika FIT... spróbuj wrzucić plik ponownie za sekundę.");
+                            toast("⏳ Inicjowanie silnika FIT... odczekaj chwilę.");
                             return;
                         }
                         const u8array = new Uint8Array(ev.target.result);
                         parseFITData(u8array, file.name);
                     } else {
-                        parseUniversalCSV(ev.target.result, file.name);
+                        // Oczyszczamy BOM jeśli występuje w plikach tekstowych
+                        let text = ev.target.result.replace(/^\uFEFF/, '');
+                        parseUniversalCSV(text, file.name);
                     }
                     if(dropZoneElement) {
                         dropZoneElement.classList.add('loaded');
                         setTimeout(() => dropZoneElement.classList.remove('loaded'), 2000);
                     }
                 } catch(err) {
-                    console.error("Processing Error:", err);
-                    toast(`❌ Błąd przetwarzania: ${file.name}`);
+                    console.error("Błąd przetwarzania pliku:", err);
+                    toast(`❌ Błąd: ${file.name}`);
                 }
             };
             
@@ -417,7 +416,7 @@
             if (!tss && durationMins > 0) tss = durationMins * 0.8; 
 
             if (!tss || tss <= 0) {
-                toast(`ℹ️ FIT odrzucony (zbyt krótki lub brak obciążenia)`);
+                toast(`ℹ️ FIT zignorowany (brak danych o obciążeniu)`);
                 return;
             }
 
@@ -440,69 +439,91 @@
     }
 
     function parseUniversalCSV(content, fileName) {
-        const lines = content.split('\n').filter(l => l.trim().length > 5);
-        if(lines.length === 0) return;
-        
-        const sep = content.includes(';') ? ';' : ',';
-        const head = lines[0].toLowerCase();
-        
-        if(head.includes('tss') || head.includes('stress') || head.includes('dystans')) {
-            const headersArr = lines[0].split(sep).map(h => h.replace(/"/g, '').trim().toLowerCase());
-            const idx = {
-                d: headersArr.findIndex(h => h.includes('data') || h.includes('date')),
-                t: headersArr.findIndex(h => h.includes('tss') || h.includes('stress')),
-                title: headersArr.findIndex(h => h.includes('tytuł') || h.includes('title')),
-                np: headersArr.findIndex(h => h.includes('np') || h.includes('znormalizowana'))
-            };
-
-            const newActs = lines.slice(1).map(l => {
-                const c = l.split(sep).map(v => v.replace(/"/g, '').trim());
-                if (!c || c.length < Math.max(idx.d, idx.t)) return null;
-                return {
-                    date: c[idx.d] ? c[idx.d].split(' ')[0] : getLocalDateStr(),
-                    tss: parseFloat((c[idx.t] || '0').replace(',', '.')) || 0,
-                    np: c[idx.np] || '--',
-                    title: `[CSV] ${c[idx.title] || 'Trening'}`
-                };
-            }).filter(x => x && x.tss > 0);
-
-            if(newActs.length > 0) {
-                newActs.forEach(act => mergeIntoHistory(act));
-                toast(`✅ Aktywności z CSV załadowane`);
-            }
+        try {
+            const lines = content.split(/\r?\n/).filter(l => l.trim().length > 0);
+            if(lines.length === 0) { toast(`ℹ️ Plik jest pusty`); return; }
             
-        } else if (head.includes('ftp') || head.includes('moc progowa')) {
-            const lastRow = lines[lines.length-1].split(sep);
-            const val = parseInt(lastRow.find(v => !isNaN(v) && parseInt(v) > 50));
-            if(val) {
-                store.config.ftp = val;
-                document.getElementById('p-ftp').value = val;
-                saveCompleteProfile();
-                toast(`⚡ Zaktualizowano FTP: ${val}W`);
-            }
-        } else if (head.includes('vo2') || head.includes('pułap tlenowy') || head.includes('pulap')) {
-            let vo2val = 0;
-            for(let i = lines.length - 1; i >= 0; i--) {
-                const cols = lines[i].split(sep);
-                for(let c of cols) {
-                    const parsed = parseFloat(c.replace(/"/g, '').replace(',','.'));
-                    if(!isNaN(parsed) && parsed > 20 && parsed < 90) {
-                        vo2val = parsed;
-                        break;
+            const sep = content.includes(';') ? ';' : ',';
+            // Pobieramy pierwsze linie z pliku żeby odgadnąć jego cel
+            const headRaw = lines[0] + (lines[1] || '');
+            const head = headRaw.toLowerCase();
+            
+            // LOGIKA AKTYWNOŚCI
+            if(head.includes('tss') || head.includes('stress') || head.includes('dystans')) {
+                const headersArr = lines[0].split(sep).map(h => h.replace(/["']/g, '').trim().toLowerCase());
+                const idx = {
+                    d: headersArr.findIndex(h => h.includes('data') || h.includes('date')),
+                    t: headersArr.findIndex(h => h.includes('tss') || h.includes('stress')),
+                    title: headersArr.findIndex(h => h.includes('tytuł') || h.includes('title')),
+                    np: headersArr.findIndex(h => h.includes('np') || h.includes('znormalizowana'))
+                };
+
+                const newActs = lines.slice(1).map(l => {
+                    const c = l.split(sep).map(v => v.replace(/["']/g, '').trim());
+                    if (!c || c.length < Math.max(idx.d, idx.t)) return null;
+                    return {
+                        date: c[idx.d] ? c[idx.d].split(' ')[0] : getLocalDateStr(),
+                        tss: parseFloat((c[idx.t] || '0').replace(',', '.')) || 0,
+                        np: c[idx.np] || '--',
+                        title: `[CSV] ${c[idx.title] || 'Trening'}`
+                    };
+                }).filter(x => x && x.tss > 0);
+
+                if(newActs.length > 0) {
+                    newActs.forEach(act => mergeIntoHistory(act));
+                    toast(`✅ Załadowano aktywności z CSV`);
+                }
+                
+            // LOGIKA FTP
+            } else if (head.includes('ftp') || head.includes('moc progowa')) {
+                const lastRow = lines[lines.length-1].split(sep);
+                const val = parseInt(lastRow.find(v => !isNaN(v) && parseInt(v) > 50));
+                if(val) {
+                    store.config.ftp = val;
+                    document.getElementById('p-ftp').value = val;
+                    saveCompleteProfile();
+                    toast(`⚡ Zaktualizowano FTP: ${val}W`);
+                }
+            
+            // ULEPSZONA LOGIKA VO2MAX (PANCERNA)
+            } else if (head.includes('vo2') || head.includes('pułap') || fileName.toLowerCase().includes('pułap') || fileName.toLowerCase().includes('vo2')) {
+                let vo2val = 0;
+                
+                // Przeszukujemy plik od początku do końca, żeby złapać NAJNOWSZY wpis (zazwyczaj na dole pliku)
+                for(let i = 0; i < lines.length; i++) {
+                    // Pomijamy nagłówki
+                    if(lines[i].toLowerCase().includes('data') || lines[i].toLowerCase().includes('pułap')) continue;
+                    
+                    const cols = lines[i].split(sep);
+                    // Skanujemy komórki w linii od prawej do lewej
+                    for(let c = cols.length - 1; c >= 0; c--) {
+                        let cleanStr = cols[c].replace(/["']/g, '').trim().replace(',', '.');
+                        let parsed = parseFloat(cleanStr);
+                        
+                        // Zabezpieczenie: VO2Max to liczba od ~25 do 85. 
+                        // Zabezpieczamy się przed złapaniem dat (np. "30.10" = 30.1) ograniczając długość tekstu (VO2Max to zwykle np. "55", "56.5" max 4 znaki).
+                        if(!isNaN(parsed) && parsed >= 25 && parsed <= 85 && cleanStr.length <= 4) {
+                            vo2val = parsed;
+                            break;
+                        }
                     }
                 }
-                if(vo2val > 0) break;
-            }
-            if(vo2val > 0) {
-                store.config.vo2max = vo2val;
-                document.getElementById('p-vo2').value = vo2val;
-                saveCompleteProfile();
-                toast(`🫁 Zaktualizowano VO2Max: ${vo2val}`);
+                
+                if(vo2val > 0) {
+                    store.config.vo2max = vo2val;
+                    const vo2Input = document.getElementById('p-vo2');
+                    if(vo2Input) vo2Input.value = vo2val;
+                    saveCompleteProfile();
+                    toast(`🫁 Zaktualizowano VO2Max: ${vo2val}`);
+                } else {
+                    toast(`ℹ️ Plik wczytany, ale nie znaleziono czystej liczby VO2Max.`);
+                }
             } else {
-                toast(`ℹ️ Nierozpoznany CSV (VO2Max pusty)`);
+                toast(`ℹ️ Nierozpoznany plik CSV: ${fileName}`);
             }
-        } else {
-            toast(`ℹ️ Nierozpoznany plik CSV`);
+        } catch(e) {
+            console.error("Błąd podczas analizy CSV:", e);
+            toast(`❌ Błąd zawartości: ${fileName}`);
         }
     }
 
