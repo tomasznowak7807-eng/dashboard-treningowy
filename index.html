@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v5.2 | Ultimate Baseline</title>
+    <title>ADAPTIVE COACH AI v5.2 | Ultimate Elite Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -23,13 +23,15 @@
             box-shadow: 0 10px 15px rgba(0,0,0,0.1);
         }
 
+        /* Statystyki */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
         .stat-box small { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 5px; }
         .stat-box span { font-size: 1.8rem; font-weight: 800; }
 
         .card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
         
+        /* Popup Profilu */
         #profile-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; z-index: 3000;
@@ -41,26 +43,30 @@
         label { display: block; font-size: 0.7rem; font-weight: 800; margin-bottom: 4px; color: var(--primary); text-transform: uppercase; }
         input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.9rem; }
 
+        /* Planer w Profilu */
         .week-planner { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 15px 0 25px 0; }
         .day-box { background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
         .day-box b { font-size: 0.75rem; display: block; margin-bottom: 5px; color: var(--secondary); text-transform: uppercase; }
         .info-tag { font-size: 0.6rem; color: #64748b; margin-top: 5px; display: block; line-height: 1.3; }
 
+        /* Kalendarz na Dashboardzie */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 15px; }
         .cal-day { padding: 12px 5px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; text-align: center; font-size: 0.75rem; color: #475569; }
         .cal-today { border: 2px solid var(--secondary); background: #f0f9ff; font-weight: 700; color: var(--primary); box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1); }
 
+        /* Przyciski i Strefy Drop */
         .btn-main { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; transition: 0.2s; }
         .btn-main:hover { background: var(--secondary); transform: translateY(-1px); }
         .btn-outline { background: none; border: 1px solid white; color: white; }
-        .btn-reset { background: #94a3b8; font-size: 0.8rem; padding: 12px 15px; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         
         .drop-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: #f8fafc; font-size: 0.8rem; transition: 0.3s; }
         .drop-zone:hover { border-color: var(--secondary); background: #f0f7ff; }
 
+        /* Grid Główny i Werdykt */
         .grid-main { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
         .ai-verdict { padding: 20px; background: #f0f9ff; border-radius: 16px; border-left: 8px solid var(--secondary); }
 
+        /* AI Chat Bot */
         #ai-chat-btn {
             position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%;
             background: var(--secondary); color: white; display: flex; justify-content: center; align-items: center;
@@ -82,7 +88,7 @@
 
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--strength); color: white; padding: 12px 30px; border-radius: 30px; display: none; z-index: 4000; font-weight: 600; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         
-        footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 0.8rem; line-height: 1.5; }
+        footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 0.8rem; }
 
         @media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } .week-planner { grid-template-columns: repeat(4, 1fr); } #ai-chat-window { width: 90%; right: 5%; bottom: 90px; } }
     </style>
@@ -109,6 +115,447 @@
         </div>
 
         <h3 style="font-size:0.9rem; color:var(--secondary); margin-top:20px; margin-bottom:10px;">2. BAZOWY PLAN TYGODNIA</h3>
-        <div class="week-planner" id="planner-container"></div>
+        <div class="week-planner" id="planner-container">
+            </div>
 
-        <h3 style="font
+        <h3 style="font-size:0.9rem; color:var(--secondary); margin-top:20px; margin-bottom:10px;">3. SYNCHRONIZACJA DANYCH (Upuść pliki CSV)</h3>
+        <div class="input-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="drop-zone" id="drop-act">🏃 Activities (8).csv</div>
+            <div class="drop-zone" id="drop-vo2">🫁 Pułap tlenowy.csv</div>
+            <div class="drop-zone" id="drop-ftp">⚡ FTP History.csv</div>
+        </div>
+
+        <button class="btn-main" style="width:100%; margin-top:10px; font-size: 1.1rem;" onclick="saveCompleteProfile()">ZAPISZ PROFIL I PRZELICZ MODEL</button>
+    </div>
+</div>
+
+<div id="ai-chat-btn" onclick="toggleChat()">💬</div>
+<div id="ai-chat-window">
+    <div class="chat-header">
+        <span>🤖 Coach AI Assistant</span>
+        <button onclick="toggleChat()" style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem;">✕</button>
+    </div>
+    <div class="chat-body" id="chat-box">
+        <div class="chat-bubble bot">Cześć! Jestem Twoim trenerem AI. Widzę Twoje statystyki w czasie rzeczywistym. W czym mogę pomóc?</div>
+    </div>
+    <div class="chat-input">
+        <input type="text" id="chat-input" placeholder="Np. Jaki trening polecasz na dziś?">
+        <button onclick="handleChat()" style="background:var(--secondary); color:white; border:none; border-radius:8px; padding:0 15px; cursor:pointer;">➔</button>
+    </div>
+</div>
+
+<div class="container">
+    <header>
+        <div>
+            <h1 style="margin:0">ADAPTIVE COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v5.2 ELITE</span></h1>
+            <small>Proactive Performance & Trend Analysis</small>
+        </div>
+        <button class="btn-main btn-outline" onclick="document.getElementById('profile-overlay').style.display='flex'">PROFIL I PLAN</button>
+    </header>
+
+    <div class="card" id="last-activity-card" style="border-left: 8px solid var(--secondary);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0">🔍 Ostatni Zarejestrowany Trening: <span id="last-title" style="color:var(--secondary)">Oczekiwanie na CSV...</span></h3>
+            <span id="last-date" style="font-size:0.8rem; font-weight:700; color:var(--secondary)"></span>
+        </div>
+        <div class="dashboard-grid" style="grid-template-columns: repeat(4, 1fr); margin: 15px 0 0 0; gap: 10px;">
+            <div style="text-align:center"><small>Dystans</small><br><b id="last-dist">--</b></div>
+            <div style="text-align:center"><small>TSS (Obciążenie)</small><br><b id="last-tss">--</b></div>
+            <div style="text-align:center"><small>NP® Power</small><br><b id="last-np">--</b></div>
+            <div style="text-align:center"><small>Avg HR</small><br><b id="last-hr">--</b></div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="stat-box"><small>Freshness (TSB)</small><span id="val-tsb">--</span></div>
+        <div class="stat-box"><small>Forma (CTL)</small><span id="val-ctl">--</span></div>
+        <div class="stat-box"><small>Moc (W/kg)</small><span id="val-wkg">--</span></div>
+        <div class="stat-box"><small>Dni do Zawodów</small><span id="val-days">--</span></div>
+    </div>
+
+    <div class="grid-main">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0">📋 Aktualizacja Statusu Dnia</h3>
+            </div>
+            <div class="input-grid" style="grid-template-columns: 1fr 1fr; margin-top: 15px;">
+                <div><label>Odczuwalny wysiłek (RPE 1-10)</label><input type="number" id="s-rpe" min="1" max="10" value="5"></div>
+                <div><label>Jakość Snu (Pamięć Trendu)</label>
+                    <select id="s-sleep">
+                        <option value="5">Bardzo dobra</option>
+                        <option value="3">Przeciętna</option>
+                        <option value="1">Słaba / Przerywany</option>
+                    </select>
+                </div>
+                <div style="grid-column: span 2;"><label>Bóle / Zdrowie</label><input type="text" id="s-pains" placeholder="Zgłoś uraz lub wpisz 'brak'"></div>
+            </div>
+            <button class="btn-main" style="width:100%; background: var(--strength);" onclick="generateEliteVerdict()">AKTUALIZUJ / NADPISZ RAPORT</button>
+
+            <h3 style="margin: 25px 0 10px 0;">📅 Kalendarz Mikrocyklu</h3>
+            <div class="calendar-grid" id="calendar-container"></div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-top:0">🧠 Proaktywny Werdykt AI</h3>
+            <div class="ai-verdict">
+                <p id="ai-status" style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">Brak wystarczających danych...</p>
+                <div id="ai-desc" style="font-size: 0.95rem; line-height: 1.5; margin: 10px 0;">Wgraj pliki CSV i zaktualizuj swój raport dnia.</div>
+                <div id="ai-action" style="font-weight: 800; color: var(--secondary); border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 12px;"></div>
+            </div>
+            <h3 style="margin-top: 25px;">📉 Performance Management Chart</h3>
+            <canvas id="mainChart" height="120"></canvas>
+        </div>
+    </div>
+
+    <footer>
+        System analityczny napędzany przez model sztucznej inteligencji <strong>Google Gemini</strong>. 
+        <br>Wszelkie sugestie treningowe powinny być konsultowane z lekarzem medycyny sportowej.
+    </footer>
+</div>
+
+<script>
+    const daysArr = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
+    const trainingDictionary = {
+        'Z1 Recovery': 'Aktywna regeneracja, przepływ krwi, <55% FTP',
+        'Z2 Endurance': 'Baza tlenowa, metabolizm tłuszczów, 56-75% FTP',
+        'Sweet Spot': 'Przesunięcie progu mleczanowego, 88-94% FTP',
+        'VO2Max / HIIT': 'Wzrost pułapu tlenowego, 106-120% FTP',
+        'Sprinty / Anaerobic': 'Pojemność beztlenowa i neuromięśniowa, >120% FTP',
+        'Siła GÓRA': 'Core, plecy, ramiona (Stabilizacja)',
+        'Siła DÓŁ': 'Przysiady, martwy ciąg (Moc w korbach/biegu)',
+        'Siła FBW': 'Full Body Workout (Ogólnorozwojowy)',
+        'Wolne': 'Pełna regeneracja pasywna'
+    };
+
+    let chart;
+    let store = {
+        history: JSON.parse(localStorage.getItem('v52_history')) || [],
+        config: JSON.parse(localStorage.getItem('v52_config')) || { plan: Array(7).fill('Z2 Endurance') },
+        vo2: localStorage.getItem('v52_vo2') || "--",
+        sleepTrend: JSON.parse(localStorage.getItem('v52_sleep_trend')) || [],
+        todayReport: JSON.parse(localStorage.getItem('v52_report')) || null
+    };
+
+    window.onload = () => {
+        initPlannerUI();
+        loadProfileData();
+        refreshDashboard();
+        setupDrop('drop-act', 'ACT');
+        setupDrop('drop-vo2', 'VO2');
+        setupDrop('drop-ftp', 'FTP');
+
+        document.getElementById('chat-input').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') handleChat();
+        });
+    };
+
+    // --- PROFLE & PLANNER ---
+    function initPlannerUI() {
+        const container = document.getElementById('planner-container');
+        container.innerHTML = '';
+        daysArr.forEach((day, i) => {
+            const div = document.createElement('div');
+            div.className = 'day-box';
+            div.innerHTML = `<b>${day.substring(0,3)}</b>
+                <select id="p-day-${i}" onchange="updateTag(this, ${i})">
+                    ${Object.keys(trainingDictionary).map(t => `<option value="${t}">${t}</option>`).join('')}
+                </select>
+                <span class="info-tag" id="tag-${i}"></span>`;
+            container.appendChild(div);
+        });
+    }
+
+    function updateTag(selectEl, idx) {
+        document.getElementById(`tag-${idx}`).innerText = trainingDictionary[selectEl.value];
+    }
+
+    function loadProfileData() {
+        const c = store.config;
+        if(c.weight) {
+            document.getElementById('p-age').value = c.age || '';
+            document.getElementById('p-weight').value = c.weight || '';
+            document.getElementById('p-ftp').value = c.ftp || '';
+            document.getElementById('p-thr-hr').value = c.thrHr || '';
+            document.getElementById('p-max-hr').value = c.maxHr || '';
+            document.getElementById('p-race-date').value = c.raceDate || '';
+            daysArr.forEach((_, i) => {
+                const sel = document.getElementById(`p-day-${i}`);
+                if(c.plan && c.plan[i]) sel.value = c.plan[i];
+                updateTag(sel, i);
+            });
+        }
+        if(store.todayReport) {
+            document.getElementById('s-rpe').value = store.todayReport.rpe;
+            document.getElementById('s-sleep').value = store.todayReport.sleep;
+            document.getElementById('s-pains').value = store.todayReport.pains;
+        }
+    }
+
+    function saveCompleteProfile() {
+        store.config = {
+            age: parseInt(document.getElementById('p-age').value) || 0,
+            weight: parseFloat(document.getElementById('p-weight').value) || 0,
+            ftp: parseInt(document.getElementById('p-ftp').value) || 0,
+            thrHr: parseInt(document.getElementById('p-thr-hr').value) || 0,
+            maxHr: parseInt(document.getElementById('p-max-hr').value) || 0,
+            raceDate: document.getElementById('p-race-date').value,
+            plan: daysArr.map((_, i) => document.getElementById(`p-day-${i}`).value)
+        };
+        localStorage.setItem('v52_config', JSON.stringify(store.config));
+        document.getElementById('profile-overlay').style.display = 'none';
+        showToast("Profil, parametry i kalendarz zaktualizowane!");
+        refreshDashboard();
+    }
+
+    // --- ROBUST CSV PARSER ---
+    // Funkcja radzi sobie z przecinkami wewnątrz cudzysłowów (np. "Tytuł, z przecinkiem")
+    function parseCSVLine(line, delimiter) {
+        let p = '', row = [''], i = 0, r = 0, s = !0, l;
+        for (l of line) {
+            if ('"' === l) {
+                if (s && l === p) row[i] += l;
+                s = !s;
+            } else if (delimiter === l && s) l = row[++i] = '';
+            else row[i] += l;
+            p = l;
+        }
+        return row;
+    }
+
+    function setupDrop(id, type) {
+        const el = document.getElementById(id);
+        el.addEventListener('dragover', e => { e.preventDefault(); el.style.background = "#e0f2fe"; });
+        el.addEventListener('dragleave', () => el.style.background = "#f8fafc");
+        el.addEventListener('drop', e => {
+            e.preventDefault();
+            el.style.background = "#f8fafc";
+            const reader = new FileReader();
+            reader.onload = (ev) => processCSVContent(ev.target.result, type);
+            reader.readAsText(e.dataTransfer.files[0], 'UTF-8');
+        });
+    }
+
+    function processCSVContent(content, type) {
+        const delimiter = content.includes(';') ? ';' : ',';
+        const lines = content.split(/\r?\n/).filter(l => l.trim() !== '');
+        
+        if (type === 'ACT') {
+            const headers = parseCSVLine(lines[0], delimiter).map(h => h.trim());
+            const idxDate = headers.indexOf('Data');
+            const idxTss = headers.findIndex(v => v.includes('Training Stress Score'));
+            const idxTitle = headers.indexOf('Tytuł');
+            const idxDist = headers.indexOf('Dystans');
+            const idxNp = headers.findIndex(v => v.includes('Normalized Power'));
+            const idxHr = headers.indexOf('Średnie tętno');
+
+            store.history = lines.slice(1).map(l => {
+                const c = parseCSVLine(l, delimiter);
+                // Normalizacja polskich liczb z przecinkami (np. 15,34 -> 15.34)
+                let rawTss = c[idxTss] ? c[idxTss].replace(',', '.') : '0';
+                return { 
+                    date: c[idxDate], 
+                    tss: parseFloat(rawTss) || 0, 
+                    title: c[idxTitle], 
+                    dist: c[idxDist], 
+                    np: c[idxNp], 
+                    hr: c[idxHr] 
+                };
+            }).filter(i => !isNaN(new Date(i.date).getTime()) && i.tss > 0);
+            localStorage.setItem('v52_history', JSON.stringify(store.history));
+            showToast(`Zsynchronizowano ${store.history.length} aktywności.`);
+        } else if (type === 'VO2') {
+            const last = parseCSVLine(lines[lines.length-1], delimiter);
+            store.vo2 = last[2] || "--";
+            localStorage.setItem('v52_vo2', store.vo2);
+            showToast("Trend VO2Max zaktualizowany.");
+        } else if (type === 'FTP') {
+            const last = parseCSVLine(lines[lines.length-1], delimiter);
+            const val = parseInt(last.find(v => !isNaN(v) && v > 50));
+            if(val) {
+                store.config.ftp = val;
+                localStorage.setItem('v52_config', JSON.stringify(store.config));
+                showToast(`FTP zaktualizowane na ${val}W.`);
+            }
+        }
+        refreshDashboard();
+    }
+
+    // --- DASHBOARD LOGIC ---
+    function refreshDashboard() {
+        const now = new Date();
+        const h = store.history.map(x => ({...x, date: new Date(x.date.split(' ')[0])}));
+        
+        if(h.length > 0) {
+            // Last Activity
+            const last = store.history[0];
+            document.getElementById('last-title').innerText = last.title;
+            document.getElementById('last-date').innerText = last.date.split(' ')[0];
+            document.getElementById('last-dist').innerText = last.dist + " km";
+            document.getElementById('last-tss').innerText = last.tss;
+            document.getElementById('last-np').innerText = (last.np || '--') + " W";
+            document.getElementById('last-hr').innerText = last.hr;
+
+            // PMC Math
+            const atl = h.filter(x => (now - x.date)/86400000 <= 7).reduce((s,i)=>s+i.tss,0)/7 || 0;
+            const ctl = h.filter(x => (now - x.date)/86400000 <= 42).reduce((s,i)=>s+i.tss,0)/42 || 0;
+            const tsb = ctl - atl;
+            
+            document.getElementById('val-tsb').innerText = Math.round(tsb);
+            document.getElementById('val-ctl').innerText = Math.round(ctl);
+            document.getElementById('val-wkg').innerText = (store.config.weight > 0 && store.config.ftp > 0) ? (store.config.ftp / store.config.weight).toFixed(2) : "--";
+            
+            if(store.config.raceDate) {
+                const rDate = new Date(store.config.raceDate);
+                const days = Math.ceil((rDate - now)/86400000);
+                document.getElementById('val-days').innerText = days > 0 ? days : "START!";
+            }
+            updateChart(h.slice(0, 30).reverse());
+            generateEliteVerdict(false);
+            renderCalendar();
+        }
+    }
+
+    function renderCalendar() {
+        const container = document.getElementById('calendar-container');
+        container.innerHTML = '';
+        const now = new Date();
+        const dayOfWeek = now.getDay() === 0 ? 6 : now.getDay() - 1; // 0 = Mon, 6 = Sun
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - dayOfWeek);
+
+        for(let i = 0; i < 7; i++) {
+            const iterDate = new Date(startOfWeek);
+            iterDate.setDate(startOfWeek.getDate() + i);
+            const isToday = iterDate.toDateString() === now.toDateString();
+            const planText = store.config.plan[i] || 'Brak planu';
+            
+            const div = document.createElement('div');
+            div.className = `cal-day ${isToday ? 'cal-today' : ''}`;
+            div.innerHTML = `<b>${daysArr[i]}</b><br><span style="font-size:0.85rem; font-weight:700">${iterDate.getDate()}</span><br><span style="margin-top:5px; display:block;">${planText.split(' ')[0]}</span>`;
+            container.appendChild(div);
+        }
+    }
+
+    // --- PROACTIVE VERDICT (TREND AWARE) ---
+    function generateEliteVerdict(isUpdate = false) {
+        if(isUpdate) {
+            store.todayReport = {
+                rpe: document.getElementById('s-rpe').value,
+                sleep: document.getElementById('s-sleep').value,
+                pains: document.getElementById('s-pains').value.toLowerCase().trim()
+            };
+            localStorage.setItem('v52_report', JSON.stringify(store.todayReport));
+            
+            // Logika pamięci snu (zapisujemy ostatnie 3 dni, jeśli ocena to sen)
+            store.sleepTrend.push(store.todayReport.sleep);
+            if(store.sleepTrend.length > 3) store.sleepTrend.shift();
+            localStorage.setItem('v52_sleep_trend', JSON.stringify(store.sleepTrend));
+            
+            showToast("Raport zaaktualizowany. Przeliczam AI...");
+        }
+
+        const tsb = parseInt(document.getElementById('val-tsb').innerText);
+        if(isNaN(tsb)) return;
+
+        const report = store.todayReport || {};
+        const pains = report.pains || '';
+        const badSleepCount = store.sleepTrend.filter(s => s === "1").length;
+        
+        const todayIdx = (new Date().getDay() + 6) % 7;
+        const planned = store.config.plan ? store.config.plan[todayIdx] : "Nic";
+
+        const st = document.getElementById('ai-status');
+        const ds = document.getElementById('ai-desc');
+        const ac = document.getElementById('ai-action');
+
+        // Drzewo decyzyjne
+        if (pains !== 'brak' && pains.length > 2) {
+            st.innerText = "🚩 ALARM ZDROWOTNY: ZGŁOSZONO BÓL";
+            ds.innerText = `Problem: "${pains}". Twój dzisiejszy plan (${planned}) zostaje w pełni odwołany w celu uniknięcia kontuzji.`;
+            ac.innerText = "DZISIAJ: Całkowity odpoczynek (Wolne) lub wizyta u fizjoterapeuty.";
+        } else if (badSleepCount >= 2) {
+            st.innerText = "😴 ALERT TRENDU: PRZECIĄŻENIE CNS";
+            ds.innerText = "Ostatnie noce to słaby sen. Mimo, że matematyczne TSB może być ok, Twój układ nerwowy jest przeciążony.";
+            ac.innerText = `KOREKTA: Zamiast ${planned}, zrób aktywną regenerację Z1.`;
+        } else if (tsb < -25) {
+            st.innerText = "⚠️ STATUS: WYSOKIE ZMĘCZENIE FIZYCZNE";
+            ds.innerText = `Twoje TSB wynosi ${tsb}. Ryzyko spadku wydolności na dzisiejszym treningu.`;
+            ac.innerText = `ZALECENIE: Pomiń ${planned}. Daj organizmowi 24h na odbudowę (Wolne).`;
+        } else if (tsb >= -25 && tsb < -5) {
+            st.innerText = "🏗️ STATUS: STREFA PRODUKTYWNA";
+            ds.innerText = "Jesteś w idealnej strefie bodźcowania (TSB: " + tsb + "). Układ adaptuje się do wysiłku.";
+            ac.innerText = `DZISIAJ: Wykonaj zgodnie z planem: ${planned}.`;
+        } else {
+            st.innerText = "🚀 STATUS: ŚWIEŻOŚĆ / GOTOWOŚĆ";
+            ds.innerText = "Parametry wskazują na pełną gotowość do rywalizacji lub najcięższych interwałów.";
+            ac.innerText = `DZISIAJ: Zrealizuj ${planned} z maksymalnym zaangażowaniem.`;
+        }
+    }
+
+    function updateChart(h) {
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        if (chart) chart.destroy();
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: { 
+                labels: h.map(x=>x.date.toLocaleDateString()), 
+                datasets: [{ label: 'TSS Load', data: h.map(x=>x.tss), borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.05)' }] 
+            },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        });
+    }
+
+    function showToast(m) {
+        const t = document.getElementById('toast');
+        t.innerText = m; t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 3000);
+    }
+
+    // --- AI CHATBOT LOGIC ---
+    function toggleChat() {
+        const w = document.getElementById('ai-chat-window');
+        w.style.display = w.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function handleChat() {
+        const input = document.getElementById('chat-input');
+        const q = input.value.trim().toLowerCase();
+        if(!q) return;
+
+        const box = document.getElementById('chat-box');
+        box.innerHTML += `<div class="chat-bubble user">${input.value}</div>`;
+        input.value = '';
+
+        // Context Retrieval
+        const tsb = parseInt(document.getElementById('val-tsb').innerText) || 0;
+        const ctl = parseInt(document.getElementById('val-ctl').innerText) || 0;
+        const wkg = document.getElementById('val-wkg').innerText;
+        const todayIdx = (new Date().getDay() + 6) % 7;
+        const planned = store.config.plan[todayIdx];
+        const pains = store.todayReport ? store.todayReport.pains : '';
+
+        setTimeout(() => {
+            let response = "";
+            if (q.includes("trening") || q.includes("robić") || q.includes("plan")) {
+                if(pains !== 'brak' && pains.length > 2) {
+                    response = `Pamiętaj, że zgłosiłeś ból: ${pains}. Twój plan to ${planned}, ale zdrowie jest najważniejsze. Odpuść dziś.`;
+                } else if(tsb < -20) {
+                    response = `Jako Twój trener odradzam ciężki wysiłek. TSB: ${tsb} to znak, że ${planned} lepiej przełożyć na jutro.`;
+                } else {
+                    response = `Parametry (TSB: ${tsb}) są optymalne. Możesz śmiało realizować dzisiejszy cel: ${planned}.`;
+                }
+            } else if (q.includes("form") || q.includes("status") || q.includes("w/kg")) {
+                response = `Zgromadzona forma (CTL) wynosi ${ctl}, a Twój stosunek mocy do wagi to ${wkg} W/kg. Budujesz solidny silnik!`;
+            } else if (q.includes("cześć") || q.includes("hej")) {
+                response = "Cześć! Widzę Twoje najnowsze dane z Garmina. Chcesz omówić dzisiejszy plan, czy przeanalizować wykres formy?";
+            } else {
+                response = "Ciekawe. Analizując Twoje obciążenie (CTL: " + ctl + ") myślę, że idziemy w dobrym kierunku. Skupmy się dziś na poprawnej realizacji planu: " + planned + ".";
+            }
+
+            box.innerHTML += `<div class="chat-bubble bot">${response}</div>`;
+            box.scrollTop = box.scrollHeight;
+        }, 500);
+    }
+</script>
+</body>
+</html>
