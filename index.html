@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v7.3.2 | Stable Hotfix</title>
+    <title>ADAPTIVE COACH AI v7.3.3 | Rock-Solid Elite</title>
     <script src="https://cdn.jsdelivr.net/npm/fit-file-parser@1.5.0/dist/fit-file-parser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -34,12 +34,9 @@
         .btn-main { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; transition: all 0.2s; }
         .btn-main:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .btn-outline { background: transparent; border: 1px solid white; color: white; }
-        
-        /* Unified Drop Zone - ulepszone pod kątem klikalności */
         .drop-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 30px; text-align: center; cursor: pointer; background: #f8fafc; font-size: 0.9rem; transition: 0.3s; font-weight: 600; color: var(--secondary); }
         .drop-zone:hover { border-color: var(--secondary); background: #e0f2fe; }
         .drop-zone.loaded { border-color: var(--strength); background: #f0fdf4; color: var(--strength); }
-        
         .ai-verdict { padding: 25px; background: #f0f9ff; border-radius: 20px; border-left: 8px solid var(--secondary); }
         .ai-badge { display: inline-block; padding: 4px 10px; background: var(--primary); color: white; border-radius: 20px; font-size: 0.6rem; font-weight: 800; margin-bottom: 10px; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-top: 20px; }
@@ -75,17 +72,17 @@
             <div><label>Wiek</label><input type="number" id="p-age"></div>
             <div><label>Waga (kg)</label><input type="number" id="p-weight" step="0.1"></div>
             <div><label>FTP (W)</label><input type="number" id="p-ftp"></div>
-            <div><label>VO2Max</label><input type="number" id="p-vo2" step="0.1" readonly title="Zaczytywane automatycznie z CSV"></div>
+            <div><label>VO2Max</label><input type="number" id="p-vo2" step="0.1" title="Zaczytywane z pliku lub edytowalne ręcznie"></div>
             <div><label>Data Zawodów</label><input type="date" id="p-race-date"></div>
         </div>
 
         <label>Harmonogram Mikrocyklu</label>
         <div class="week-planner" id="planner-container"></div>
 
-        <label>Import Danych (.CSV & .FIT)</label>
+        <label>Uniwersalny Import Danych (.CSV & .FIT)</label>
         <div class="drop-zone" id="drop-universal">
             📥 Upuść pliki tutaj <b>LUB KLIKNIJ</b> aby wybrać z dysku.<br>
-            <span style="font-size: 0.75rem; font-weight: 400; color: #64748b; margin-top: 5px; display: block;">Obsługuje: Aktywności CSV, FTP CSV, VO2Max CSV oraz oryginalne pliki z zegarka (.FIT).</span>
+            <span style="font-size: 0.75rem; font-weight: 400; color: #64748b; margin-top: 5px; display: block;">Obsługuje: Aktywności CSV, FTP CSV, VO2Max CSV oraz oryginalne pliki .FIT z zegarka.</span>
         </div>
 
         <div style="display:flex; justify-content: space-between; align-items: center; margin-top:20px;">
@@ -98,7 +95,7 @@
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v7.3.2 STABLE</span></h1>
+            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v7.3.3 STABLE</span></h1>
             <small>Omni-Format Forecasting & Human AI Coaching</small>
         </div>
         <button class="btn-main btn-outline" onclick="document.getElementById('profile-overlay').style.display='flex'">USTAWIENIA</button>
@@ -199,6 +196,12 @@
 </div>
 
 <script>
+    // --- Helper for Safe Local Dates ---
+    function getLocalDateStr(dateObj = new Date()) {
+        const tzOffset = dateObj.getTimezoneOffset() * 60000;
+        return new Date(dateObj.getTime() - tzOffset).toISOString().split('T')[0];
+    }
+
     const trainingDictionary = {
         'Z1 Recovery': { desc: '<b>Regeneracja aktywna:</b> Bardzo lekka jazda/bieg, tętno <55% FTP. Cel: Przepływ krwi i usuwanie metabolitów.', color: '#94a3b8' },
         'Z2 Endurance': { desc: '<b>Baza tlenowa:</b> 56-75% FTP. Fundament wydolności, spalanie tłuszczów.', color: '#3b82f6' },
@@ -214,7 +217,7 @@
     let chart;
     let store = { history: [], config: {}, today: {}, forecast: [] };
 
-    // BARDZO WAŻNE: Defensive State Management (Zapobiega błędom ładowania)
+    // BARDZO WAŻNE: Odporność na stare błędy i korupcję localStorage
     function initializeStore() {
         try {
             const h = JSON.parse(localStorage.getItem('ac_v7_history'));
@@ -232,7 +235,7 @@
             const f = JSON.parse(localStorage.getItem('ac_v7_forecast'));
             store.forecast = (Array.isArray(f) && f.length === 7) ? f : Array(7).fill(0);
         } catch (e) {
-            console.error("Błąd pamięci localStorage. Ładowanie domyślnych danych.");
+            console.error("Lokalne dane uszkodzone. Resetuję do bezpiecznego stanu.", e);
             store = { history: [], config: { plan: Array(7).fill('Z2 Endurance'), weight: 0, ftp: 0, vo2max: 0 }, today: { rpe: 5, sleep: 3, health: 'zdrowy' }, forecast: Array(7).fill(0) };
         }
     }
@@ -312,19 +315,24 @@
     }
 
     function saveCompleteProfile() {
-        store.config = {
-            age: document.getElementById('p-age').value,
-            weight: parseFloat(document.getElementById('p-weight').value) || 0,
-            ftp: parseInt(document.getElementById('p-ftp').value) || 0,
-            vo2max: store.config.vo2max || 0,
-            thrHr: parseInt(document.getElementById('p-thr-hr').value) || 0,
-            raceDate: document.getElementById('p-race-date').value,
-            plan: Array.from({length:7}, (_, i) => document.getElementById(`p-day-${i}`).value)
-        };
-        localStorage.setItem('ac_v7_config', JSON.stringify(store.config));
-        toast("✅ Konfiguracja zapisana pomyślnie");
-        refresh();
-        closeConfig();
+        try {
+            store.config = {
+                age: document.getElementById('p-age').value,
+                weight: parseFloat(document.getElementById('p-weight').value) || 0,
+                ftp: parseInt(document.getElementById('p-ftp').value) || 0,
+                vo2max: parseFloat(document.getElementById('p-vo2').value) || store.config.vo2max || 0,
+                thrHr: parseInt(document.getElementById('p-thr-hr').value) || 0,
+                raceDate: document.getElementById('p-race-date').value,
+                plan: Array.from({length:7}, (_, i) => document.getElementById(`p-day-${i}`) ? document.getElementById(`p-day-${i}`).value : 'Z2 Endurance')
+            };
+            localStorage.setItem('ac_v7_config', JSON.stringify(store.config));
+            refresh();
+            closeConfig();
+            toast("✅ Konfiguracja zapisana pomyślnie");
+        } catch(e) {
+            console.error("Save Error", e);
+            toast("❌ Wystąpił błąd podczas zapisu.");
+        }
     }
 
     function updateDailyStatus() {
@@ -334,18 +342,15 @@
             health: document.getElementById('s-health').value || 'zdrowy'
         };
         localStorage.setItem('ac_v7_today', JSON.stringify(store.today));
-        toast("🚀 Zaktualizowano raport dnia");
+        toast("🚀 Raport zaktualizowany");
         refresh();
     }
 
-    // --- Ulepszona i w pełni funkcjonalna obsługa wrzucania/klikania plików ---
     function setupUniversalDrop() {
         const el = document.getElementById('drop-universal');
         const fileInput = document.getElementById('file-input');
         
-        // Kliknięcie w pole wywołuje systemowy wybór plików
         el.onclick = () => fileInput.click();
-        
         fileInput.onchange = (e) => handleFiles(e.target.files, el);
 
         el.ondragover = (e) => { e.preventDefault(); el.style.background = "#e0f2fe"; };
@@ -369,7 +374,10 @@
                     } else {
                         parseUniversalCSV(ev.target.result, file.name);
                     }
-                    if(dropZoneElement) dropZoneElement.classList.add('loaded');
+                    if(dropZoneElement) {
+                        dropZoneElement.classList.add('loaded');
+                        setTimeout(() => dropZoneElement.classList.remove('loaded'), 2000);
+                    }
                 } catch(err) {
                     console.error("Processing Error:", err);
                     toast(`❌ Błąd przetwarzania: ${file.name}`);
@@ -412,7 +420,7 @@
             }
 
             const actDate = session && session.start_time ? session.start_time.toISOString().split('T')[0] : 
-                           (data.records && data.records[0] ? data.records[0].timestamp.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
+                           (data.records && data.records[0] ? data.records[0].timestamp.toISOString().split('T')[0] : getLocalDateStr());
             
             const np = session && session.normalized_power ? Math.round(session.normalized_power) : '--';
             const sport = session && session.sport ? session.sport.toUpperCase() : 'FIT';
@@ -447,16 +455,19 @@
 
             const newActs = lines.slice(1).map(l => {
                 const c = l.split(sep).map(v => v.replace(/"/g, '').trim());
+                if (!c || c.length < Math.max(idx.d, idx.t)) return null;
                 return {
-                    date: c[idx.d]?.split(' ')[0],
-                    tss: parseFloat(c[idx.t]?.replace(',', '.')) || 0,
+                    date: c[idx.d] ? c[idx.d].split(' ')[0] : getLocalDateStr(),
+                    tss: parseFloat((c[idx.t] || '0').replace(',', '.')) || 0,
                     np: c[idx.np] || '--',
                     title: `[CSV] ${c[idx.title] || 'Trening'}`
                 };
-            }).filter(x => x.tss > 0 && x.date);
+            }).filter(x => x && x.tss > 0);
 
-            newActs.forEach(act => mergeIntoHistory(act));
-            toast(`✅ Załadowano aktywności z CSV`);
+            if(newActs.length > 0) {
+                newActs.forEach(act => mergeIntoHistory(act));
+                toast(`✅ Załadowano aktywności z CSV`);
+            }
             
         } else if (head.includes('ftp') || head.includes('moc progowa')) {
             const lastRow = lines[lines.length-1].split(sep);
@@ -467,17 +478,30 @@
                 saveCompleteProfile();
                 toast(`⚡ Zaktualizowano FTP: ${val}W`);
             }
-        } else if (head.includes('vo2') || head.includes('pułap tlenowy')) {
-            const lastRow = lines[lines.length-1].split(sep);
-            const val = parseFloat(lastRow.find(v => !isNaN(parseFloat(v.replace(',','.'))) && parseFloat(v.replace(',','.')) > 25 && parseFloat(v.replace(',','.')) < 90)?.replace(',','.'));
-            if(val) {
-                store.config.vo2max = val;
-                document.getElementById('p-vo2').value = val;
+        // ULEPSZONE ROZPOZNAWANIE VO2MAX (Skanowanie wsteczne w poszukiwaniu liczby)
+        } else if (head.includes('vo2') || head.includes('pułap tlenowy') || head.includes('pulap')) {
+            let vo2val = 0;
+            for(let i = lines.length - 1; i >= 0; i--) {
+                const cols = lines[i].split(sep);
+                for(let c of cols) {
+                    const parsed = parseFloat(c.replace(/"/g, '').replace(',','.'));
+                    if(!isNaN(parsed) && parsed > 20 && parsed < 90) {
+                        vo2val = parsed;
+                        break;
+                    }
+                }
+                if(vo2val > 0) break;
+            }
+            if(vo2val > 0) {
+                store.config.vo2max = vo2val;
+                document.getElementById('p-vo2').value = vo2val;
                 saveCompleteProfile();
-                toast(`🫁 Zaktualizowano VO2Max: ${val}`);
+                toast(`🫁 Zaktualizowano VO2Max: ${vo2val}`);
+            } else {
+                toast(`ℹ️ Nie znaleziono poprawnej wartości VO2Max w pliku.`);
             }
         } else {
-            toast(`ℹ️ Nierozpoznany plik CSV.`);
+            toast(`ℹ️ Nierozpoznany plik CSV: ${fileName}`);
         }
     }
 
@@ -507,19 +531,19 @@
         const end = new Date(now); end.setDate(now.getDate() + 7);
 
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-            const dateStr = d.toISOString().split('T')[0];
+            const dateStr = getLocalDateStr(d);
             let dayTss = dataMap[dateStr] || 0;
             
             const isForecast = d > now;
             if (isForecast) {
-                const diffDays = Math.floor((d - now) / (1000 * 60 * 60 * 24)) - 1;
+                const diffDays = Math.round((d - now) / (1000 * 60 * 60 * 24)) - 1;
                 dayTss = store.forecast[diffDays] || 0;
             }
 
             ctl = (dayTss * (1/42)) + (ctl * (1 - (1/42)));
             atl = (dayTss * (1/7)) + (atl * (1 - (1/7)));
             
-            result.push({ date: dateStr, ctl: Math.round(ctl), tsb: Math.round(ctl - atl), isForecast: isForecast });
+            result.push({ date: dateStr, ctl: Math.round(ctl), atl: Math.round(atl), tsb: Math.round(ctl - atl), isForecast: isForecast });
         }
         return result;
     }
@@ -530,17 +554,23 @@
         
         if(h.length > 0 && pmcData.length > 0) {
             const last = h[0];
-            document.getElementById('last-title').innerText = last.title;
-            document.getElementById('last-tss').innerText = last.tss;
-            document.getElementById('last-np').innerText = last.np + (last.np !== '--' ? ' W' : '');
-            document.getElementById('last-date').innerText = last.date;
+            document.getElementById('last-title').innerText = last.title || '--';
+            document.getElementById('last-tss').innerText = last.tss || '--';
+            document.getElementById('last-np').innerText = last.np + (last.np !== '--' && last.np ? ' W' : '');
+            document.getElementById('last-date').innerText = last.date ? last.date.split(' ')[0] : '--';
 
-            const todayStr = new Date().toISOString().split('T')[0];
-            const currentPMC = pmcData.find(p => p.date === todayStr) || pmcData[pmcData.length - 8];
-            const forecastEndPMC = pmcData[pmcData.length - 1];
+            const todayStr = getLocalDateStr(new Date());
+            
+            // Bezpieczne pobieranie dzisiejszego PMC
+            let currentPMC = pmcData.find(p => p.date === todayStr);
+            if (!currentPMC) {
+                const pastData = pmcData.filter(p => p.date <= todayStr);
+                currentPMC = pastData.length > 0 ? pastData[pastData.length - 1] : { ctl: 0, atl: 0, tsb: 0 };
+            }
+            const forecastEndPMC = pmcData[pmcData.length - 1] || { ctl: 0, atl: 0, tsb: 0 };
 
             const ctl = currentPMC.ctl;
-            const atl = pmcData.find(p => p.date === todayStr)?.atl || 0;
+            const atl = currentPMC.atl;
             const tsb = currentPMC.tsb;
             
             const prevCtlIndex = pmcData.findIndex(p => p.date === todayStr) - 7;
@@ -548,7 +578,7 @@
             const ramp = ctl - prevCtl;
 
             document.getElementById('val-ctl').innerText = ctl;
-            document.getElementById('val-atl').innerText = Math.round(atl);
+            document.getElementById('val-atl').innerText = atl;
             document.getElementById('val-tsb').innerText = tsb;
             
             const wkg = (store.config.ftp / store.config.weight) || 0;
@@ -569,8 +599,9 @@
         const ds = document.getElementById('ai-desc');
         const ac = document.getElementById('ai-action');
         const todayIdx = (new Date().getDay() + 6) % 7;
+        
         let planKey = store.config.plan[todayIdx];
-        if(!trainingDictionary[planKey]) planKey = 'Z2 Endurance'; // fallback
+        if(!trainingDictionary[planKey]) planKey = 'Z2 Endurance'; // Zabezpieczenie
         
         document.getElementById('current-plan-badge').innerText = planKey;
         document.getElementById('unit-description').innerHTML = trainingDictionary[planKey].desc;
@@ -597,75 +628,4 @@
             actionText = "ZALECENIE: Skróć dzisiejszą jednostkę o połowę.";
         }
 
-        if (forecastEndPMC && forecastEndPMC.tsb < -35 && store.today.health === 'zdrowy') {
-            actionText += ` <br><br><span style="color:var(--forecast);">🔮 <b>WIDOK Z SYMULATORA:</b> Uważaj! Twój zaplanowany tydzień zrzuci Twoje TSB do ${forecastEndPMC.tsb}. Zaplanuj mocny sen!</span>`;
-        } else if (forecastEndPMC && forecastEndPMC.tsb > 10 && store.today.health === 'zdrowy') {
-            actionText += ` <br><br><span style="color:var(--forecast);">🔮 <b>WIDOK Z SYMULATORA:</b> Dobrze zaplanowany luz! Za 7 dni osiągniesz dużą świeżość (TSB ${forecastEndPMC.tsb}). Idealnie przed wyścigiem.</span>`;
-        }
-
-        st.innerText = statusText;
-        ds.innerHTML = `<i>"${descText}"</i>`;
-        ac.innerHTML = actionText;
-
-        const raceDate = store.config.raceDate ? new Date(store.config.raceDate) : null;
-        const daysToRace = raceDate ? Math.ceil((raceDate - new Date()) / (1000 * 60 * 60 * 24)) : null;
-        let cyclePrediction = "Brak daty zawodów do analizy fazy.";
-
-        if (daysToRace !== null && daysToRace > 0) {
-            if (daysToRace < 14) cyclePrediction = `<b>Faza: Ostrzenie (Tapering).</b> Zostało tylko ${daysToRace} dni do startu! Skupiamy się na świeżości. Objętość w dół, intensywność punktowa w górę.`;
-            else if (daysToRace < 45) cyclePrediction = `<b>Faza: Budowa (Build).</b> To najtrudniejszy okres. Kolejny mikrocykl powinien przesuwać Twoje limity przed startem.`;
-            else cyclePrediction = `<b>Faza: Baza (Base).</b> Budujesz fundamenty. Skup się na regularności i objętości w tlenie (Z2).`;
-        }
-        document.getElementById('cycle-prediction').innerHTML = cyclePrediction;
-    }
-
-    function renderCalendar() {
-        const container = document.getElementById('calendar-container');
-        container.innerHTML = '';
-        const today = (new Date().getDay() + 6) % 7;
-        ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'].forEach((d, i) => {
-            const div = document.createElement('div');
-            let unit = store.config.plan[i];
-            if(!trainingDictionary[unit]) unit = 'Z2 Endurance';
-            div.className = `cal-day ${i === today ? 'cal-today' : ''}`;
-            div.innerHTML = `<b>${d}</b><span class="cal-unit" style="background:${trainingDictionary[unit].color}">${unit.split(' ')[0]}</span>`;
-            container.appendChild(div);
-        });
-    }
-
-    function updateChart(data) {
-        const ctx = document.getElementById('mainChart').getContext('2d');
-        if(chart) chart.destroy();
-        
-        const segmentLine = { borderDash: ctx => data[ctx.p0DataIndex]?.isForecast ? [5, 5] : undefined };
-
-        chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.map(d => d.date.slice(5)),
-                datasets: [
-                    { label: 'Forma (CTL)', data: data.map(d => d.ctl), borderColor: '#3b82f6', tension: 0.4, pointRadius: 0, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)', segment: segmentLine },
-                    { label: 'Świeżość (TSB)', data: data.map(d => d.tsb), borderColor: '#10b981', tension: 0.4, pointRadius: 0, segment: segmentLine }
-                ]
-            },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                plugins: { legend: { display: false } },
-                scales: { x: { grid: { display: false } }, y: { grid: { color: '#f1f5f9' } } } 
-            }
-        });
-    }
-
-    function toast(m) {
-        const t = document.getElementById('toast');
-        t.innerText = m; t.style.display = 'block';
-        setTimeout(() => t.style.display = 'none', 3000);
-    }
-
-    function clearAllData() {
-        if(confirm("Czy na pewno usunąć wszystkie dane?")) { localStorage.clear(); location.reload(); }
-    }
-</script>
-</body>
-</html>
+        if (forecastEndPMC &&
