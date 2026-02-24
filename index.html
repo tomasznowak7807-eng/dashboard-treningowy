@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v7.2 | Elite Predictor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <title>ADAPTIVE COACH AI v7.3 | Multi-Format Elite Predictor</title>
+    <script src="https://cdn.jsdelivr.net/npm/fit-file-parser@1.5.0/dist/fit-file-parser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #0f172a; --secondary: #3b82f6; --accent: #ef4444;
@@ -102,10 +103,10 @@
         <label>Harmonogram Mikrocyklu</label>
         <div class="week-planner" id="planner-container"></div>
 
-        <label>Import Danych z Garmina</label>
+        <label>Uniwersalny Import Danych (.CSV & .FIT)</label>
         <div class="drop-zone" id="drop-universal">
-            📥 Upuść tutaj DOWOLNY plik CSV (Activities, FTP History, lub VO2Max).<br>
-            <span style="font-size: 0.75rem; font-weight: 400; color: #64748b; margin-top: 5px; display: block;">AI automatycznie rozpozna zawartość po nagłówkach. Możesz wrzucić kilka plików naraz.</span>
+            📥 Upuść tutaj DOWOLNY plik .CSV lub .FIT.<br>
+            <span style="font-size: 0.75rem; font-weight: 400; color: #64748b; margin-top: 5px; display: block;">System połączy i inteligentnie przetworzy historię aktywności z obu formatów bez dublowania.</span>
         </div>
 
         <div style="display:flex; justify-content: space-between; align-items: center; margin-top:20px;">
@@ -118,8 +119,8 @@
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v7.2 ELITE</span></h1>
-            <small>Intuitive Forecasting & Human AI Coaching</small>
+            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v7.3 ELITE</span></h1>
+            <small>Omni-Format Forecasting & Human AI Coaching</small>
         </div>
         <button class="btn-main btn-outline" onclick="document.getElementById('profile-overlay').style.display='flex'">USTAWIENIA</button>
     </header>
@@ -181,7 +182,7 @@
             
             <div id="microcycle-coach-info" class="microcycle-info">
                 <b>💡 Strategia Mikrocyklu & Periodyzacja:</b>
-                <span id="cycle-prediction">Wczytaj dane CSV, aby wygenerować prognozę trendu.</span>
+                <span id="cycle-prediction">Wczytaj dane CSV lub FIT, aby wygenerować prognozę trendu.</span>
             </div>
         </div>
 
@@ -189,7 +190,7 @@
             <div class="ai-badge">NAPĘDZANE PRZEZ GOOGLE GEMINI 1.5 PRO</div>
             <div class="ai-verdict">
                 <p id="ai-status" style="font-weight: 900; font-size: 1.25rem; color: var(--primary); margin-top:0;">Trener AI analizuje...</p>
-                <div id="ai-desc" style="font-size: 1rem; margin: 15px 0; line-height: 1.6; color: #475569; font-style: italic;">"Czekam na dane, by przygotować werdykt."</div>
+                <div id="ai-desc" style="font-size: 1rem; margin: 15px 0; line-height: 1.6; color: #475569; font-style: italic;">"Czekam na dane z aktywności, by przygotować dla Ciebie werdykt."</div>
                 <div id="ai-action" style="font-weight: 800; color: var(--secondary); border-top: 2px solid #e2e8f0; padding-top: 15px; margin-top: 15px; font-size: 1.1rem;"></div>
             </div>
 
@@ -214,12 +215,12 @@
             <div><small>Tytuł</small><b id="last-title" style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">--</b></div>
             <div><small>TSS</small><b id="last-tss" style="display:block;">--</b></div>
             <div><small>NP® Power</small><b id="last-np" style="display:block; color:var(--secondary);">--</b></div>
-            <div><small>Data</small><b id="last-date" style="display:block;">--</b></div>
+            <div><small>Źródło</small><b id="last-date" style="display:block;">--</b></div>
         </div>
     </div>
 
     <footer>
-        System napędzany przez Google Gemini. Wszystkie analizy bazują na modelu PMC i periodyzacji 3:1.
+        System napędzany przez Google Gemini. Obsługuje bezpośredni odczyt plików binarnego standardu Garmin (.FIT) oraz Garmin Connect (.CSV). 
     </footer>
 </div>
 
@@ -266,7 +267,6 @@
         });
     }
 
-    // --- Intuicyjny Symulator ---
     function initForecastUI() {
         const container = document.getElementById('forecast-inputs');
         container.innerHTML = '';
@@ -347,6 +347,7 @@
         refresh();
     }
 
+    // --- Ulepszony Universal Drop Zone z obsługą FIT i CSV ---
     function setupUniversalDrop() {
         const el = document.getElementById('drop-universal');
         el.ondragover = (e) => { e.preventDefault(); el.style.background = "#e0f2fe"; };
@@ -355,14 +356,66 @@
             e.preventDefault();
             Array.from(e.dataTransfer.files).forEach(file => {
                 const reader = new FileReader();
+                const isFit = file.name.toLowerCase().endsWith('.fit');
+                
                 reader.onload = (ev) => {
-                    parseUniversalCSV(ev.target.result, file.name);
+                    if(isFit) {
+                        parseFITData(ev.target.result, file.name);
+                    } else {
+                        parseUniversalCSV(ev.target.result, file.name);
+                    }
                     el.classList.add('loaded');
-                    toast(`Analiza: ${file.name}`);
                 };
-                reader.readAsText(file, 'UTF-8');
+                
+                if(isFit) {
+                    reader.readAsArrayBuffer(file);
+                } else {
+                    reader.readAsText(file, 'UTF-8');
+                }
             });
         };
+    }
+
+    function parseFITData(arrayBuffer, fileName) {
+        if (typeof FitParser === 'undefined') {
+            toast("Błąd: Biblioteka FIT nie załadowała się. Sprawdź połączenie z internetem.");
+            return;
+        }
+
+        const fitParser = new FitParser({ force: true, speedUnit: 'km/h', lengthUnit: 'km' });
+        
+        fitParser.parse(arrayBuffer, (err, data) => {
+            if (err) { toast("❌ Błąd odczytu pliku: " + fileName); return; }
+            if (!data.sessions || data.sessions.length === 0) { toast("ℹ️ Brak sesji treningowej w " + fileName); return; }
+
+            const session = data.sessions[0];
+            const actDate = session.start_time ? session.start_time.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+            
+            // Oszacowanie TSS: Jeśli plik FIT ma wpisany training_stress_score (z mocy), używamy go.
+            // W przeciwnym razie estymujemy TSS bazując na czasie (np. 1h biegu ~ 45-60 TSS). Przyjmujemy 0.8 TSS na minutę jako umiarkowaną bazę dla FIT bez pomiaru mocy.
+            let tss = session.training_stress_score;
+            if (!tss) {
+                const durationMinutes = (session.total_elapsed_time || 0) / 60;
+                tss = durationMinutes * 0.8; 
+            }
+
+            const np = session.normalized_power ? Math.round(session.normalized_power) : '--';
+            const sportName = session.sport ? session.sport.charAt(0).toUpperCase() + session.sport.slice(1) : 'Trening';
+
+            const newAct = {
+                date: actDate,
+                tss: Math.round(tss * 10) / 10,
+                np: np,
+                title: `[FIT] ${sportName}`
+            };
+
+            if (newAct.tss > 0) {
+                mergeIntoHistory(newAct);
+                toast(`✅ Przetworzono FIT: ${newAct.title}`);
+            } else {
+                toast(`ℹ️ Plik FIT zignorowany (TSS = 0)`);
+            }
+        });
     }
 
     function parseUniversalCSV(content, fileName) {
@@ -384,19 +437,15 @@
             const newActs = lines.slice(1).map(l => {
                 const c = l.split(sep).map(v => v.replace(/"/g, '').trim());
                 return {
-                    date: c[idx.d],
+                    date: c[idx.d]?.split(' ')[0],
                     tss: parseFloat(c[idx.t]?.replace(',', '.')) || 0,
                     np: c[idx.np] || '--',
-                    title: c[idx.title] || 'Trening'
+                    title: `[CSV] ${c[idx.title] || 'Trening'}`
                 };
             }).filter(x => x.tss > 0);
 
-            store.history = [...newActs, ...store.history]
-                .filter((v, i, a) => a.findIndex(t => t.date === v.date && t.tss === v.tss) === i)
-                .sort((a,b) => new Date(b.date) - new Date(a.date));
-            
-            localStorage.setItem('ac_v7_history', JSON.stringify(store.history));
-            toast(`✅ Dodano Aktywności!`);
+            newActs.forEach(act => mergeIntoHistory(act));
+            toast(`✅ Przetworzono CSV (Aktywności)`);
             
         } else if (head.includes('ftp') || head.includes('moc progowa')) {
             const lastRow = lines[lines.length-1].split(sep);
@@ -408,9 +457,21 @@
                 toast(`⚡ Zaktualizowano FTP: ${val}W`);
             }
         } else {
-            toast(`ℹ️ Plik ${fileName} wczytany`);
+            toast(`ℹ️ Nierozpoznany plik CSV: ${fileName}`);
         }
-        refresh();
+    }
+
+    // Pomocnicza funkcja łącząca nową aktywność z historią
+    function mergeIntoHistory(newAct) {
+        // Zabezpieczenie przed duplikatami (ta sama data i bardzo zbliżony TSS np z różnicą zaokrąglenia CSV i FIT)
+        const isDuplicate = store.history.some(t => t.date === newAct.date && Math.abs(t.tss - newAct.tss) < 2);
+        
+        if (!isDuplicate) {
+            store.history.push(newAct);
+            store.history.sort((a,b) => new Date(b.date) - new Date(a.date));
+            localStorage.setItem('ac_v7_history', JSON.stringify(store.history));
+            refresh();
+        }
     }
 
     function calculatePMC() {
@@ -455,7 +516,9 @@
             document.getElementById('last-title').innerText = last.title;
             document.getElementById('last-tss').innerText = last.tss;
             document.getElementById('last-np').innerText = last.np + (last.np !== '--' ? ' W' : '');
-            document.getElementById('last-date').innerText = last.date.split(' ')[0];
+            
+            // Format daty i źródła w Ostatniej Aktywności
+            document.getElementById('last-date').innerText = last.date + (last.title.includes('[FIT]') ? ' (Zegarek)' : ' (Connect)');
 
             const todayStr = new Date().toISOString().split('T')[0];
             const currentPMC = pmcData.find(p => p.date === todayStr) || pmcData[pmcData.length - 8];
