@@ -322,18 +322,24 @@
         generateEliteVerdict(false);
     }
 
-    // --- ROBUST CSV PARSER ---
+    // --- BEZPIECZNY PARSER CSV ---
     function parseCSVLine(line, delimiter) {
-        let p = '', row = [''], i = 0, r = 0, s = !0, l;
-        for (l of line) {
-            if ('"' === l) {
-                if (s && l === p) row[i] += l;
-                s = !s;
-            } else if (delimiter === l && s) l = row[++i] = '';
-            else row[i] += l;
-            p = l;
+        let result = [];
+        let inQuotes = false;
+        let currentWord = '';
+        for (let i = 0; i < line.length; i++) {
+            let char = line[i];
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === delimiter && !inQuotes) {
+                result.push(currentWord.trim());
+                currentWord = '';
+            } else {
+                currentWord += char;
+            }
         }
-        return row;
+        result.push(currentWord.trim());
+        return result;
     }
 
     function setupDrop(id, type) {
@@ -343,9 +349,11 @@
         el.addEventListener('drop', e => {
             e.preventDefault();
             el.style.background = "#f8fafc";
+            const file = e.dataTransfer.files[0];
+            if (!file) return;
             const reader = new FileReader();
             reader.onload = (ev) => processCSVContent(ev.target.result, type);
-            reader.readAsText(e.dataTransfer.files[0], 'UTF-8');
+            reader.readAsText(file, 'UTF-8');
         });
     }
 
@@ -354,40 +362,54 @@
         const lines = content.split(/\r?\n/).filter(l => l.trim() !== '');
         
         if (type === 'ACT') {
-            const headers = parseCSVLine(lines[0], delimiter).map(h => h.trim());
-            const idxDate = headers.indexOf('Data');
-            const idxTss = headers.findIndex(v => v.includes('Training Stress Score'));
-            const idxTitle = headers.indexOf('Tytuł');
-            const idxDist = headers.indexOf('Dystans');
-            const idxNp = headers.findIndex(v => v.includes('Normalized Power'));
-            const idxHr = headers.indexOf('Średnie tętno');
+            const headers = parseCSVLine(lines[0], delimiter).map(h => h.toLowerCase());
+            const idxDate = headers.findIndex(h => h.includes('data') || h.includes('date'));
+            const idxTss = headers.findIndex(h => h.includes('training stress score') || h.includes('tss'));
+            const idxTitle = headers.findIndex(h => h.includes('tytuł') || h.includes('title'));
+            const idxDist = headers.findIndex(h => h.includes('dystans') || h.includes('distance'));
+            const idxNp = headers.findIndex(h => h.includes('normalized power') || h.includes('np'));
+            const idxHr = headers.findIndex(h => h.includes('średnie tętno') || h.includes('heart rate') || h.includes('avg hr'));
 
             store.history = lines.slice(1).map(l => {
                 const c = parseCSVLine(l, delimiter);
-                let rawTss = c[idxTss] ? c[idxTss].replace(',', '.') : '0';
+                let rawTss = (c[idxTss] || '0').replace(',', '.');
+                let rawDist = (c[idxDist] || '0').replace(',', '.');
                 return { 
                     date: c[idxDate], 
                     tss: parseFloat(rawTss) || 0, 
-                    title: c[idxTitle], 
-                    dist: c[idxDist], 
-                    np: c[idxNp], 
-                    hr: c[idxHr] 
+                    title: c[idxTitle] || 'Trening', 
+                    dist: parseFloat(rawDist) || 0, 
+                    np: c[idxNp] || '--', 
+                    hr: c[idxHr] || '--' 
                 };
-            }).filter(i => !isNaN(new Date(i.date).getTime()) && i.tss > 0);
+            }).filter(i => i.date && !isNaN(new Date(i.date.split(' ')[0]).getTime()) && i.tss > 0);
+            
+            // Wymuszenie poprawnego sortowania dat
+            store.history.sort((a, b) => new Date(b.date.split(' ')[0]) - new Date(a.date.split(' ')[0]));
+            
             localStorage.setItem('v53_history', JSON.stringify(store.history));
             showToast(`Zsynchronizowano ${store.history.length} aktywności.`);
         } else if (type === 'VO2') {
-            const last = parseCSVLine(lines[lines.length-1], delimiter);
-            store.vo2 = last[2] || "--";
-            localStorage.setItem('v53_vo2', store.vo2);
-            showToast("Trend VO2Max zaktualizowany.");
+            for (let i = lines.length - 1; i >= 0; i--) {
+                const cols = parseCSVLine(lines[i], delimiter);
+                const val = parseFloat(cols[cols.length - 1]?.replace(',', '.'));
+                if (!isNaN(val) && val > 20 && val < 90) {
+                    store.vo2 = val;
+                    localStorage.setItem('v53_vo2', store.vo2);
+                    showToast("Trend VO2Max zaktualizowany.");
+                    break;
+                }
+            }
         } else if (type === 'FTP') {
-            const last = parseCSVLine(lines[lines.length-1], delimiter);
-            const val = parseInt(last.find(v => !isNaN(v) && v > 50));
-            if(val) {
-                store.config.ftp = val;
-                localStorage.setItem('v53_config', JSON.stringify(store.config));
-                showToast(`FTP zaktualizowane na ${val}W.`);
+            for (let i = lines.length - 1; i >= 0; i--) {
+                const cols = parseCSVLine(lines[i], delimiter);
+                const val = parseInt(cols.find(v => !isNaN(parseFloat(v.replace(',','.'))) && parseFloat(v.replace(',','.')) > 50));
+                if (val) {
+                    store.config.ftp = val;
+                    localStorage.setItem('v53_config', JSON.stringify(store.config));
+                    showToast(`FTP zaktualizowane na ${val}W.`);
+                    break;
+                }
             }
         }
         refreshDashboard();
@@ -468,7 +490,7 @@
         }
 
         let tsb = parseInt(document.getElementById('val-tsb').innerText);
-        if(isNaN(tsb)) tsb = 0; // Fallback jeśli brak plików
+        if(isNaN(tsb)) tsb = 0; 
 
         const report = store.todayReport || {};
         const pains = report.pains || '';
@@ -481,7 +503,6 @@
         const ds = document.getElementById('ai-desc');
         const ac = document.getElementById('ai-action');
 
-        // Drzewo decyzyjne z priorytetem zgłoszeń użytkownika
         if (pains !== 'brak' && pains.length > 2) {
             st.innerText = "🚩 ALARM ZDROWOTNY: BÓL";
             ds.innerText = `Problem: "${pains}". Bezpieczeństwo najważniejsze.`;
@@ -565,7 +586,7 @@
             } else if (q.includes("zawod") || q.includes("start")) {
                 response = `Zegar tyka! Dni do celu: ${document.getElementById('val-days').innerText}. Pamiętaj, aby przed startem zredukować TSS o połowę, by wyprowadzić TSB na +15.`;
             } else if (q.includes("cześć") || q.includes("hej")) {
-                response = "Witaj! Twój dashboard zasilany modelem AI (Gemini) działa i analizuje twarde dane z CSV. W czym mogę pomóc przed dzisiejszym treningiem?";
+                response = "Witaj! Twój dashboard zasilany modelem AI działa i analizuje twarde dane z CSV. W czym mogę pomóc przed dzisiejszym treningiem?";
             } else {
                 response = `Patrząc na Twoje obciążenie rzędu ${ctl} CTL, nasuwa się jeden wniosek: konsekwencja popłaca. Skupmy się dzisiaj na realizacji zaplanowanego "${planned}".`;
             }
