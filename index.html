@@ -3,95 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v5.3 | Ultimate Elite Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <title>ADAPTIVE COACH AI v5.6 | Garmin Connect Style</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #0f172a; --secondary: #3b82f6; --accent: #ef4444;
-            --strength: #10b981; --recovery: #f59e0b; --bg: #f8fafc;
-            --dark: #1e293b; --text: #334155;
+            --garmin-blue: #00a7d1;
+            --garmin-dark: #1a1c1e;
+            --garmin-card: #282c2f;
+            --garmin-border: #3d4246;
+            --text-main: #e2e4e6;
+            --text-dim: #949ba2;
+            --strength: #4caf50;
+            --accent: #ff3b30;
         }
         * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
-        body { margin: 0; padding: 20px; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 80px; }
+        body { 
+            margin: 0; padding: 20px; 
+            font-family: 'Roboto', sans-serif; 
+            background: var(--garmin-dark); 
+            color: var(--text-main); 
+            padding-bottom: 80px;
+        }
         .container { max-width: 1200px; margin: auto; }
 
         header {
-            background: linear-gradient(135deg, var(--primary) 0%, #1e293b 100%);
-            color: white; padding: 1.5rem; border-radius: 16px; margin-bottom: 20px;
+            background: var(--garmin-card);
+            padding: 1.5rem; border-radius: 8px; margin-bottom: 20px;
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+            border-bottom: 3px solid var(--garmin-blue);
         }
 
-        /* Statystyki */
+        /* Statystyki Garmin Style */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
-        .stat-box small { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 5px; }
-        .stat-box span { font-size: 1.8rem; font-weight: 800; }
+        .stat-box { 
+            background: var(--garmin-card); 
+            padding: 20px; border-radius: 8px; 
+            border: 1px solid var(--garmin-border);
+            text-align: center;
+        }
+        .stat-box small { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; display: block; margin-bottom: 8px; }
+        .stat-box span { font-size: 2rem; font-weight: 900; color: var(--garmin-blue); }
 
-        .card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+        .card { 
+            background: var(--garmin-card); 
+            padding: 25px; border-radius: 8px; 
+            border: 1px solid var(--garmin-border); 
+            margin-bottom: 20px; 
+        }
         
-        /* Popup Profilu */
+        /* Profile Popup */
         #profile-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; z-index: 3000;
+            background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 3000;
         }
-        .popup-card { background: white; padding: 30px; border-radius: 20px; max-width: 950px; width: 95%; max-height: 90vh; overflow-y: auto; }
-        .popup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .popup-card { 
+            background: var(--garmin-card); color: white;
+            padding: 30px; border-radius: 12px; max-width: 950px; width: 95%; 
+            max-height: 90vh; overflow-y: auto; border: 1px solid var(--garmin-border);
+        }
         
         .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
-        label { display: block; font-size: 0.7rem; font-weight: 800; margin-bottom: 4px; color: var(--primary); text-transform: uppercase; }
-        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.9rem; }
-
-        /* Planer w Profilu */
-        .week-planner { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 15px 0 25px 0; }
-        .day-box { background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
-        .day-box b { font-size: 0.75rem; display: block; margin-bottom: 5px; color: var(--secondary); text-transform: uppercase; }
-        .info-tag { font-size: 0.6rem; color: #64748b; margin-top: 5px; display: block; line-height: 1.3; }
-
-        /* Kalendarz na Dashboardzie */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 15px; }
-        .cal-day { padding: 12px 5px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; text-align: center; font-size: 0.75rem; color: #475569; }
-        .cal-today { border: 2px solid var(--secondary); background: #f0f9ff; font-weight: 700; color: var(--primary); box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1); }
-
-        /* Przyciski i Strefy Drop */
-        .btn-main { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; transition: 0.2s; }
-        .btn-main:hover { background: var(--secondary); transform: translateY(-1px); }
-        .btn-outline { background: none; border: 1px solid white; color: white; }
-        .btn-reset { background: #94a3b8; font-size: 0.8rem; padding: 12px 15px; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        
-        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: #f8fafc; font-size: 0.8rem; transition: 0.3s; }
-        .drop-zone:hover { border-color: var(--secondary); background: #f0f7ff; }
-
-        /* Grid Główny i Werdykt */
-        .grid-main { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
-        .ai-verdict { padding: 20px; background: #f0f9ff; border-radius: 16px; border-left: 8px solid var(--secondary); }
-
-        /* AI Chat Bot */
-        #ai-chat-btn {
-            position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%;
-            background: var(--secondary); color: white; display: flex; justify-content: center; align-items: center;
-            font-size: 1.8rem; cursor: pointer; box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4); z-index: 2000; transition: 0.3s;
+        label { display: block; font-size: 0.65rem; font-weight: 700; margin-bottom: 5px; color: var(--garmin-blue); text-transform: uppercase; }
+        input, select { 
+            width: 100%; padding: 10px; border-radius: 4px; 
+            border: 1px solid var(--garmin-border); 
+            background: #1a1c1e; color: white; font-size: 0.9rem; 
         }
-        #ai-chat-btn:hover { transform: scale(1.1); }
-        #ai-chat-window {
-            position: fixed; bottom: 100px; right: 30px; width: 350px; height: 450px;
-            background: white; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            display: none; flex-direction: column; border: 1px solid #e2e8f0; z-index: 2000; overflow: hidden;
+
+        /* Planner */
+        .week-planner { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin: 15px 0 25px 0; }
+        .day-box { background: #1a1c1e; padding: 10px; border-radius: 4px; border: 1px solid var(--garmin-border); text-align: center; }
+        .day-box b { font-size: 0.7rem; display: block; margin-bottom: 5px; color: var(--garmin-blue); }
+
+        .btn-main { 
+            padding: 12px 24px; background: var(--garmin-blue); color: white; 
+            border: none; border-radius: 4px; cursor: pointer; font-weight: 700; text-transform: uppercase;
         }
-        .chat-header { background: var(--primary); color: white; padding: 15px; font-weight: 800; display: flex; justify-content: space-between; }
-        .chat-body { flex: 1; padding: 15px; overflow-y: auto; background: #fdfdfd; display: flex; flex-direction: column; gap: 10px; }
-        .chat-bubble { padding: 10px 14px; border-radius: 15px; max-width: 85%; font-size: 0.85rem; line-height: 1.4; }
-        .bot { background: #f1f5f9; align-self: flex-start; border-bottom-left-radius: 2px; color: var(--primary); }
-        .user { background: var(--secondary); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .chat-input { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 10px; }
-        .chat-input input { flex: 1; border: 1px solid #ddd; padding: 10px; border-radius: 10px; outline: none; }
-
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--strength); color: white; padding: 12px 30px; border-radius: 30px; display: none; z-index: 4000; font-weight: 600; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .btn-outline { background: transparent; border: 1px solid var(--garmin-blue); color: var(--garmin-blue); }
         
-        footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 0.8rem; line-height: 1.5; }
+        /* Drop Zone Success States */
+        .drop-zone { 
+            border: 2px dashed var(--garmin-border); border-radius: 8px; padding: 20px; 
+            text-align: center; cursor: pointer; background: #1a1c1e; font-size: 0.8rem; transition: 0.3s;
+        }
+        .drop-zone.success { border-color: var(--strength); background: rgba(76, 175, 80, 0.1); color: var(--strength); }
 
-        @media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } .week-planner { grid-template-columns: repeat(4, 1fr); } #ai-chat-window { width: 90%; right: 5%; bottom: 90px; } }
+        .ai-verdict { 
+            padding: 20px; background: rgba(0, 167, 209, 0.05); 
+            border-radius: 8px; border-left: 5px solid var(--garmin-blue); 
+        }
+
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 15px; }
+        .cal-day { padding: 10px 5px; background: #1a1c1e; border: 1px solid var(--garmin-border); border-radius: 4px; text-align: center; font-size: 0.7rem; }
+        .cal-today { border-bottom: 3px solid var(--garmin-blue); color: var(--garmin-blue); }
+
+        .toast { 
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
+            background: var(--strength); color: white; padding: 12px 30px; 
+            border-radius: 4px; display: none; z-index: 4000; font-weight: 600; 
+        }
+
+        @media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } .week-planner { grid-template-columns: repeat(4, 1fr); } }
     </style>
 </head>
 <body>
@@ -100,547 +113,305 @@
 
 <div id="profile-overlay">
     <div class="popup-card">
-        <div class="popup-header">
-            <h2 style="margin:0">⚙️ Konfiguracja Elite & Harmonogram</h2>
-            <button onclick="document.getElementById('profile-overlay').style.display='none'" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2 style="margin:0">Konfiguracja Treningowa</h2>
+            <button onclick="document.getElementById('profile-overlay').style.display='none'" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">✕</button>
         </div>
 
-        <h3 style="font-size:0.9rem; color:var(--secondary); margin-bottom:10px;">1. BIOMETRIA I CELE STARTOWE</h3>
         <div class="input-grid">
             <div><label>Wiek</label><input type="number" id="p-age"></div>
             <div><label>Waga (kg)</label><input type="number" id="p-weight" step="0.1"></div>
             <div><label>FTP (W)</label><input type="number" id="p-ftp"></div>
-            <div><label>Próg HR (BPM)</label><input type="number" id="p-thr-hr"></div>
-            <div><label>Max HR</label><input type="number" id="p-max-hr"></div>
-            <div><label>Data Głównych Zawodów</label><input type="date" id="p-race-date"></div>
+            <div><label>Próg HR</label><input type="number" id="p-thr-hr"></div>
+            <div><label>Data Zawodów</label><input type="date" id="p-race-date"></div>
         </div>
 
-        <h3 style="font-size:0.9rem; color:var(--secondary); margin-top:20px; margin-bottom:10px;">2. BAZOWY PLAN TYGODNIA</h3>
+        <label>Plan Tygodniowy</label>
         <div class="week-planner" id="planner-container"></div>
 
-        <h3 style="font-size:0.9rem; color:var(--secondary); margin-top:20px; margin-bottom:10px;">3. SYNCHRONIZACJA DANYCH (Upuść pliki CSV)</h3>
+        <label>Import Danych (Garmin CSV)</label>
         <div class="input-grid" style="grid-template-columns: 1fr 1fr 1fr;">
-            <div class="drop-zone" id="drop-act">🏃 Activities (8).csv</div>
-            <div class="drop-zone" id="drop-vo2">🫁 Pułap tlenowy.csv</div>
-            <div class="drop-zone" id="drop-ftp">⚡ FTP History.csv</div>
+            <div class="drop-zone" id="drop-act">🏃 Aktywności</div>
+            <div class="drop-zone" id="drop-vo2">🫁 VO2Max</div>
+            <div class="drop-zone" id="drop-ftp">⚡ FTP</div>
         </div>
 
-        <button class="btn-main" style="width:100%; margin-top:10px; font-size: 1.1rem;" onclick="saveCompleteProfile()">ZAPISZ PROFIL I PRZELICZ MODEL</button>
-    </div>
-</div>
-
-<div id="ai-chat-btn" onclick="toggleChat()">💬</div>
-<div id="ai-chat-window">
-    <div class="chat-header">
-        <span>🤖 Coach AI Assistant</span>
-        <button onclick="toggleChat()" style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem;">✕</button>
-    </div>
-    <div class="chat-body" id="chat-box">
-        <div class="chat-bubble bot">Cześć! Jestem Twoim trenerem AI. Analizuję Twoje dane na bieżąco. W czym mogę pomóc?</div>
-    </div>
-    <div class="chat-input">
-        <input type="text" id="chat-input" placeholder="Zadaj pytanie dotyczące treningu...">
-        <button onclick="handleChat()" style="background:var(--secondary); color:white; border:none; border-radius:8px; padding:0 15px; cursor:pointer;">➔</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+            <button class="btn-danger" style="background:none; border:none; color:var(--accent); cursor:pointer;" onclick="clearData()">Wyczyść dane</button>
+            <button class="btn-main" onclick="saveProfile()">Zapisz i zamknij</button>
+        </div>
     </div>
 </div>
 
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">ADAPTIVE COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v5.3 ULTIMATE</span></h1>
-            <small>Proactive Performance, Trend Analysis & Chatbot</small>
+            <h1 style="margin:0; font-size: 1.2rem;">ADAPTIVE COACH <span style="color:var(--garmin-blue)">AI v5.6</span></h1>
+            <small style="color:var(--text-dim)">Garmin-Linked Performance Insight</small>
         </div>
-        <button class="btn-main btn-outline" onclick="document.getElementById('profile-overlay').style.display='flex'">PROFIL I PLANER</button>
+        <button class="btn-main btn-outline" onclick="document.getElementById('profile-overlay').style.display='flex'">Ustawienia</button>
     </header>
 
-    <div class="card" id="last-activity-card" style="border-left: 8px solid var(--secondary);">
+    <div class="card" style="border-left: 5px solid var(--garmin-blue);">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin:0">🔍 Ostatni Zarejestrowany Trening: <span id="last-title" style="color:var(--secondary)">Oczekiwanie na CSV...</span></h3>
-            <span id="last-date" style="font-size:0.8rem; font-weight:700; color:var(--secondary)"></span>
+            <h3 style="margin:0; font-size:0.9rem;">Ostatnia aktywność: <span id="last-title" style="color:var(--garmin-blue)">Oczekiwanie...</span></h3>
+            <span id="last-date" style="font-size:0.75rem; color:var(--text-dim)"></span>
         </div>
-        <div class="dashboard-grid" style="grid-template-columns: repeat(4, 1fr); margin: 15px 0 0 0; gap: 10px;">
-            <div style="text-align:center"><small>Dystans</small><br><b id="last-dist">--</b></div>
-            <div style="text-align:center"><small>TSS (Obciążenie)</small><br><b id="last-tss">--</b></div>
-            <div style="text-align:center"><small>NP® Power</small><br><b id="last-np">--</b></div>
-            <div style="text-align:center"><small>Avg HR</small><br><b id="last-hr">--</b></div>
+        <div class="dashboard-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 15px;">
+            <div class="stat-box" style="padding:10px;"><small>Dystans</small><b id="last-dist">--</b></div>
+            <div class="stat-box" style="padding:10px;"><small>TSS</small><b id="last-tss">--</b></div>
+            <div class="stat-box" style="padding:10px;"><small>NP® Power</small><b id="last-np" style="color:var(--garmin-blue)">--</b></div>
+            <div class="stat-box" style="padding:10px;"><small>Śr. HR</small><b id="last-hr">--</b></div>
         </div>
     </div>
 
     <div class="dashboard-grid">
-        <div class="stat-box"><small>Freshness (TSB)</small><span id="val-tsb">--</span></div>
         <div class="stat-box"><small>Forma (CTL)</small><span id="val-ctl">--</span></div>
-        <div class="stat-box"><small>Moc (W/kg)</small><span id="val-wkg">--</span></div>
-        <div class="stat-box"><small>Dni do Zawodów</small><span id="val-days">--</span></div>
+        <div class="stat-box"><small>Freshness (TSB)</small><span id="val-tsb">--</span></div>
+        <div class="stat-box"><small>Stosunek W/kg</small><span id="val-wkg">--</span></div>
+        <div class="stat-box"><small>Dni do Startu</small><span id="val-days">--</span></div>
     </div>
 
-    <div class="grid-main">
+    <div style="display:grid; grid-template-columns: 1.4fr 1fr; gap:20px;">
         <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="margin:0">📋 Raport Dnia & Pamięć Trendu</h3>
-            </div>
-            <div class="input-grid" style="grid-template-columns: 1fr 1fr; margin-top: 15px;">
-                <div><label>Odczuwalny wysiłek (RPE 1-10)</label><input type="number" id="s-rpe" min="1" max="10" value="5"></div>
-                <div><label>Jakość Snu (Monitorowane)</label>
+            <h3 style="margin-top:0; font-size:1rem;">Raport Dnia</h3>
+            <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
+                <div><label>RPE (Wysiłek 1-10)</label><input type="number" id="s-rpe" min="1" max="10" value="5"></div>
+                <div><label>Jakość Snu</label>
                     <select id="s-sleep">
                         <option value="5">Bardzo dobra</option>
-                        <option value="3">Przeciętna</option>
-                        <option value="1">Słaba / Przerywany</option>
+                        <option value="3" selected>Przeciętna</option>
+                        <option value="1">Słaba / Krótka</option>
                     </select>
                 </div>
-                <div style="grid-column: span 2;"><label>Bóle / Zdrowie</label><input type="text" id="s-pains" placeholder="Zgłoś uraz lub wpisz 'brak'"></div>
+                <div style="grid-column: span 2;">
+                    <label>Status Zdrowia</label>
+                    <select id="s-health">
+                        <option value="zdrowy">Pełne zdrowie / Brak bólu</option>
+                        <option value="kontuzja">Kontuzja (wymagana przerwa)</option>
+                        <option value="przeziebienie">Przeziębienie / Infekcja</option>
+                        <option value="przemeczenie">Silne przemęczenie</option>
+                    </select>
+                </div>
             </div>
-            
-            <div style="display:flex; gap:10px;">
-                <button class="btn-main" style="flex:2; background: var(--strength);" onclick="generateEliteVerdict(true)">AKTUALIZUJ / NADPISZ RAPORT</button>
-                <button class="btn-reset" onclick="resetTodayReport()">CZYŚĆ</button>
-            </div>
-
-            <h3 style="margin: 25px 0 10px 0;">📅 Kalendarz Mikrocyklu</h3>
+            <button class="btn-main" style="width:100%;" onclick="updateDaily()">Zaktualizuj status</button>
             <div class="calendar-grid" id="calendar-container"></div>
         </div>
 
         <div class="card">
-            <h3 style="margin-top:0">🧠 Proaktywny Werdykt AI</h3>
+            <h3 style="margin-top:0; font-size:1rem;">Werdykt AI</h3>
             <div class="ai-verdict">
-                <p id="ai-status" style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">Brak wystarczających danych...</p>
-                <div id="ai-desc" style="font-size: 0.95rem; line-height: 1.5; margin: 10px 0;">Wgraj pliki CSV i zaktualizuj swój raport dnia.</div>
-                <div id="ai-action" style="font-weight: 800; color: var(--secondary); border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 12px;"></div>
+                <p id="ai-status" style="font-weight: 700; color:var(--garmin-blue);">Gotowość do analizy...</p>
+                <div id="ai-desc" style="font-size: 0.85rem; margin: 10px 0; color:var(--text-dim);">Wgraj dane CSV i zaktualizuj raport dnia.</div>
+                <div id="ai-action" style="font-weight: 800; border-top: 1px solid var(--garmin-border); padding-top: 10px; margin-top:10px;"></div>
             </div>
-            <h3 style="margin-top: 25px;">📉 Performance Management Chart</h3>
-            <canvas id="mainChart" height="120"></canvas>
+            <canvas id="mainChart" height="150" style="margin-top:20px;"></canvas>
         </div>
     </div>
-
-    <footer>
-        System analityczny napędzany przez model sztucznej inteligencji <strong>Google Gemini</strong>.<br>
-        Twoje dane są przetwarzane lokalnie w przeglądarce. Konsultuj zdrowie z fizjoterapeutą.
-    </footer>
 </div>
 
 <script>
-    const daysArr = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
     const trainingDictionary = {
-        'Z1 Recovery': 'Aktywna regeneracja, przepływ krwi, <55% FTP',
-        'Z2 Endurance': 'Baza tlenowa, metabolizm tłuszczów, 56-75% FTP',
-        'Sweet Spot': 'Przesunięcie progu mleczanowego, 88-94% FTP',
-        'VO2Max / HIIT': 'Wzrost pułapu tlenowego, 106-120% FTP',
-        'Sprinty / Anaerobic': 'Pojemność beztlenowa i neuromięśniowa, >120% FTP',
-        'Siła GÓRA': 'Core, plecy, ramiona (Stabilizacja)',
-        'Siła DÓŁ': 'Przysiady, martwy ciąg (Moc w korbach/biegu)',
-        'Siła FBW': 'Full Body Workout (Ogólnorozwojowy)',
-        'Wolne': 'Pełna regeneracja pasywna'
+        'Z1 Recovery': 'Z1 Recovery - regeneracja aktywna',
+        'Z2 Endurance': 'Z2 Endurance - baza tlenowa',
+        'Sweet Spot': 'Sweet Spot - budowa progu',
+        'VO2Max': 'VO2Max - interwały tlenowe',
+        'Siła FBW': 'Siła FBW - ogólnorozwojowy',
+        'Wolne': 'Wolne - odpoczynek'
     };
 
     let chart;
     let store = {
-        history: JSON.parse(localStorage.getItem('v53_history')) || [],
-        config: JSON.parse(localStorage.getItem('v53_config')) || { plan: Array(7).fill('Z2 Endurance') },
-        vo2: localStorage.getItem('v53_vo2') || "--",
-        sleepTrend: JSON.parse(localStorage.getItem('v53_sleep_trend')) || [],
-        todayReport: JSON.parse(localStorage.getItem('v53_report')) || null
+        history: JSON.parse(localStorage.getItem('g_hist')) || [],
+        config: JSON.parse(localStorage.getItem('g_conf')) || { plan: Array(7).fill('Z2 Endurance'), weight: 0, ftp: 0 },
+        today: JSON.parse(localStorage.getItem('g_today')) || { rpe: 5, sleep: 3, health: 'zdrowy' }
     };
 
     window.onload = () => {
-        initPlannerUI();
-        loadProfileData();
-        refreshDashboard();
+        initUI();
+        refresh();
         setupDrop('drop-act', 'ACT');
         setupDrop('drop-vo2', 'VO2');
         setupDrop('drop-ftp', 'FTP');
-
-        document.getElementById('chat-input').addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') handleChat();
-        });
     };
 
-    function initPlannerUI() {
+    function initUI() {
         const container = document.getElementById('planner-container');
-        container.innerHTML = '';
-        daysArr.forEach((day, i) => {
+        const days = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nie'];
+        days.forEach((d, i) => {
             const div = document.createElement('div');
             div.className = 'day-box';
-            div.innerHTML = `<b>${day.substring(0,3)}</b>
-                <select id="p-day-${i}" onchange="updateTag(this, ${i})">
-                    ${Object.keys(trainingDictionary).map(t => `<option value="${t}">${t}</option>`).join('')}
-                </select>
-                <span class="info-tag" id="tag-${i}"></span>`;
+            div.innerHTML = `<b>${d}</b><select id="p-day-${i}">
+                ${Object.keys(trainingDictionary).map(k => `<option value="${k}" ${store.config.plan[i] === k ? 'selected':''}>${k}</option>`).join('')}
+            </select>`;
             container.appendChild(div);
         });
-    }
-
-    function updateTag(selectEl, idx) {
-        document.getElementById(`tag-${idx}`).innerText = trainingDictionary[selectEl.value];
-    }
-
-    function loadProfileData() {
-        const c = store.config;
-        if(c.weight) {
-            document.getElementById('p-age').value = c.age || '';
-            document.getElementById('p-weight').value = c.weight || '';
-            document.getElementById('p-ftp').value = c.ftp || '';
-            document.getElementById('p-thr-hr').value = c.thrHr || '';
-            document.getElementById('p-max-hr').value = c.maxHr || '';
-            document.getElementById('p-race-date').value = c.raceDate || '';
-            daysArr.forEach((_, i) => {
-                const sel = document.getElementById(`p-day-${i}`);
-                if(c.plan && c.plan[i]) sel.value = c.plan[i];
-                updateTag(sel, i);
-            });
-        }
-        if(store.todayReport) {
-            document.getElementById('s-rpe').value = store.todayReport.rpe;
-            document.getElementById('s-sleep').value = store.todayReport.sleep;
-            document.getElementById('s-pains').value = store.todayReport.pains;
+        
+        if(store.config.weight) {
+            document.getElementById('p-age').value = store.config.age;
+            document.getElementById('p-weight').value = store.config.weight;
+            document.getElementById('p-ftp').value = store.config.ftp;
+            document.getElementById('p-thr-hr').value = store.config.thrHr;
+            document.getElementById('p-race-date').value = store.config.raceDate;
         }
     }
 
-    function saveCompleteProfile() {
+    function saveProfile() {
         store.config = {
-            age: parseInt(document.getElementById('p-age').value) || 0,
-            weight: parseFloat(document.getElementById('p-weight').value) || 0,
-            ftp: parseInt(document.getElementById('p-ftp').value) || 0,
-            thrHr: parseInt(document.getElementById('p-thr-hr').value) || 0,
-            maxHr: parseInt(document.getElementById('p-max-hr').value) || 0,
+            age: document.getElementById('p-age').value,
+            weight: document.getElementById('p-weight').value,
+            ftp: document.getElementById('p-ftp').value,
+            thrHr: document.getElementById('p-thr-hr').value,
             raceDate: document.getElementById('p-race-date').value,
-            plan: daysArr.map((_, i) => document.getElementById(`p-day-${i}`).value)
+            plan: Array.from({length:7}, (_, i) => document.getElementById(`p-day-${i}`).value)
         };
-        localStorage.setItem('v53_config', JSON.stringify(store.config));
+        localStorage.setItem('g_conf', JSON.stringify(store.config));
         document.getElementById('profile-overlay').style.display = 'none';
-        showToast("Profil, parametry i kalendarz zaktualizowane!");
-        refreshDashboard();
+        toast("Profil zapisany");
+        refresh();
     }
 
-    function resetTodayReport() {
-        store.todayReport = null;
-        localStorage.removeItem('v53_report');
-        document.getElementById('s-pains').value = '';
-        document.getElementById('s-rpe').value = '5';
-        document.getElementById('s-sleep').value = '5';
-        showToast("Zresetowano dzisiejszy raport.");
-        generateEliteVerdict(false);
-    }
-
-    // --- NOWY, NIEZAWODNY PARSER CSV ---
-    function processCSVContent(content, type) {
-        try {
-            // Usunięcie znaków BOM, które psują nagłówki
-            content = content.replace(/^\uFEFF/, '');
-            const lines = content.split(/\r?\n/).filter(l => l.trim() !== '');
-            if (lines.length === 0) return;
-
-            const delimiter = lines[0].includes(';') ? ';' : ',';
-
-            // Funkcja do omijania przecinków wew. cudzysłowów
-            const parseCSVLine = (line) => {
-                const result = [];
-                let currentWord = '';
-                let inQuotes = false;
-                for (let i = 0; i < line.length; i++) {
-                    const char = line[i];
-                    if (char === '"') {
-                        if (inQuotes && line[i + 1] === '"') {
-                            currentWord += '"'; 
-                            i++;
-                        } else {
-                            inQuotes = !inQuotes;
-                        }
-                    } else if (char === delimiter && !inQuotes) {
-                        result.push(currentWord.trim());
-                        currentWord = '';
-                    } else {
-                        currentWord += char;
-                    }
-                }
-                result.push(currentWord.trim());
-                return result.map(v => v.replace(/^"|"$/g, '').trim());
-            };
-
-            if (type === 'ACT') {
-                const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase());
-                const idxDate = headers.findIndex(h => h.includes('data') || h.includes('date'));
-                const idxTss = headers.findIndex(h => h.includes('training stress score') || h.includes('tss'));
-                const idxTitle = headers.findIndex(h => h.includes('tytuł') || h.includes('title'));
-                const idxDist = headers.findIndex(h => h.includes('dystans') || h.includes('distance'));
-                const idxNp = headers.findIndex(h => h.includes('normalized power') || h.includes('np'));
-                const idxHr = headers.findIndex(h => h.includes('tętno') || h.includes('heart rate') || h.includes('avg hr'));
-
-                if (idxDate === -1 || idxTss === -1) {
-                    showToast("Błąd: W pliku brakuje kolumny z Datą lub TSS.");
-                    return;
-                }
-
-                const parsedHistory = [];
-                for (let i = 1; i < lines.length; i++) {
-                    const c = parseCSVLine(lines[i]);
-                    if (!c[idxDate] || !c[idxTss]) continue;
-                    
-                    let rawTss = c[idxTss].replace(',', '.');
-                    let rawDist = c[idxDist] ? c[idxDist].replace(',', '.') : '0';
-                    let rawNp = c[idxNp] ? c[idxNp].replace(',', '.') : '--';
-                    
-                    const tssVal = parseFloat(rawTss);
-                    if (isNaN(tssVal) || tssVal <= 0) continue;
-
-                    const dateStr = c[idxDate].split(' ')[0];
-                    if (isNaN(new Date(dateStr).getTime())) continue;
-
-                    parsedHistory.push({ 
-                        date: c[idxDate], 
-                        tss: tssVal, 
-                        title: c[idxTitle] || 'Trening', 
-                        dist: parseFloat(rawDist) || 0, 
-                        np: rawNp !== '--' ? Math.round(parseFloat(rawNp)) : '--', 
-                        hr: c[idxHr] || '--' 
-                    });
-                }
-
-                if (parsedHistory.length > 0) {
-                    // Wymuś prawidłowe sortowanie dat od najnowszych
-                    store.history = parsedHistory.sort((a, b) => new Date(b.date.split(' ')[0]) - new Date(a.date.split(' ')[0]));
-                    localStorage.setItem('v53_history', JSON.stringify(store.history));
-                    showToast(`Zsynchronizowano ${store.history.length} aktywności.`);
-                } else {
-                    showToast("Plik odczytano, ale nie znaleziono treningów z wartością TSS.");
-                }
-
-            } else if (type === 'VO2') {
-                let updated = false;
-                for (let i = lines.length - 1; i >= 0; i--) {
-                    const cols = parseCSVLine(lines[i]);
-                    const valStr = cols[cols.length - 1];
-                    if (!valStr) continue;
-                    
-                    const val = parseFloat(valStr.replace(',', '.'));
-                    if (!isNaN(val) && val > 20 && val < 90) {
-                        store.vo2 = val;
-                        localStorage.setItem('v53_vo2', store.vo2);
-                        showToast("Trend VO2Max zaktualizowany.");
-                        updated = true;
-                        break;
-                    }
-                }
-                if(!updated) showToast("Nie wykryto liczby VO2Max.");
-                
-            } else if (type === 'FTP') {
-                let updated = false;
-                for (let i = lines.length - 1; i >= 0; i--) {
-                    const cols = parseCSVLine(lines[i]);
-                    for (let j = cols.length - 1; j >= 0; j--) {
-                        const strVal = cols[j] || '';
-                        const val = parseInt(strVal.replace(',', '.'));
-                        if (!isNaN(val) && val > 50 && val < 500) {
-                            store.config.ftp = val;
-                            localStorage.setItem('v53_config', JSON.stringify(store.config));
-                            showToast(`FTP zaktualizowane na ${val}W.`);
-                            updated = true;
-                            break;
-                        }
-                    }
-                    if(updated) break;
-                }
-                if(!updated) showToast("Brak wartości mocy w pliku FTP.");
-            }
-            refreshDashboard();
-        } catch(err) {
-            console.error(err);
-            showToast("Wystąpił błąd parsowania. Sprawdź format pliku CSV.");
-        }
+    function updateDaily() {
+        store.today = {
+            rpe: document.getElementById('s-rpe').value,
+            sleep: document.getElementById('s-sleep').value,
+            health: document.getElementById('s-health').value
+        };
+        localStorage.setItem('g_today', JSON.stringify(store.today));
+        toast("Status zaktualizowany");
+        refresh();
     }
 
     function setupDrop(id, type) {
         const el = document.getElementById(id);
-        el.addEventListener('dragover', e => { e.preventDefault(); el.style.background = "#e0f2fe"; });
-        el.addEventListener('dragleave', () => el.style.background = "#f8fafc");
-        el.addEventListener('drop', e => {
+        el.ondragover = (e) => { e.preventDefault(); el.style.borderColor = var(--garmin-blue); };
+        el.ondrop = (e) => {
             e.preventDefault();
-            el.style.background = "#f8fafc";
-            const file = e.dataTransfer.files[0];
-            if (!file) return;
             const reader = new FileReader();
-            reader.onload = (ev) => processCSVContent(ev.target.result, type);
-            reader.readAsText(file, 'UTF-8');
-        });
+            reader.onload = (ev) => {
+                parseCSV(ev.target.result, type);
+                el.classList.add('success');
+                el.innerText = "✓ " + (type === 'ACT' ? 'Aktywności' : type);
+            };
+            reader.readAsText(e.dataTransfer.files[0], 'UTF-8');
+        };
     }
 
-    // --- DASHBOARD LOGIC ---
-    function refreshDashboard() {
-        const now = new Date();
-        const h = store.history.map(x => ({...x, date: new Date(x.date.split(' ')[0])}));
-        
+    function parseCSV(content, type) {
+        const lines = content.split('\n').filter(l => l.trim().length > 0);
+        const sep = content.includes(';') ? ';' : ',';
+        const head = lines[0].split(sep).map(h => h.replace(/"/g, '').trim());
+
+        if(type === 'ACT') {
+            const iDate = head.findIndex(h => /data|date/i.test(h));
+            const iTss = head.findIndex(h => /tss|stress/i.test(h));
+            const iNp = head.findIndex(h => /np|znormalizowana|normalized/i.test(h));
+            const iTitle = head.findIndex(h => /tytuł|title/i.test(h));
+            const iDist = head.findIndex(h => /dystans|distance/i.test(h));
+            const iHr = head.findIndex(h => /tętno|hr/i.test(h));
+
+            store.history = lines.slice(1).map(l => {
+                const c = l.split(sep).map(v => v.replace(/"/g, '').trim());
+                return {
+                    date: c[iDate],
+                    tss: parseFloat(c[iTss]?.replace(',', '.')) || 0,
+                    np: c[iNp] || '--',
+                    title: c[iTitle] || 'Trening',
+                    dist: c[iDist] || '--',
+                    hr: c[iHr] || '--'
+                };
+            }).filter(x => x.tss > 0);
+            localStorage.setItem('g_hist', JSON.stringify(store.history));
+            toast("Zaczytano " + store.history.length + " treningów");
+        }
+        refresh();
+    }
+
+    function refresh() {
+        const h = store.history;
         if(h.length > 0) {
-            const last = store.history[0];
+            const last = h[0];
             document.getElementById('last-title').innerText = last.title;
-            document.getElementById('last-date').innerText = last.date.split(' ')[0];
             document.getElementById('last-dist').innerText = last.dist + " km";
             document.getElementById('last-tss').innerText = last.tss;
-            document.getElementById('last-np').innerText = (last.np || '--') + " W";
+            document.getElementById('last-np').innerText = last.np + " W";
             document.getElementById('last-hr').innerText = last.hr;
+            document.getElementById('last-date').innerText = last.date.split(' ')[0];
 
-            const atl = h.filter(x => (now - x.date)/86400000 <= 7).reduce((s,i)=>s+i.tss,0)/7 || 0;
-            const ctl = h.filter(x => (now - x.date)/86400000 <= 42).reduce((s,i)=>s+i.tss,0)/42 || 0;
+            const ctl = h.slice(0, 42).reduce((a,b)=>a+b.tss, 0) / 42;
+            const atl = h.slice(0, 7).reduce((a,b)=>a+b.tss, 0) / 7;
             const tsb = ctl - atl;
-            
-            document.getElementById('val-tsb').innerText = Math.round(tsb);
+
             document.getElementById('val-ctl').innerText = Math.round(ctl);
-            updateChart(h.slice(0, 30).reverse());
+            document.getElementById('val-tsb').innerText = Math.round(tsb);
+            document.getElementById('val-wkg').innerText = (store.config.ftp / store.config.weight).toFixed(2);
+            
+            if(store.config.raceDate) {
+                const diff = new Date(store.config.raceDate) - new Date();
+                document.getElementById('val-days').innerText = Math.ceil(diff/(1000*60*60*24));
+            }
+            
+            updateVerdict(tsb);
+            updateChart(ctl, atl);
         }
-
-        document.getElementById('val-wkg').innerText = (store.config.weight > 0 && store.config.ftp > 0) ? (store.config.ftp / store.config.weight).toFixed(2) : "--";
-        document.getElementById('val-vo2').innerText = store.vo2;
-
-        if(store.config.raceDate) {
-            const rDate = new Date(store.config.raceDate);
-            const days = Math.ceil((rDate - now)/86400000);
-            document.getElementById('val-days').innerText = days > 0 ? days : "START!";
-        }
-
-        generateEliteVerdict(false);
         renderCalendar();
+    }
+
+    function updateVerdict(tsb) {
+        const st = document.getElementById('ai-status');
+        const ds = document.getElementById('ai-desc');
+        const ac = document.getElementById('ai-action');
+        const todayIdx = (new Date().getDay() + 6) % 7;
+        const plan = store.config.plan[todayIdx];
+
+        if(store.today.health !== 'zdrowy') {
+            st.innerText = "🚩 STATUS: REGENERACJA WYMUSZONA";
+            ds.innerText = "Zgłoszono problem zdrowotny: " + store.today.health;
+            ac.innerText = "ZALECENIE: Odpuść trening, skup się na odpoczynku.";
+        } else if(tsb < -20) {
+            st.innerText = "⚠️ STATUS: WYSOKIE OBCIĄŻENIE";
+            ds.innerText = "Twój deficyt świeżości wynosi " + Math.round(tsb);
+            ac.innerText = "ZALECENIE: " + plan + " wykonaj z niską intensywnością.";
+        } else {
+            st.innerText = "🚀 STATUS: GOTOWOŚĆ";
+            ds.innerText = "Parametry optymalne do realizacji planu.";
+            ac.innerText = "ZADANIE: " + trainingDictionary[plan];
+        }
     }
 
     function renderCalendar() {
         const container = document.getElementById('calendar-container');
         container.innerHTML = '';
-        const now = new Date();
-        const dayOfWeek = now.getDay() === 0 ? 6 : now.getDay() - 1; 
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - dayOfWeek);
-
-        for(let i = 0; i < 7; i++) {
-            const iterDate = new Date(startOfWeek);
-            iterDate.setDate(startOfWeek.getDate() + i);
-            const isToday = iterDate.toDateString() === now.toDateString();
-            const planText = store.config.plan[i] || 'Brak planu';
-            
+        const today = (new Date().getDay() + 6) % 7;
+        ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'].forEach((d, i) => {
             const div = document.createElement('div');
-            div.className = `cal-day ${isToday ? 'cal-today' : ''}`;
-            div.innerHTML = `<b>${daysArr[i].substring(0,3)}</b><br><span style="font-size:0.85rem; font-weight:700">${iterDate.getDate()}</span><br><span style="margin-top:5px; display:block;">${planText.split(' ')[0]}</span>`;
+            div.className = `cal-day ${i === today ? 'cal-today' : ''}`;
+            div.innerHTML = `<b>${d}</b><br><span style="font-size:0.6rem">${store.config.plan[i].split(' ')[0]}</span>`;
             container.appendChild(div);
-        }
-    }
-
-    // --- PROACTIVE VERDICT (TREND AWARE) ---
-    function generateEliteVerdict(isUpdate = false) {
-        if(isUpdate) {
-            store.todayReport = {
-                rpe: document.getElementById('s-rpe').value,
-                sleep: document.getElementById('s-sleep').value,
-                pains: document.getElementById('s-pains').value.toLowerCase().trim()
-            };
-            localStorage.setItem('v53_report', JSON.stringify(store.todayReport));
-            
-            store.sleepTrend.push(store.todayReport.sleep);
-            if(store.sleepTrend.length > 3) store.sleepTrend.shift();
-            localStorage.setItem('v53_sleep_trend', JSON.stringify(store.sleepTrend));
-            
-            showToast("Raport zaktualizowany! Przeliczam status...");
-        }
-
-        let tsb = parseInt(document.getElementById('val-tsb').innerText);
-        if(isNaN(tsb)) tsb = 0; 
-
-        const report = store.todayReport || {};
-        const pains = report.pains || '';
-        const badSleepCount = store.sleepTrend.filter(s => s === "1").length;
-        
-        const todayIdx = (new Date().getDay() + 6) % 7;
-        const planned = store.config.plan ? store.config.plan[todayIdx] : "Nieustalony";
-
-        const st = document.getElementById('ai-status');
-        const ds = document.getElementById('ai-desc');
-        const ac = document.getElementById('ai-action');
-
-        if (pains !== 'brak' && pains.length > 2) {
-            st.innerText = "🚩 ALARM ZDROWOTNY: BÓL";
-            ds.innerText = `Problem: "${pains}". Bezpieczeństwo najważniejsze.`;
-            ac.innerText = `ODWOŁANO: ${planned}. DZISIAJ: Pełny odpoczynek i regeneracja.`;
-        } else if (badSleepCount >= 2) {
-            st.innerText = "😴 ALERT TRENDU: PRZECIĄŻENIE CNS";
-            ds.innerText = "Słaby sen rejestrowany w ostatnich dniach. Twój układ nerwowy potrzebuje oddechu.";
-            ac.innerText = `KOREKTA PLANU: Zamiast ${planned}, zrób lekkie rozbieganie Z1 / Joga.`;
-        } else if (tsb < -25) {
-            st.innerText = "⚠️ STATUS: WYSOKIE ZMĘCZENIE";
-            ds.innerText = `Twoje TSB wynosi ${tsb}. Znajdujesz się w głębokim "dołku" adaptacyjnym. Ryzyko spadku mocy.`;
-            ac.innerText = `ZALECENIE: Jeśli to możliwe, przełóż ${planned} i wykonaj dzień Wolny.`;
-        } else if (tsb >= -25 && tsb < -5) {
-            st.innerText = "🏗️ STATUS: PRODUKTYWNY";
-            ds.innerText = `Jesteś w optymalnej strefie bodźcowania (TSB: ${tsb}). Układ skutecznie adaptuje się do wysiłku.`;
-            ac.innerText = `DZISIAJ: Wykonaj zgodnie z planem: ${planned}.`;
-        } else {
-            st.innerText = "🚀 STATUS: ŚWIEŻOŚĆ";
-            ds.innerText = "Parametry obciążeń wskazują na dużą gotowość organizmu do generowania wysokiej mocy.";
-            ac.innerText = `DZISIAJ: Zrealizuj zaplanowany ${planned} ze 100% zaangażowaniem.`;
-        }
-    }
-
-    function updateChart(h) {
-        if(h.length === 0) return;
-        const ctx = document.getElementById('mainChart').getContext('2d');
-        if (chart) chart.destroy();
-        chart = new Chart(ctx, {
-            type: 'line',
-            data: { 
-                labels: h.map(x=>x.date.toLocaleDateString()), 
-                datasets: [{ label: 'TSS Load', data: h.map(x=>x.tss), borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.05)' }] 
-            },
-            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
         });
     }
 
-    function showToast(m) {
+    function updateChart(ctl, atl) {
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        if(chart) chart.destroy();
+        chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Forma (CTL)', 'Zmęczenie (ATL)'],
+                datasets: [{ data: [ctl, atl], backgroundColor: ['#00a7d1', '#ff3b30'] }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#3d4246' } } } }
+        });
+    }
+
+    function toast(m) {
         const t = document.getElementById('toast');
         t.innerText = m; t.style.display = 'block';
         setTimeout(() => t.style.display = 'none', 3000);
     }
 
-    // --- AI CHATBOT LOGIC ---
-    function toggleChat() {
-        const w = document.getElementById('ai-chat-window');
-        w.style.display = w.style.display === 'flex' ? 'none' : 'flex';
-    }
-
-    function handleChat() {
-        const input = document.getElementById('chat-input');
-        const q = input.value.trim().toLowerCase();
-        if(!q) return;
-
-        const box = document.getElementById('chat-box');
-        box.innerHTML += `<div class="chat-bubble user">${input.value}</div>`;
-        input.value = '';
-
-        let tsb = parseInt(document.getElementById('val-tsb').innerText);
-        if(isNaN(tsb)) tsb = 0;
-        let ctl = parseInt(document.getElementById('val-ctl').innerText);
-        if(isNaN(ctl)) ctl = 0;
-        
-        const wkg = document.getElementById('val-wkg').innerText;
-        const todayIdx = (new Date().getDay() + 6) % 7;
-        const planned = store.config.plan[todayIdx];
-        const pains = store.todayReport ? store.todayReport.pains : '';
-
-        setTimeout(() => {
-            let response = "";
-            if (q.includes("trening") || q.includes("robić") || q.includes("plan")) {
-                if(pains !== 'brak' && pains.length > 2) {
-                    response = `Uważaj! Ostatnio zgłosiłeś problem: "${pains}". Mimo że Twój plan zakłada ${planned}, jako trener rekomenduję całkowite odpuszczenie tej jednostki.`;
-                } else if(tsb < -20) {
-                    response = `Twoje TSB to ${tsb}. Oznacza to ogromne nawarstwienie zmęczenia. Nawet jeśli masz w planie ${planned}, zrób z tego "Recovery Ride".`;
-                } else {
-                    response = `Twój plan zakłada dziś: ${planned}. TSB na poziomie ${tsb} oznacza, że masz odpowiednie zasoby energetyczne do wykonania zadania. Do dzieła!`;
-                }
-            } else if (q.includes("form") || q.includes("status") || q.includes("w/kg") || q.includes("wydoln")) {
-                response = `Zbudowałeś silnik o wartości ${ctl} CTL, a stosunek mocy do wagi to ${wkg} W/kg. Pułap tlenowy utrzymuje się na poziomie ${store.vo2}. Kawał dobrej roboty!`;
-            } else if (q.includes("zawod") || q.includes("start")) {
-                response = `Zegar tyka! Dni do celu: ${document.getElementById('val-days').innerText}. Pamiętaj, aby przed startem zredukować TSS o połowę, by wyprowadzić TSB na +15.`;
-            } else if (q.includes("cześć") || q.includes("hej")) {
-                response = "Witaj! Twój dashboard zasilany modelem AI (Gemini) działa i analizuje twarde dane z CSV. W czym mogę pomóc przed dzisiejszym treningiem?";
-            } else {
-                response = `Patrząc na Twoje obciążenie rzędu ${ctl} CTL, nasuwa się jeden wniosek: konsekwencja popłaca. Skupmy się dzisiaj na realizacji zaplanowanego "${planned}".`;
-            }
-
-            box.innerHTML += `<div class="chat-bubble bot">${response}</div>`;
-            box.scrollTop = box.scrollHeight;
-        }, 600);
+    function clearData() {
+        if(confirm("Czy na pewno usunąć wszystkie dane?")) { localStorage.clear(); location.reload(); }
     }
 </script>
 </body>
