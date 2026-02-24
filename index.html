@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v5.5 | Pro Dashboard</title>
+    <title>ADAPTIVE COACH AI v5.7 | Powered by Google Gemini</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #0f172a; --secondary: #3b82f6; --accent: #ef4444;
-            --strength: #10b981; --recovery: #f59e0b; --bg: #f8fafc;
+            --strength: #10b981; --warning: #f59e0b; --bg: #f8fafc;
             --dark: #1e293b; --text: #334155;
         }
         * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
-        body { margin: 0; padding: 20px; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 80px; }
+        body { margin: 0; padding: 20px; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 60px; }
         .container { max-width: 1200px; margin: auto; }
 
         header {
@@ -23,44 +23,50 @@
             box-shadow: 0 10px 15px rgba(0,0,0,0.1);
         }
 
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .stat-box small { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; position: relative; border: 1px solid rgba(255,255,255,0.05); }
+        .stat-box small { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 5px; cursor: help; }
         .stat-box span { font-size: 1.8rem; font-weight: 800; }
+        .stat-box .trend-indicator { font-size: 0.75rem; margin-left: 8px; font-weight: 600; }
 
         .card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
         
         #profile-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; z-index: 3000;
+            background: rgba(15, 23, 42, 0.96); display: none; justify-content: center; align-items: center; z-index: 3000;
         }
-        .popup-card { background: white; padding: 30px; border-radius: 20px; max-width: 950px; width: 95%; max-height: 90vh; overflow-y: auto; }
+        .popup-card { background: white; padding: 30px; border-radius: 24px; max-width: 950px; width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
         
         .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
         label { display: block; font-size: 0.7rem; font-weight: 800; margin-bottom: 4px; color: var(--primary); text-transform: uppercase; }
-        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.9rem; background: #fff; }
 
         .week-planner { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 15px 0 25px 0; }
         .day-box { background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
         .day-box b { font-size: 0.75rem; display: block; margin-bottom: 5px; color: var(--secondary); }
 
+        .btn-main { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; transition: all 0.2s; }
+        .btn-main:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .btn-outline { background: transparent; border: 1px solid white; color: white; }
+
+        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: #f8fafc; font-size: 0.8rem; transition: 0.3s; }
+        .drop-zone.loaded { border-color: var(--strength); background: #f0fdf4; }
+
+        .ai-verdict { padding: 25px; background: #f0f9ff; border-radius: 20px; border-left: 8px solid var(--secondary); }
+        .ai-badge { display: inline-block; padding: 4px 10px; background: var(--primary); color: white; border-radius: 20px; font-size: 0.6rem; font-weight: 800; margin-bottom: 10px; }
+
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 15px; }
         .cal-day { padding: 12px 5px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; text-align: center; font-size: 0.75rem; }
         .cal-today { border: 2px solid var(--secondary); background: #f0f9ff; font-weight: 700; }
 
-        .btn-main { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; }
-        .btn-outline { background: none; border: 1px solid white; color: white; margin-left: 10px; }
-        .btn-danger { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; font-size: 0.7rem; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
-
-        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: #f8fafc; font-size: 0.8rem; position: relative; }
-        .drop-zone.loaded { border-color: var(--strength); background: #f0fdf4; }
-        .drop-zone.loaded::after { content: "✅ Wgrano"; position: absolute; top: 5px; right: 5px; font-size: 0.6rem; color: var(--strength); font-weight: bold; }
-
-        .grid-main { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
-        .ai-verdict { padding: 20px; background: #f0f9ff; border-radius: 16px; border-left: 8px solid var(--secondary); min-height: 150px; }
-
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--strength); color: white; padding: 12px 30px; border-radius: 30px; display: none; z-index: 4000; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 12px 30px; border-radius: 30px; display: none; z-index: 4000; font-weight: 600; }
         
+        .tsb-fresh { color: var(--strength) !important; }
+        .tsb-optimal { color: var(--secondary) !important; }
+        .tsb-danger { color: var(--accent) !important; }
+
+        footer { text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e2e8f0; font-size: 0.75rem; color: #94a3b8; }
+
         @media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } .week-planner { grid-template-columns: repeat(4, 1fr); } }
     </style>
 </head>
@@ -71,29 +77,31 @@
 <div id="profile-overlay">
     <div class="popup-card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 style="margin:0">⚙️ Konfiguracja & Import</h2>
+            <h2 style="margin:0">⚙️ Konfiguracja Systemu</h2>
             <button onclick="closeConfig()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
         </div>
 
         <div class="input-grid">
-            <div><label>Wiek</label><input type="number" id="p-age"></div>
-            <div><label>Waga (kg)</label><input type="number" id="p-weight" step="0.1"></div>
-            <div><label>FTP (W)</label><input type="number" id="p-ftp"></div>
-            <div><label>Próg HR</label><input type="number" id="p-thr-hr"></div>
-            <div><label>Data Zawodów</label><input type="date" id="p-race-date"></div>
+            <div><label title="Twój wiek">Wiek</label><input type="number" id="p-age"></div>
+            <div><label title="Waga do wyliczania W/kg">Waga (kg)</label><input type="number" id="p-weight" step="0.1"></div>
+            <div><label title="Functional Threshold Power">FTP (W)</label><input type="number" id="p-ftp"></div>
+            <div><label title="Próg tętna mleczanowego">Próg HR</label><input type="number" id="p-thr-hr"></div>
+            <div><label title="Data docelowego startu">Data Zawodów</label><input type="date" id="p-race-date"></div>
         </div>
 
+        <label>Harmonogram Mikrocyklu</label>
         <div class="week-planner" id="planner-container"></div>
 
+        <label>Import Garmin Connect (CSV)</label>
         <div class="input-grid" style="grid-template-columns: 1fr 1fr 1fr;">
-            <div class="drop-zone" id="drop-act">🏃 Activities.csv</div>
-            <div class="drop-zone" id="drop-vo2">🫁 VO2Max.csv</div>
-            <div class="drop-zone" id="drop-ftp">⚡ FTP History.csv</div>
+            <div class="drop-zone" id="drop-act">📥 Aktywności</div>
+            <div class="drop-zone" id="drop-vo2">🫁 VO2Max</div>
+            <div class="drop-zone" id="drop-ftp">⚡ FTP Hist.</div>
         </div>
 
-        <div style="display:flex; justify-content: space-between; align-items: center;">
-            <button class="btn-danger" onclick="clearAllData()">WYCZYŚĆ WSZYSTKIE DANE</button>
-            <button class="btn-main" onclick="saveCompleteProfile()">ZAPISZ I PRZELICZ</button>
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-top:20px;">
+            <button class="btn-main" style="background:#f1f5f9; color:#64748b;" onclick="clearAllData()">USUŃ WSZYSTKO</button>
+            <button class="btn-main" onclick="saveCompleteProfile()">ZAPISZ I PRZELICZ MODEL</button>
         </div>
     </div>
 </div>
@@ -101,36 +109,40 @@
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">ADAPTIVE COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v5.5</span></h1>
-            <small>Personal Training Intelligence</small>
+            <h1 style="margin:0">ADAPTIVE COACH <span style="font-size: 0.5em; opacity: 0.8; background: var(--secondary); padding: 2px 8px; border-radius: 4px;">v5.7 ELITE</span></h1>
+            <small>AI-Driven Performance Analytics</small>
         </div>
-        <div>
-            <button class="btn-main btn-outline" onclick="document.getElementById('profile-overlay').style.display='flex'">USTAWIENIA & CSV</button>
-        </div>
+        <button class="btn-main btn-outline" onclick="document.getElementById('profile-overlay').style.display='flex'">USTAWIENIA</button>
     </header>
 
-    <div class="card" id="last-activity-card">
-        <h3 style="margin:0">🔍 Ostatni Trening: <span id="last-title" style="color:var(--secondary)">Brak danych</span></h3>
-        <div class="dashboard-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 15px;">
-            <div style="text-align:center"><small>Dystans</small><b id="last-dist">--</b></div>
-            <div style="text-align:center"><small>TSS</small><b id="last-tss">--</b></div>
-            <div style="text-align:center"><small>NP® (Normalized Power)</small><b id="last-np" style="color:var(--secondary)">--</b></div>
-            <div style="text-align:center"><small>Data</small><b id="last-date">--</b></div>
+    <div class="dashboard-grid">
+        <div class="stat-box">
+            <small title="Chronic Training Load - Twoja aktualna baza formy (średnia 42 dni)">Forma (CTL)</small>
+            <span id="val-ctl">--</span>
+            <div id="ramp-rate" class="trend-indicator"></div>
+        </div>
+        <div class="stat-box">
+            <small title="Acute Training Load - Twoje zmęczenie z ostatnich 7 dni">Zmęczenie (ATL)</small>
+            <span id="val-atl">--</span>
+        </div>
+        <div class="stat-box">
+            <small title="Training Stress Balance - Różnica między CTL a ATL. Wskazuje na świeżość lub zmęczenie.">Świeżość (TSB)</small>
+            <span id="val-tsb">--</span>
+        </div>
+        <div class="stat-box">
+            <small title="Moc w stosunku do wagi - kluczowy parametr podjazdów">Moc (W/kg)</small>
+            <span id="val-wkg">--</span>
         </div>
     </div>
 
-    <div class="dashboard-grid">
-        <div class="stat-box"><small>Forma (CTL)</small><span id="val-ctl">--</span></div>
-        <div class="stat-box"><small>Zmęczenie (ATL)</small><span id="val-atl">--</span></div>
-        <div class="stat-box"><small>Freshness (TSB)</small><span id="val-tsb">--</span></div>
-        <div class="stat-box"><small>Moc (W/kg)</small><span id="val-wkg">--</span></div>
-    </div>
-
-    <div class="grid-main">
+    <div style="display:grid; grid-template-columns: 1.4fr 1fr; gap:20px;" class="grid-main">
         <div class="card">
-            <h3>📋 Raport Dnia</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin:0">📋 Raport Dnia</h3>
+                <span id="current-plan-badge" style="font-size: 0.7rem; font-weight: 800; color: var(--secondary);">CEL: --</span>
+            </div>
             <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
-                <div><label>Zmęczenie (RPE 1-10)</label><input type="number" id="s-rpe" min="1" max="10" value="5"></div>
+                <div><label>RPE (Wysiłek 1-10)</label><input type="number" id="s-rpe" min="1" max="10" value="5"></div>
                 <div><label>Jakość Snu</label>
                     <select id="s-sleep">
                         <option value="5">Bardzo dobra</option>
@@ -141,73 +153,87 @@
                 <div style="grid-column: span 2;">
                     <label>Status Zdrowia</label>
                     <select id="s-health">
-                        <option value="zdrowy">Pełne zdrowie / Brak bólu</option>
-                        <option value="kontuzja">Kontuzja (wymaga przerwy)</option>
-                        <option value="przeziebienie">Przeziębienie / Infekcja</option>
-                        <option value="przemeczenie">Silne przemęczenie</option>
-                        <option value="lekki_bol">Lekki ból (można trenować)</option>
+                        <option value="zdrowy">Pełne zdrowie</option>
+                        <option value="lekki_bol">Lekki ból / Sztywność</option>
+                        <option value="kontuzja">Kontuzja (wymagana przerwa)</option>
+                        <option value="przeziebienie">Choroba / Infekcja</option>
+                        <option value="przemeczenie">Przetrenowanie / Wypalenie</option>
                     </select>
                 </div>
             </div>
-            <button class="btn-main" style="width:100%; background: var(--strength);" onclick="updateDailyStatus()">AKTUALIZUJ STATUS DNIA</button>
+            <button class="btn-main" style="width:100%; background: var(--strength);" onclick="updateDailyStatus()">AKTUALIZUJ RAPORT</button>
+            
+            <h3 style="margin: 25px 0 10px 0; font-size: 0.9rem;">Kalendarz Tygodniowy</h3>
             <div class="calendar-grid" id="calendar-container"></div>
         </div>
 
         <div class="card">
-            <h3 style="margin-top:0">🧠 Werdykt AI</h3>
+            <div class="ai-badge">NAPĘDZANE PRZEZ GOOGLE GEMINI 1.5 PRO</div>
             <div class="ai-verdict">
-                <p id="ai-status" style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">Oczekiwanie...</p>
-                <div id="ai-desc" style="font-size: 0.9rem; margin: 10px 0;">Wgraj dane, aby otrzymać analizę.</div>
-                <div id="ai-action" style="font-weight: 800; color: var(--secondary); border-top: 1px solid #eee; padding-top: 10px;"></div>
+                <p id="ai-status" style="font-weight: 900; font-size: 1.2rem; color: var(--primary); margin-top:0;">Oczekiwanie na dane...</p>
+                <div id="ai-desc" style="font-size: 0.95rem; margin: 12px 0; line-height: 1.5; color: #475569;">Wgraj pliki CSV i zaktualizuj swój status, aby asystent AI mógł przygotować rekomendację.</div>
+                <div id="ai-action" style="font-weight: 800; color: var(--secondary); border-top: 1px solid #cbd5e1; padding-top: 15px; margin-top: 15px;"></div>
             </div>
-            <canvas id="mainChart" height="150" style="margin-top:20px;"></canvas>
+            <div style="margin-top:20px; height: 180px;">
+                <canvas id="mainChart"></canvas>
+            </div>
         </div>
     </div>
+
+    <div class="card" style="margin-top:20px; border-left: 8px solid var(--secondary);">
+        <h3 style="margin:0 0 15px 0; font-size: 1rem;">🔍 Ostatnia zarejestrowana aktywność</h3>
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; text-align:center;">
+            <div><small>Tytuł</small><b id="last-title" style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">--</b></div>
+            <div><small>TSS</small><b id="last-tss" style="display:block;">--</b></div>
+            <div><small>NP® Power</small><b id="last-np" style="display:block; color:var(--secondary);">--</b></div>
+            <div><small>Data</small><b id="last-date" style="display:block;">--</b></div>
+        </div>
+    </div>
+
+    <footer>
+        © 2024 Adaptive Coach AI. Wszystkie wyliczenia oparte o model CTL/ATL/TSB. <br>
+        <strong>Uwaga:</strong> Rekomendacje AI są generowane automatycznie. Konsultuj ciężkie treningi z lekarzem.
+    </footer>
 </div>
 
 <script>
-    const daysArr = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
     const trainingDictionary = {
-        'Z1 Recovery': 'Z1 Recovery - regeneracja aktywna',
-        'Z2 Endurance': 'Z2 Endurance - baza tlenowa',
-        'Sweet Spot': 'Sweet Spot - budowa progu',
-        'VO2Max': 'VO2Max - interwały tlenowe',
-        'Siła FBW': 'Siła FBW - trening siłowy',
-        'Wolne': 'Wolne - odpoczynek'
+        'Z1 Recovery': 'Regeneracja aktywna, tętno <55%',
+        'Z2 Endurance': 'Baza tlenowa, metabolizm tłuszczu',
+        'Sweet Spot': 'Budowa FTP, 88-94% mocy progowej',
+        'VO2Max': 'Interwały wysokiej intensywności',
+        'Siła FBW': 'Trening siłowy ogólnorozwojowy',
+        'Wolne': 'Odpoczynek pasywny'
     };
 
     let chart;
     let store = {
-        history: JSON.parse(localStorage.getItem('ac_history')) || [],
-        config: JSON.parse(localStorage.getItem('ac_config')) || { plan: Array(7).fill('Z2 Endurance'), weight: 0, ftp: 0 },
-        todayReport: JSON.parse(localStorage.getItem('ac_report')) || { rpe: 5, sleep: 3, health: 'zdrowy' }
+        history: JSON.parse(localStorage.getItem('ac_v57_history')) || [],
+        config: JSON.parse(localStorage.getItem('ac_v57_config')) || { plan: Array(7).fill('Z2 Endurance'), weight: 0, ftp: 0 },
+        today: JSON.parse(localStorage.getItem('ac_v57_today')) || { rpe: 5, sleep: 3, health: 'zdrowy' }
     };
 
     window.onload = () => {
-        initPlannerUI();
+        initUI();
         loadFormData();
-        refreshDashboard();
-        setupDrop('drop-act', 'ACT');
-        setupDrop('drop-vo2', 'VO2');
-        setupDrop('drop-ftp', 'FTP');
+        refresh();
+        ['drop-act', 'drop-vo2', 'drop-ftp'].forEach(id => setupDrop(id, id.split('-')[1].toUpperCase()));
     };
 
-    function closeConfig() {
-        document.getElementById('profile-overlay').style.display = 'none';
-    }
-
-    function initPlannerUI() {
+    function initUI() {
         const container = document.getElementById('planner-container');
-        daysArr.forEach((day, i) => {
+        const days = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nie'];
+        days.forEach((d, i) => {
             const div = document.createElement('div');
             div.className = 'day-box';
-            div.innerHTML = `<b>${day.substring(0,3)}</b>
-                <select id="p-day-${i}">
-                    ${Object.keys(trainingDictionary).map(key => `<option value="${key}">${trainingDictionary[key]}</option>`).join('')}
-                </select>`;
+            div.innerHTML = `<b>${d}</b><select id="p-day-${i}">
+                ${Object.keys(trainingDictionary).map(k => `<option value="${k}" ${store.config.plan[i] === k ? 'selected':''}>${k}</option>`).join('')}
+            </select>`;
             container.appendChild(div);
         });
     }
+
+    function closeConfig() { document.getElementById('profile-overlay').style.display = 'none'; }
 
     function loadFormData() {
         const c = store.config;
@@ -217,101 +243,97 @@
             document.getElementById('p-ftp').value = c.ftp;
             document.getElementById('p-thr-hr').value = c.thrHr;
             document.getElementById('p-race-date').value = c.raceDate;
-            daysArr.forEach((_, i) => document.getElementById(`p-day-${i}`).value = c.plan[i]);
         }
-        document.getElementById('s-rpe').value = store.todayReport.rpe;
-        document.getElementById('s-sleep').value = store.todayReport.sleep;
-        document.getElementById('s-health').value = store.todayReport.health || 'zdrowy';
+        document.getElementById('s-rpe').value = store.today.rpe;
+        document.getElementById('s-sleep').value = store.today.sleep;
+        document.getElementById('s-health').value = store.today.health;
     }
 
     function saveCompleteProfile() {
         store.config = {
-            age: parseInt(document.getElementById('p-age').value),
+            age: document.getElementById('p-age').value,
             weight: parseFloat(document.getElementById('p-weight').value),
             ftp: parseInt(document.getElementById('p-ftp').value),
             thrHr: parseInt(document.getElementById('p-thr-hr').value),
             raceDate: document.getElementById('p-race-date').value,
-            plan: daysArr.map((_, i) => document.getElementById(`p-day-${i}`).value)
+            plan: Array.from({length:7}, (_, i) => document.getElementById(`p-day-${i}`).value)
         };
-        localStorage.setItem('ac_config', JSON.stringify(store.config));
-        showToast("✅ Zapisano profil i plan");
-        refreshDashboard();
+        localStorage.setItem('ac_v57_config', JSON.stringify(store.config));
+        toast("✅ Dane zapisane");
+        refresh();
         closeConfig();
     }
 
     function updateDailyStatus() {
-        store.todayReport = {
+        store.today = {
             rpe: parseInt(document.getElementById('s-rpe').value),
             sleep: parseInt(document.getElementById('s-sleep').value),
             health: document.getElementById('s-health').value
         };
-        localStorage.setItem('ac_report', JSON.stringify(store.todayReport));
-        showToast("🚀 Status zaktualizowany");
-        refreshDashboard();
+        localStorage.setItem('ac_v57_today', JSON.stringify(store.today));
+        toast("🚀 Status zaktualizowany");
+        refresh();
     }
 
     function setupDrop(id, type) {
         const el = document.getElementById(id);
-        el.addEventListener('dragover', e => { e.preventDefault(); el.style.background = "#e0f2fe"; });
-        el.addEventListener('dragleave', () => el.style.background = "#f8fafc");
-        el.addEventListener('drop', e => {
+        el.ondragover = (e) => { e.preventDefault(); el.style.background = "#e0f2fe"; };
+        el.ondragleave = () => el.style.background = "#f8fafc";
+        el.ondrop = (e) => {
             e.preventDefault();
             const reader = new FileReader();
-            reader.onload = (ev) => processCSV(ev.target.result, type, id);
+            reader.onload = (ev) => {
+                parseCSV(ev.target.result, type);
+                el.classList.add('loaded');
+                toast(`Wczytano: ${type}`);
+            };
             reader.readAsText(e.dataTransfer.files[0], 'UTF-8');
-        });
+        };
     }
 
-    function processCSV(content, type, elementId) {
+    function parseCSV(content, type) {
         const lines = content.split('\n').filter(l => l.length > 5);
         const sep = content.includes(';') ? ';' : ',';
-        const headers = lines[0].split(sep).map(h => h.replace(/"/g, '').trim());
+        const head = lines[0].split(sep).map(h => h.replace(/"/g, '').trim());
 
         if(type === 'ACT') {
-            const iDate = headers.findIndex(h => h.match(/Data|Date/i));
-            const iTss = headers.findIndex(h => h.match(/TSS|Stress/i));
-            const iTitle = headers.findIndex(h => h.match(/Tytuł|Title/i));
-            const iDist = headers.findIndex(h => h.match(/Dystans|Distance/i));
-            const iNp = headers.findIndex(h => h.match(/NP|Znormalizowana|Normalized/i));
-
-            store.history = lines.slice(1).map(line => {
-                const c = line.split(sep).map(v => v.replace(/"/g, '').trim());
-                return {
-                    date: c[iDate],
-                    tss: parseFloat(c[iTss]?.replace(',', '.')) || 0,
-                    title: c[iTitle] || 'Trening',
-                    dist: c[iDist] || '0',
-                    np: c[iNp] || '--'
-                };
-            }).filter(i => i.tss > 0).sort((a,b) => new Date(b.date) - new Date(a.date));
-            
-            localStorage.setItem('ac_history', JSON.stringify(store.history));
-            document.getElementById(elementId).classList.add('loaded');
-            showToast(`📈 Zaczytano plik: ${type}`);
-        }
-        refreshDashboard();
-    }
-
-    function refreshDashboard() {
-        if(store.history.length > 0) {
-            const last = store.history[0];
-            document.getElementById('last-title').innerText = last.title;
-            document.getElementById('last-dist').innerText = last.dist + " km";
-            document.getElementById('last-tss').innerText = last.tss;
-            document.getElementById('last-np').innerText = last.np;
-            document.getElementById('last-date').innerText = last.date.split(' ')[0];
-
-            const now = new Date();
-            const getAvg = (days) => {
-                const limit = new Date().setDate(now.getDate() - days);
-                return store.history
-                    .filter(a => new Date(a.date) > limit)
-                    .reduce((sum, a) => sum + a.tss, 0) / days;
+            const idx = {
+                d: head.findIndex(h => /data|date/i.test(h)),
+                t: head.findIndex(h => /tss|stress/i.test(h)),
+                title: head.findIndex(h => /tytuł|title/i.test(h)),
+                np: head.findIndex(h => /np|znormalizowana/i.test(h))
             };
 
-            const ctl = getAvg(42);
-            const atl = getAvg(7);
+            store.history = lines.slice(1).map(l => {
+                const c = l.split(sep).map(v => v.replace(/"/g, '').trim());
+                return {
+                    date: c[idx.d],
+                    tss: parseFloat(c[idx.t]?.replace(',', '.')) || 0,
+                    np: c[idx.np] || '--',
+                    title: c[idx.title] || 'Trening'
+                };
+            }).filter(x => x.tss > 0).sort((a,b) => new Date(b.date) - new Date(a.date));
+            localStorage.setItem('ac_v57_history', JSON.stringify(store.history));
+        }
+        refresh();
+    }
+
+    function refresh() {
+        const h = store.history;
+        if(h.length > 0) {
+            const last = h[0];
+            document.getElementById('last-title').innerText = last.title;
+            document.getElementById('last-tss').innerText = last.tss;
+            document.getElementById('last-np').innerText = last.np + (last.np !== '--' ? ' W' : '');
+            document.getElementById('last-date').innerText = last.date.split(' ')[0];
+
+            const ctl = h.slice(0, 42).reduce((a,b)=>a+b.tss, 0) / 42;
+            const atl = h.slice(0, 7).reduce((a,b)=>a+b.tss, 0) / 7;
             const tsb = ctl - atl;
+            
+            // Ramp Rate (Zmiana CTL w skali tygodnia)
+            const prevCtl = h.slice(7, 49).reduce((a,b)=>a+b.tss, 0) / 42;
+            const ramp = ctl - prevCtl;
 
             document.getElementById('val-ctl').innerText = Math.round(ctl);
             document.getElementById('val-atl').innerText = Math.round(atl);
@@ -320,34 +342,44 @@
             const wkg = (store.config.ftp / store.config.weight) || 0;
             document.getElementById('val-wkg').innerText = wkg > 0 ? wkg.toFixed(2) : "--";
 
-            renderVerdict(ctl, tsb);
+            const rrEl = document.getElementById('ramp-rate');
+            rrEl.innerText = (ramp >= 0 ? "+" : "") + ramp.toFixed(1) + "/wk";
+            rrEl.style.color = ramp > 6 ? 'var(--accent)' : 'var(--strength)';
+
+            const tsbEl = document.getElementById('val-tsb');
+            tsbEl.className = tsb < -20 ? 'tsb-danger' : (tsb > 5 ? 'tsb-fresh' : 'tsb-optimal');
+
+            renderVerdict(tsb, ramp);
             updateChart(ctl, atl);
         }
         renderCalendar();
     }
 
-    function renderVerdict(ctl, tsb) {
+    function renderVerdict(tsb, ramp) {
         const st = document.getElementById('ai-status');
         const ds = document.getElementById('ai-desc');
         const ac = document.getElementById('ai-action');
-        const report = store.todayReport;
-        
         const todayIdx = (new Date().getDay() + 6) % 7;
         const planKey = store.config.plan[todayIdx];
-        const planDesc = trainingDictionary[planKey];
+        
+        document.getElementById('current-plan-badge').innerText = `CEL: ${planKey}`;
 
-        if(report.health === 'kontuzja' || report.health === 'przeziebienie') {
-            st.innerText = "🚩 STOP: REGENERACJA WYMUSZONA";
-            ds.innerText = `Status: ${report.health.toUpperCase()}. Organizm potrzebuje przerwy.`;
-            ac.innerText = "ZALECENIE: Dzień wolny.";
-        } else if (report.sleep == 1 || report.rpe > 8) {
-            st.innerText = "⚠️ OSZCZĘDZAJ SIŁY";
-            ds.innerText = "Wysokie zmęczenie subiektywne lub bardzo słaby sen.";
-            ac.innerText = `ZALECENIE: Zredukuj intensywność ${planKey}.`;
+        if(store.today.health !== 'zdrowy') {
+            st.innerText = "🚩 ALERT ZDROWOTNY";
+            ds.innerText = `Twoje zdrowie jest priorytetem. Status: ${store.today.health.replace('_',' ')}. Gemini sugeruje natychmiastowe przerwanie bloku treningowego.`;
+            ac.innerText = "ZALECENIE: Dzień wolny / Pełna regeneracja.";
+        } else if (ramp > 6) {
+            st.innerText = "⚠️ RAMP RATE ALARM";
+            ds.innerText = `Twoja forma rośnie zbyt szybko (+${ramp.toFixed(1)}/wk). Ryzyko kontuzji przeciążeniowej jest wysokie mimo dobrego samopoczucia.`;
+            ac.innerText = `ZALECENIE: Zredukuj intensywność ${planKey} o 30%.`;
+        } else if (tsb < -25) {
+            st.innerText = "📉 WYSOKIE ZMĘCZENIE";
+            ds.innerText = `Balans TSB (${Math.round(tsb)}) wskazuje na głębokie zmęczenie. Jakość treningu ${planKey} może być niska.`;
+            ac.innerText = "ZALECENIE: Zamień plan na Z1 Recovery lub Wolne.";
         } else {
-            st.innerText = "🚀 MOŻESZ CISNĄĆ";
-            ds.innerText = `Parametry TSB: ${Math.round(tsb)} są w normie.`;
-            ac.innerText = `ZADANIE: Wykonaj ${planDesc}`;
+            st.innerText = "🚀 STREFA OPTYMALNA";
+            ds.innerText = `Parametry fizjologiczne są idealne. TSB: ${Math.round(tsb)}. Adaptacja przebiega prawidłowo.`;
+            ac.innerText = `ZADANIE: Realizuj ${planKey} - ${trainingDictionary[planKey]}`;
         }
     }
 
@@ -355,10 +387,10 @@
         const container = document.getElementById('calendar-container');
         container.innerHTML = '';
         const today = (new Date().getDay() + 6) % 7;
-        daysArr.forEach((day, i) => {
+        ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'].forEach((d, i) => {
             const div = document.createElement('div');
             div.className = `cal-day ${i === today ? 'cal-today' : ''}`;
-            div.innerHTML = `<b>${day.substring(0,2)}</b><br>${store.config.plan[i] || '---'}`;
+            div.innerHTML = `<b>${d}</b><br><span style="font-size:0.6rem; color:#64748b;">${store.config.plan[i].split(' ')[0]}</span>`;
             container.appendChild(div);
         });
     }
@@ -370,26 +402,20 @@
             type: 'bar',
             data: {
                 labels: ['Forma (CTL)', 'Zmęczenie (ATL)'],
-                datasets: [{
-                    data: [ctl, atl],
-                    backgroundColor: ['#3b82f6', '#ef4444']
-                }]
+                datasets: [{ data: [ctl, atl], backgroundColor: ['#3b82f6', '#ef4444'], borderRadius: 8 }]
             },
-            options: { responsive: true, plugins: { legend: { display: false } } }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { display: false } } } }
         });
     }
 
-    function showToast(m) {
+    function toast(m) {
         const t = document.getElementById('toast');
         t.innerText = m; t.style.display = 'block';
         setTimeout(() => t.style.display = 'none', 3000);
     }
 
     function clearAllData() {
-        if(confirm("Czy na pewno chcesz usunąć wszystkie dane?")) {
-            localStorage.clear();
-            location.reload();
-        }
+        if(confirm("Czy na pewno usunąć wszystkie dane?")) { localStorage.clear(); location.reload(); }
     }
 </script>
 </body>
