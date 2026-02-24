@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v4.9.1 | Stable Elite Dashboard</title>
+    <title>ADAPTIVE COACH AI v4.9.2 | Trend Intelligence</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -23,7 +23,6 @@
             box-shadow: 0 10px 15px rgba(0,0,0,0.1);
         }
 
-        /* Stat Boxy */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .stat-box small { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 5px; }
@@ -31,7 +30,6 @@
 
         .card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
         
-        /* Popup Profile - ROZBUDOWANY */
         #profile-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; z-index: 1000;
@@ -43,7 +41,6 @@
         label { display: block; font-size: 0.7rem; font-weight: 800; margin-bottom: 4px; color: var(--primary); text-transform: uppercase; }
         input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.9rem; }
 
-        /* Week Planner UI */
         .week-planner { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 15px 0; }
         .day-box { background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
         .day-box b { font-size: 0.75rem; display: block; margin-bottom: 5px; color: var(--secondary); }
@@ -52,105 +49,105 @@
         .btn-main:hover { background: var(--secondary); transform: translateY(-1px); }
         .btn-outline { background: none; border: 1px solid white; color: white; }
         
-        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: #f8fafc; font-size: 0.75rem; transition: 0.3s; }
-        .drop-zone:hover { border-color: var(--secondary); background: #f0f7ff; }
-
+        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: #f8fafc; font-size: 0.75rem; }
+        
         .grid-main { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
         .ai-verdict { padding: 20px; background: #f0f9ff; border-radius: 16px; border-left: 8px solid var(--secondary); }
+        .trend-badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; vertical-align: middle; }
 
         .toast { position: fixed; bottom: 20px; right: 20px; background: var(--strength); color: white; padding: 15px 30px; border-radius: 12px; display: none; z-index: 2000; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-
-        @media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } .week-planner { grid-template-columns: repeat(3, 1fr); } }
     </style>
 </head>
 <body>
 
-<div id="toast" class="toast">Dane pobrane pomyślnie!</div>
+<div id="toast" class="toast">Import zakończony sukcesem!</div>
 
 <div id="profile-overlay">
     <div class="popup-card">
         <div class="popup-header">
-            <h2 style="margin:0">⚙️ Konfiguracja Zawodnika & Planera</h2>
+            <h2 style="margin:0">⚙️ Profil & Harmonogram Elite</h2>
             <button onclick="document.getElementById('profile-overlay').style.display='none'" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
         </div>
 
-        <h3 style="font-size:0.9rem; color:var(--secondary)">1. BIOMETRIA I CELE</h3>
         <div class="input-grid">
             <div><label>Wiek</label><input type="number" id="p-age"></div>
             <div><label>Waga (kg)</label><input type="number" id="p-weight" step="0.1"></div>
-            <div><label>FTP (Waty)</label><input type="number" id="p-ftp"></div>
-            <div><label>Próg HR (BPM)</label><input type="number" id="p-thr-hr"></div>
+            <div><label>FTP (W)</label><input type="number" id="p-ftp"></div>
+            <div><label>Próg HR</label><input type="number" id="p-thr-hr"></div>
             <div><label>Max HR</label><input type="number" id="p-max-hr"></div>
-            <div><label>Data Zawodów</label><input type="date" id="p-race-date"></div>
+            <div><label>Cel startu</label><input type="date" id="p-race-date"></div>
         </div>
 
-        <h3 style="font-size:0.9rem; color:var(--secondary); margin-top:20px;">2. TYGODNIOWY HARMONOGRAM TRENINGOWY</h3>
-        <div class="week-planner" id="planner-container">
-            </div>
+        <label>📅 Twój plan tygodniowy:</label>
+        <div class="week-planner" id="planner-container"></div>
 
-        <h3 style="font-size:0.9rem; color:var(--secondary); margin-top:20px;">3. IMPORT DANYCH (CSV)</h3>
         <div class="input-grid" style="grid-template-columns: 1fr 1fr 1fr;">
             <div class="drop-zone" id="drop-act">🏃 Activities.csv</div>
-            <div class="drop-zone" id="drop-vo2">🫁 Pułap tlenowy.csv</div>
+            <div class="drop-zone" id="drop-vo2">🫁 VO2Max.csv</div>
             <div class="drop-zone" id="drop-ftp">⚡ FTP History.csv</div>
         </div>
-
-        <button class="btn-main" style="width:100%; margin-top:20px;" onclick="saveCompleteProfile()">ZAPISZ PROFIL I SYNCHRONIZUJ</button>
+        <button class="btn-main" style="width:100%" onclick="saveCompleteProfile()">ZAPISZ I SYNCHRONIZUJ AI</button>
     </div>
 </div>
 
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">ADAPTIVE COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v4.9.1 ELITE</span></h1>
-            <small>Stabilny System Zarządzania Wydolnością</small>
+            <h1 style="margin:0">COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v4.9.2 ELITE</span></h1>
+            <small>Trend Intelligence & Performance Memory</small>
         </div>
         <button class="btn-main btn-outline" onclick="document.getElementById('profile-overlay').style.display='flex'">PROFIL I PLANER</button>
     </header>
 
     <div class="card" id="last-activity-card" style="border-left: 8px solid var(--secondary);">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin:0"><span id="last-title">Oczekiwanie na dane...</span></h3>
+            <h3 style="margin:0"><span id="last-title">Ładowanie danych...</span></h3>
             <span id="last-date" style="font-size:0.8rem; font-weight:700; color:var(--secondary)"></span>
         </div>
         <div class="dashboard-grid" style="grid-template-columns: repeat(4, 1fr); margin: 15px 0 0 0;">
             <div style="text-align:center"><small>Dystans</small><br><b id="last-dist">--</b></div>
             <div style="text-align:center"><small>TSS</small><br><b id="last-tss">--</b></div>
-            <div style="text-align:center"><small>NP Power</small><br><b id="last-np">--</b></div>
-            <div style="text-align:center"><small>Avg HR</small><br><b id="last-hr">--</b></div>
+            <div style="text-align:center"><small>Moc Znorm. (NP)</small><br><b id="last-np">--</b></div>
+            <div style="text-align:center"><small>Śr. HR</small><br><b id="last-hr">--</b></div>
         </div>
     </div>
 
     <div class="dashboard-grid">
         <div class="stat-box"><small>Freshness (TSB)</small><span id="val-tsb">--</span></div>
         <div class="stat-box"><small>Forma (CTL)</small><span id="val-ctl">--</span></div>
-        <div class="stat-box"><small>W/kg Ratio</small><span id="val-wkg">--</span></div>
-        <div class="stat-box"><small>Do Zawodów</small><span id="val-days">--</span></div>
+        <div class="stat-box"><small>Moc (W/kg)</small><span id="val-wkg">--</span></div>
+        <div class="stat-box"><small>VO2Max</small><span id="val-vo2">--</span></div>
     </div>
 
     <div class="grid-main">
         <div class="card">
-            <h3 style="margin-top:0">📋 Raport Potreningowy</h3>
+            <h3 style="margin-top:0">📋 Raport Dnia</h3>
             <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
-                <div><label>Odczuwalny wysiłek (RPE)</label><input type="number" id="s-rpe" min="1" max="10" value="5"></div>
-                <div><label>Jakość Snu</label><select id="s-sleep"><option value="5">Bardzo dobra</option><option value="3">Średnia</option><option value="1">Słaba</option></select></div>
-                <div style="grid-column: span 2;"><label>Bóle / Problemy / Zdrowie</label><input type="text" id="s-pains" placeholder="Wpisz 'brak' lub opis problemu"></div>
+                <div><label>Wysiłek (RPE 1-10)</label><input type="number" id="s-rpe" min="1" max="10" value="5"></div>
+                <div><label>Jakość Snu</label>
+                    <select id="s-sleep">
+                        <option value="5">Bardzo dobra</option>
+                        <option value="3">Średnia</option>
+                        <option value="1">Słaba (Pamięć trendu!)</option>
+                    </select>
+                </div>
+                <div style="grid-column: span 2;"><label>Bóle / Zdrowie</label><input type="text" id="s-pains" placeholder="Opisz jeśli coś boli..."></div>
             </div>
-            <button class="btn-main" style="width:100%; background: var(--strength);" onclick="generateEliteVerdict()">ANALIZUJ DZISIEJSZY STATUS</button>
+            <button class="btn-main" style="width:100%; background: var(--strength);" onclick="generateTrendVerdict()">ANALIZUJ Z PAMIĘCIĄ TRENDU</button>
         </div>
 
         <div class="card">
-            <h3 style="margin-top:0">🧠 Werdykt Coach AI</h3>
+            <h3 style="margin-top:0">🧠 Werdykt Coach AI (Elite)</h3>
             <div class="ai-verdict">
-                <p id="ai-status" style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">Brak danych...</p>
-                <div id="ai-desc" style="font-size: 0.9rem; line-height: 1.4; margin: 10px 0;">Wgraj pliki CSV i wypełnij profil.</div>
+                <p id="ai-status" style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">System gotowy.</p>
+                <div id="ai-desc" style="font-size: 0.9rem; line-height: 1.4; margin: 10px 0;">Analizuję Twoje ostatnie 3 dni...</div>
                 <div id="ai-action" style="font-weight: 800; color: var(--secondary); border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 10px;"></div>
             </div>
         </div>
     </div>
 
     <div class="card">
-        <h3 style="margin-top:0">📉 Trend Performance Management (30 dni)</h3>
+        <h3 style="margin-top:0">📉 Performance Chart (PMC)</h3>
         <canvas id="mainChart" height="100"></canvas>
     </div>
 </div>
@@ -159,9 +156,10 @@
     const daysArr = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Niedz'];
     let chart;
     let store = {
-        history: JSON.parse(localStorage.getItem('v491_history')) || [],
-        config: JSON.parse(localStorage.getItem('v491_config')) || { plan: Array(7).fill('Kolarstwo Z2') },
-        vo2: localStorage.getItem('v491_vo2') || "--"
+        history: JSON.parse(localStorage.getItem('v492_history')) || [],
+        config: JSON.parse(localStorage.getItem('v492_config')) || { plan: Array(7).fill('Wolne') },
+        vo2: localStorage.getItem('v492_vo2') || "--",
+        subjectiveHistory: JSON.parse(localStorage.getItem('v492_sub_hist')) || []
     };
 
     window.onload = () => {
@@ -182,9 +180,7 @@
                 <select id="p-day-${i}">
                     <option value="Kolarstwo Z2">🚴 Z2</option>
                     <option value="Kolarstwo Interwały">⚡ Interwały</option>
-                    <option value="Bieganie">🏃 Bieg</option>
                     <option value="Siła FBW">🏋️ FBW</option>
-                    <option value="Siła Góra/Dół">🏋️ G/D</option>
                     <option value="Wolne">🛌 Wolne</option>
                 </select>`;
             container.appendChild(div);
@@ -200,9 +196,7 @@
             document.getElementById('p-thr-hr').value = c.thrHr;
             document.getElementById('p-max-hr').value = c.maxHr;
             document.getElementById('p-race-date').value = c.raceDate;
-            daysArr.forEach((_, i) => {
-                if(c.plan[i]) document.getElementById(`p-day-${i}`).value = c.plan[i];
-            });
+            daysArr.forEach((_, i) => { if(c.plan[i]) document.getElementById(`p-day-${i}`).value = c.plan[i]; });
         }
     }
 
@@ -216,9 +210,9 @@
             raceDate: document.getElementById('p-race-date').value,
             plan: daysArr.map((_, i) => document.getElementById(`p-day-${i}`).value)
         };
-        localStorage.setItem('v491_config', JSON.stringify(store.config));
+        localStorage.setItem('v492_config', JSON.stringify(store.config));
         document.getElementById('profile-overlay').style.display = 'none';
-        showToast("Profil i plan zapisany!");
+        showToast("Zapisano profil.");
         refreshDashboard();
     }
 
@@ -257,25 +251,25 @@
                 const c = l.split(d).map(v => v.replace(/"/g,''));
                 return { 
                     date: c[idxDate], 
-                    tss: parseFloat(c[idxTss]) || 0, 
+                    tss: parseFloat(c[idxTss]?.replace(',', '.')) || 0, 
                     title: c[idxTitle], 
                     dist: c[idxDist], 
                     np: c[idxNp], 
                     hr: c[idxHr] 
                 };
             }).filter(i => i.tss > 0);
-            localStorage.setItem('v491_history', JSON.stringify(store.history));
-            showToast(`Wczytano ${store.history.length} treningów!`);
+            localStorage.setItem('v492_history', JSON.stringify(store.history));
+            showToast("Wczytano aktywności.");
         } else if (type === 'VO2') {
             const last = lines[lines.length-1].split(d);
             store.vo2 = last[2] || "--";
-            localStorage.setItem('v491_vo2', store.vo2);
+            localStorage.setItem('v492_vo2', store.vo2);
         } else if (type === 'FTP') {
             const last = lines[lines.length-1].split(d);
             const val = parseInt(last.find(v => !isNaN(v) && v > 50));
             if(val) {
                 store.config.ftp = val;
-                localStorage.setItem('v491_config', JSON.stringify(store.config));
+                localStorage.setItem('v492_config', JSON.stringify(store.config));
             }
         }
         refreshDashboard();
@@ -299,41 +293,46 @@
             document.getElementById('val-tsb').innerText = Math.round(tsb);
             document.getElementById('val-ctl').innerText = Math.round(ctl);
             document.getElementById('val-wkg').innerText = store.config.weight > 0 ? (store.config.ftp / store.config.weight).toFixed(2) : "--";
+            document.getElementById('val-vo2').innerText = store.vo2;
             
-            if(store.config.raceDate) {
-                const days = Math.ceil((new Date(store.config.raceDate) - new Date())/86400000);
-                document.getElementById('val-days').innerText = days > 0 ? days : "START!";
-            }
             updateChart(h.slice(0, 30).reverse());
         }
     }
 
-    function generateEliteVerdict() {
-        const tsb = parseInt(document.getElementById('val-tsb').innerText) || 0;
+    function generateTrendVerdict() {
+        const currentTsb = parseInt(document.getElementById('val-tsb').innerText) || 0;
+        const sleep = document.getElementById('s-sleep').value;
         const pains = document.getElementById('s-pains').value;
         const todayIdx = (new Date().getDay() + 6) % 7;
-        const planned = store.config.plan ? store.config.plan[todayIdx] : "Nie ustalono";
+        const planned = store.config.plan ? store.config.plan[todayIdx] : "Wolne";
+
+        // Pamięć Trendu: Zapisz dzisiejszy sen
+        store.subjectiveHistory.push({ date: new Date().toLocaleDateString(), sleep: sleep });
+        if(store.subjectiveHistory.length > 3) store.subjectiveHistory.shift();
+        localStorage.setItem('v492_sub_hist', JSON.stringify(store.subjectiveHistory));
+
+        const badSleepTrend = store.subjectiveHistory.filter(s => s.sleep === "1").length >= 2;
 
         const st = document.getElementById('ai-status');
         const ds = document.getElementById('ai-desc');
         const ac = document.getElementById('ai-action');
 
         if (pains.toLowerCase() !== 'brak' && pains.length > 2) {
-            st.innerText = "🚩 ALARM: RYZYKO KONTUZJI";
-            ds.innerText = `Zgłoszono: ${pains}. W tej sytuacji planowane ${planned} musi zostać odwołane.`;
-            ac.innerText = "DZISIAJ: Pełna regeneracja i wizyta u fizjoterapeuty.";
-        } else if (tsb < -10) {
-            st.innerText = "🏗️ STATUS: PRODUKTYWNY (Budowanie)";
-            ds.innerText = `TSB wynosi ${tsb}. Jesteś w idealnej strefie adaptacji do obciążeń.`;
-            ac.innerText = `DZISIAJ: Wykonaj planowane ${planned}. Pamiętaj o nawodnieniu.`;
-        } else if (tsb > 5) {
-            st.innerText = "🚀 STATUS: PEŁNA ŚWIEŻOŚĆ";
-            ds.innerText = "Wskaźniki wskazują na pełną gotowość do bicia rekordów.";
-            ac.innerText = `DZISIAJ: Jeśli planowałeś ${planned}, zrób to na 105% możliwości.`;
+            st.innerText = "🚩 ALARM ZDROWOTNY";
+            ds.innerText = `Zgłoszono ból: "${pains}". Trend zmęczenia nieistotny przy ryzyku urazu.`;
+            ac.innerText = "STOP: Dziś tylko mobilizacja. Planowane " + planned + " odwołane.";
+        } else if (badSleepTrend) {
+            st.innerText = "😴 TREND: BRAK REGENERACJI";
+            ds.innerText = "To już kolejna noc ze słabym snem. Twoje TSB ("+currentTsb+") może być mylące - układ nerwowy jest przeciążony.";
+            ac.innerText = "REDUKCJA: Zamiast " + planned + " zrób 30 min jogi lub spacer.";
+        } else if (currentTsb < -15) {
+            st.innerText = "🏗️ STATUS: BUDOWANIE (PRODUKTYWNY)";
+            ds.innerText = "Jesteś w optymalnej strefie adaptacji. Organizm przyjmuje obciążenia.";
+            ac.innerText = "TRENING: Wykonaj " + planned + ". Monitoruj tętno.";
         } else {
             st.innerText = "⚖️ STATUS: NEUTRALNY";
-            ds.innerText = "Balans świeżości i obciążenia jest zachowany.";
-            ac.innerText = `DZISIAJ: Zrealizuj spokojne ${planned}.`;
+            ds.innerText = "Balans świeżości zachowany.";
+            ac.innerText = "TRENING: Realizuj planowe " + planned;
         }
     }
 
