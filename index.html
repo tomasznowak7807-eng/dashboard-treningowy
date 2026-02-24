@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v5.2 | Ultimate Baseline</title>
+    <title>ADAPTIVE COACH AI v5.3 | Ultimate Elite Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -23,13 +23,15 @@
             box-shadow: 0 10px 15px rgba(0,0,0,0.1);
         }
 
+        /* Statystyki */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .stat-box { background: var(--dark); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
         .stat-box small { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 5px; }
         .stat-box span { font-size: 1.8rem; font-weight: 800; }
 
         .card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
         
+        /* Popup Profilu */
         #profile-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; z-index: 3000;
@@ -41,15 +43,18 @@
         label { display: block; font-size: 0.7rem; font-weight: 800; margin-bottom: 4px; color: var(--primary); text-transform: uppercase; }
         input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.9rem; }
 
+        /* Planer w Profilu */
         .week-planner { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 15px 0 25px 0; }
         .day-box { background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
         .day-box b { font-size: 0.75rem; display: block; margin-bottom: 5px; color: var(--secondary); text-transform: uppercase; }
         .info-tag { font-size: 0.6rem; color: #64748b; margin-top: 5px; display: block; line-height: 1.3; }
 
+        /* Kalendarz na Dashboardzie */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 15px; }
         .cal-day { padding: 12px 5px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; text-align: center; font-size: 0.75rem; color: #475569; }
         .cal-today { border: 2px solid var(--secondary); background: #f0f9ff; font-weight: 700; color: var(--primary); box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1); }
 
+        /* Przyciski i Strefy Drop */
         .btn-main { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; transition: 0.2s; }
         .btn-main:hover { background: var(--secondary); transform: translateY(-1px); }
         .btn-outline { background: none; border: 1px solid white; color: white; }
@@ -58,9 +63,11 @@
         .drop-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: #f8fafc; font-size: 0.8rem; transition: 0.3s; }
         .drop-zone:hover { border-color: var(--secondary); background: #f0f7ff; }
 
+        /* Grid Główny i Werdykt */
         .grid-main { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
         .ai-verdict { padding: 20px; background: #f0f9ff; border-radius: 16px; border-left: 8px solid var(--secondary); }
 
+        /* AI Chat Bot */
         #ai-chat-btn {
             position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%;
             background: var(--secondary); color: white; display: flex; justify-content: center; align-items: center;
@@ -140,7 +147,7 @@
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">ADAPTIVE COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v5.2 ULTIMATE</span></h1>
+            <h1 style="margin:0">ADAPTIVE COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v5.3 ULTIMATE</span></h1>
             <small>Proactive Performance, Trend Analysis & Chatbot</small>
         </div>
         <button class="btn-main btn-outline" onclick="document.getElementById('profile-overlay').style.display='flex'">PROFIL I PLANER</button>
@@ -226,11 +233,11 @@
 
     let chart;
     let store = {
-        history: JSON.parse(localStorage.getItem('v52_history')) || [],
-        config: JSON.parse(localStorage.getItem('v52_config')) || { plan: Array(7).fill('Z2 Endurance') },
-        vo2: localStorage.getItem('v52_vo2') || "--",
-        sleepTrend: JSON.parse(localStorage.getItem('v52_sleep_trend')) || [],
-        todayReport: JSON.parse(localStorage.getItem('v52_report')) || null
+        history: JSON.parse(localStorage.getItem('v53_history')) || [],
+        config: JSON.parse(localStorage.getItem('v53_config')) || { plan: Array(7).fill('Z2 Endurance') },
+        vo2: localStorage.getItem('v53_vo2') || "--",
+        sleepTrend: JSON.parse(localStorage.getItem('v53_sleep_trend')) || [],
+        todayReport: JSON.parse(localStorage.getItem('v53_report')) || null
     };
 
     window.onload = () => {
@@ -297,7 +304,7 @@
             raceDate: document.getElementById('p-race-date').value,
             plan: daysArr.map((_, i) => document.getElementById(`p-day-${i}`).value)
         };
-        localStorage.setItem('v52_config', JSON.stringify(store.config));
+        localStorage.setItem('v53_config', JSON.stringify(store.config));
         document.getElementById('profile-overlay').style.display = 'none';
         showToast("Profil, parametry i kalendarz zaktualizowane!");
         refreshDashboard();
@@ -305,7 +312,7 @@
 
     function resetTodayReport() {
         store.todayReport = null;
-        localStorage.removeItem('v52_report');
+        localStorage.removeItem('v53_report');
         document.getElementById('s-pains').value = '';
         document.getElementById('s-rpe').value = '5';
         document.getElementById('s-sleep').value = '5';
@@ -313,23 +320,131 @@
         generateEliteVerdict(false);
     }
 
-    function parseCSVLine(line, delimiter) {
-        let result = [];
-        let inQuotes = false;
-        let currentWord = '';
-        for (let i = 0; i < line.length; i++) {
-            let char = line[i];
-            if (char === '"') {
-                inQuotes = !inQuotes;
-            } else if (char === delimiter && !inQuotes) {
+    // --- NOWY, NIEZAWODNY PARSER CSV ---
+    function processCSVContent(content, type) {
+        try {
+            // Usunięcie znaków BOM, które psują nagłówki
+            content = content.replace(/^\uFEFF/, '');
+            const lines = content.split(/\r?\n/).filter(l => l.trim() !== '');
+            if (lines.length === 0) return;
+
+            const delimiter = lines[0].includes(';') ? ';' : ',';
+
+            // Funkcja do omijania przecinków wew. cudzysłowów
+            const parseCSVLine = (line) => {
+                const result = [];
+                let currentWord = '';
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        if (inQuotes && line[i + 1] === '"') {
+                            currentWord += '"'; 
+                            i++;
+                        } else {
+                            inQuotes = !inQuotes;
+                        }
+                    } else if (char === delimiter && !inQuotes) {
+                        result.push(currentWord.trim());
+                        currentWord = '';
+                    } else {
+                        currentWord += char;
+                    }
+                }
                 result.push(currentWord.trim());
-                currentWord = '';
-            } else {
-                currentWord += char;
+                return result.map(v => v.replace(/^"|"$/g, '').trim());
+            };
+
+            if (type === 'ACT') {
+                const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase());
+                const idxDate = headers.findIndex(h => h.includes('data') || h.includes('date'));
+                const idxTss = headers.findIndex(h => h.includes('training stress score') || h.includes('tss'));
+                const idxTitle = headers.findIndex(h => h.includes('tytuł') || h.includes('title'));
+                const idxDist = headers.findIndex(h => h.includes('dystans') || h.includes('distance'));
+                const idxNp = headers.findIndex(h => h.includes('normalized power') || h.includes('np'));
+                const idxHr = headers.findIndex(h => h.includes('tętno') || h.includes('heart rate') || h.includes('avg hr'));
+
+                if (idxDate === -1 || idxTss === -1) {
+                    showToast("Błąd: W pliku brakuje kolumny z Datą lub TSS.");
+                    return;
+                }
+
+                const parsedHistory = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const c = parseCSVLine(lines[i]);
+                    if (!c[idxDate] || !c[idxTss]) continue;
+                    
+                    let rawTss = c[idxTss].replace(',', '.');
+                    let rawDist = c[idxDist] ? c[idxDist].replace(',', '.') : '0';
+                    let rawNp = c[idxNp] ? c[idxNp].replace(',', '.') : '--';
+                    
+                    const tssVal = parseFloat(rawTss);
+                    if (isNaN(tssVal) || tssVal <= 0) continue;
+
+                    const dateStr = c[idxDate].split(' ')[0];
+                    if (isNaN(new Date(dateStr).getTime())) continue;
+
+                    parsedHistory.push({ 
+                        date: c[idxDate], 
+                        tss: tssVal, 
+                        title: c[idxTitle] || 'Trening', 
+                        dist: parseFloat(rawDist) || 0, 
+                        np: rawNp !== '--' ? Math.round(parseFloat(rawNp)) : '--', 
+                        hr: c[idxHr] || '--' 
+                    });
+                }
+
+                if (parsedHistory.length > 0) {
+                    // Wymuś prawidłowe sortowanie dat od najnowszych
+                    store.history = parsedHistory.sort((a, b) => new Date(b.date.split(' ')[0]) - new Date(a.date.split(' ')[0]));
+                    localStorage.setItem('v53_history', JSON.stringify(store.history));
+                    showToast(`Zsynchronizowano ${store.history.length} aktywności.`);
+                } else {
+                    showToast("Plik odczytano, ale nie znaleziono treningów z wartością TSS.");
+                }
+
+            } else if (type === 'VO2') {
+                let updated = false;
+                for (let i = lines.length - 1; i >= 0; i--) {
+                    const cols = parseCSVLine(lines[i]);
+                    const valStr = cols[cols.length - 1];
+                    if (!valStr) continue;
+                    
+                    const val = parseFloat(valStr.replace(',', '.'));
+                    if (!isNaN(val) && val > 20 && val < 90) {
+                        store.vo2 = val;
+                        localStorage.setItem('v53_vo2', store.vo2);
+                        showToast("Trend VO2Max zaktualizowany.");
+                        updated = true;
+                        break;
+                    }
+                }
+                if(!updated) showToast("Nie wykryto liczby VO2Max.");
+                
+            } else if (type === 'FTP') {
+                let updated = false;
+                for (let i = lines.length - 1; i >= 0; i--) {
+                    const cols = parseCSVLine(lines[i]);
+                    for (let j = cols.length - 1; j >= 0; j--) {
+                        const strVal = cols[j] || '';
+                        const val = parseInt(strVal.replace(',', '.'));
+                        if (!isNaN(val) && val > 50 && val < 500) {
+                            store.config.ftp = val;
+                            localStorage.setItem('v53_config', JSON.stringify(store.config));
+                            showToast(`FTP zaktualizowane na ${val}W.`);
+                            updated = true;
+                            break;
+                        }
+                    }
+                    if(updated) break;
+                }
+                if(!updated) showToast("Brak wartości mocy w pliku FTP.");
             }
+            refreshDashboard();
+        } catch(err) {
+            console.error(err);
+            showToast("Wystąpił błąd parsowania. Sprawdź format pliku CSV.");
         }
-        result.push(currentWord.trim());
-        return result;
     }
 
     function setupDrop(id, type) {
@@ -347,62 +462,7 @@
         });
     }
 
-    function processCSVContent(content, type) {
-        const delimiter = content.includes(';') ? ';' : ',';
-        const lines = content.split(/\r?\n/).filter(l => l.trim() !== '');
-        
-        if (type === 'ACT') {
-            const headers = parseCSVLine(lines[0], delimiter).map(h => h.toLowerCase());
-            const idxDate = headers.findIndex(h => h.includes('data') || h.includes('date'));
-            const idxTss = headers.findIndex(h => h.includes('training stress score') || h.includes('tss'));
-            const idxTitle = headers.findIndex(h => h.includes('tytuł') || h.includes('title'));
-            const idxDist = headers.findIndex(h => h.includes('dystans') || h.includes('distance'));
-            const idxNp = headers.findIndex(h => h.includes('normalized power') || h.includes('np'));
-            const idxHr = headers.findIndex(h => h.includes('średnie tętno') || h.includes('heart rate') || h.includes('avg hr'));
-
-            store.history = lines.slice(1).map(l => {
-                const c = parseCSVLine(l, delimiter);
-                let rawTss = (c[idxTss] || '0').replace(',', '.');
-                let rawDist = (c[idxDist] || '0').replace(',', '.');
-                return { 
-                    date: c[idxDate], 
-                    tss: parseFloat(rawTss) || 0, 
-                    title: c[idxTitle] || 'Trening', 
-                    dist: parseFloat(rawDist) || 0, 
-                    np: c[idxNp] || '--', 
-                    hr: c[idxHr] || '--' 
-                };
-            }).filter(i => i.date && !isNaN(new Date(i.date.split(' ')[0]).getTime()) && i.tss > 0);
-            
-            store.history.sort((a, b) => new Date(b.date.split(' ')[0]) - new Date(a.date.split(' ')[0]));
-            localStorage.setItem('v52_history', JSON.stringify(store.history));
-            showToast(`Zsynchronizowano ${store.history.length} aktywności.`);
-        } else if (type === 'VO2') {
-            for (let i = lines.length - 1; i >= 0; i--) {
-                const cols = parseCSVLine(lines[i], delimiter);
-                const val = parseFloat(cols[cols.length - 1]?.replace(',', '.'));
-                if (!isNaN(val) && val > 20 && val < 90) {
-                    store.vo2 = val;
-                    localStorage.setItem('v52_vo2', store.vo2);
-                    showToast("Trend VO2Max zaktualizowany.");
-                    break;
-                }
-            }
-        } else if (type === 'FTP') {
-            for (let i = lines.length - 1; i >= 0; i--) {
-                const cols = parseCSVLine(lines[i], delimiter);
-                const val = parseInt(cols.find(v => !isNaN(parseFloat(v.replace(',','.'))) && parseFloat(v.replace(',','.')) > 50));
-                if (val) {
-                    store.config.ftp = val;
-                    localStorage.setItem('v52_config', JSON.stringify(store.config));
-                    showToast(`FTP zaktualizowane na ${val}W.`);
-                    break;
-                }
-            }
-        }
-        refreshDashboard();
-    }
-
+    // --- DASHBOARD LOGIC ---
     function refreshDashboard() {
         const now = new Date();
         const h = store.history.map(x => ({...x, date: new Date(x.date.split(' ')[0])}));
@@ -459,6 +519,7 @@
         }
     }
 
+    // --- PROACTIVE VERDICT (TREND AWARE) ---
     function generateEliteVerdict(isUpdate = false) {
         if(isUpdate) {
             store.todayReport = {
@@ -466,11 +527,11 @@
                 sleep: document.getElementById('s-sleep').value,
                 pains: document.getElementById('s-pains').value.toLowerCase().trim()
             };
-            localStorage.setItem('v52_report', JSON.stringify(store.todayReport));
+            localStorage.setItem('v53_report', JSON.stringify(store.todayReport));
             
             store.sleepTrend.push(store.todayReport.sleep);
             if(store.sleepTrend.length > 3) store.sleepTrend.shift();
-            localStorage.setItem('v52_sleep_trend', JSON.stringify(store.sleepTrend));
+            localStorage.setItem('v53_sleep_trend', JSON.stringify(store.sleepTrend));
             
             showToast("Raport zaktualizowany! Przeliczam status...");
         }
@@ -532,6 +593,7 @@
         setTimeout(() => t.style.display = 'none', 3000);
     }
 
+    // --- AI CHATBOT LOGIC ---
     function toggleChat() {
         const w = document.getElementById('ai-chat-window');
         w.style.display = w.style.display === 'flex' ? 'none' : 'flex';
@@ -571,7 +633,7 @@
             } else if (q.includes("zawod") || q.includes("start")) {
                 response = `Zegar tyka! Dni do celu: ${document.getElementById('val-days').innerText}. Pamiętaj, aby przed startem zredukować TSS o połowę, by wyprowadzić TSB na +15.`;
             } else if (q.includes("cześć") || q.includes("hej")) {
-                response = "Witaj! Twój dashboard zasilany modelem AI działa i analizuje twarde dane z CSV. W czym mogę pomóc przed dzisiejszym treningiem?";
+                response = "Witaj! Twój dashboard zasilany modelem AI (Gemini) działa i analizuje twarde dane z CSV. W czym mogę pomóc przed dzisiejszym treningiem?";
             } else {
                 response = `Patrząc na Twoje obciążenie rzędu ${ctl} CTL, nasuwa się jeden wniosek: konsekwencja popłaca. Skupmy się dzisiaj na realizacji zaplanowanego "${planned}".`;
             }
