@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAPTIVE COACH AI v4.9.2 | Trend Intelligence</title>
+    <title>ADAPTIVE COACH AI v5.0 | Calendar & Strength Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -20,7 +20,6 @@
             background: linear-gradient(135deg, var(--primary) 0%, #1e293b 100%);
             color: white; padding: 1.5rem; border-radius: 16px; margin-bottom: 20px;
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
         }
 
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
@@ -30,87 +29,77 @@
 
         .card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
         
+        /* Popup Profile */
         #profile-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; z-index: 1000;
+            background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; z-index: 2000;
         }
-        .popup-card { background: white; padding: 30px; border-radius: 20px; max-width: 900px; width: 95%; max-height: 90vh; overflow-y: auto; }
-        .popup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .popup-card { background: white; padding: 30px; border-radius: 20px; max-width: 1000px; width: 95%; max-height: 90vh; overflow-y: auto; }
         
         .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
         label { display: block; font-size: 0.7rem; font-weight: 800; margin-bottom: 4px; color: var(--primary); text-transform: uppercase; }
-        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.9rem; }
+        input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.9rem; }
 
+        /* Week Planner & Calendar */
         .week-planner { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 15px 0; }
         .day-box { background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
         .day-box b { font-size: 0.75rem; display: block; margin-bottom: 5px; color: var(--secondary); }
+        
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 10px; }
+        .cal-day { padding: 10px; background: #fff; border: 1px solid #eee; border-radius: 8px; min-height: 80px; font-size: 0.7rem; }
+        .cal-today { border: 2px solid var(--secondary); background: #f0f7ff; }
 
         .btn-main { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; transition: 0.2s; }
-        .btn-main:hover { background: var(--secondary); transform: translateY(-1px); }
-        .btn-outline { background: none; border: 1px solid white; color: white; }
+        .btn-main:hover { background: var(--secondary); }
+        .btn-reset { background: #94a3b8; font-size: 0.7rem; padding: 5px 10px; }
         
-        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: #f8fafc; font-size: 0.75rem; }
+        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; background: #f8fafc; font-size: 0.7rem; }
         
         .grid-main { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
-        .ai-verdict { padding: 20px; background: #f0f9ff; border-radius: 16px; border-left: 8px solid var(--secondary); }
-        .trend-badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; vertical-align: middle; }
+        .ai-verdict { padding: 20px; background: #f0f9ff; border-radius: 16px; border-left: 8px solid var(--secondary); position: relative; }
+        
+        .info-tag { font-size: 0.6rem; color: #64748b; margin-top: 2px; display: block; line-height: 1.2; }
 
-        .toast { position: fixed; bottom: 20px; right: 20px; background: var(--strength); color: white; padding: 15px 30px; border-radius: 12px; display: none; z-index: 2000; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        @media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } .week-planner { grid-template-columns: repeat(4, 1fr); } }
     </style>
 </head>
 <body>
 
-<div id="toast" class="toast">Import zakończony sukcesem!</div>
-
 <div id="profile-overlay">
     <div class="popup-card">
-        <div class="popup-header">
-            <h2 style="margin:0">⚙️ Profil & Harmonogram Elite</h2>
-            <button onclick="document.getElementById('profile-overlay').style.display='none'" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
+        <div style="display:flex; justify-content:space-between;">
+            <h2 style="margin-top:0">⚙️ Konfiguracja Systemu Elite</h2>
+            <button onclick="toggleProfile()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
         </div>
 
         <div class="input-grid">
-            <div><label>Wiek</label><input type="number" id="p-age"></div>
             <div><label>Waga (kg)</label><input type="number" id="p-weight" step="0.1"></div>
             <div><label>FTP (W)</label><input type="number" id="p-ftp"></div>
             <div><label>Próg HR</label><input type="number" id="p-thr-hr"></div>
-            <div><label>Max HR</label><input type="number" id="p-max-hr"></div>
-            <div><label>Cel startu</label><input type="date" id="p-race-date"></div>
+            <div><label>Data Zawodów</label><input type="date" id="p-race-date"></div>
         </div>
 
-        <label>📅 Twój plan tygodniowy:</label>
-        <div class="week-planner" id="planner-container"></div>
+        <label>📅 Planowanie Tygodniowe (Wybierz typ i intensywność):</label>
+        <div class="week-planner" id="planner-container">
+            </div>
 
-        <div class="input-grid" style="grid-template-columns: 1fr 1fr 1fr;">
-            <div class="drop-zone" id="drop-act">🏃 Activities.csv</div>
-            <div class="drop-zone" id="drop-vo2">🫁 VO2Max.csv</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top:20px;">
+            <div class="drop-zone" id="drop-act">🏃 Activities (8).csv</div>
+            <div class="drop-zone" id="drop-vo2">🫁 Pułap tlenowy.csv</div>
             <div class="drop-zone" id="drop-ftp">⚡ FTP History.csv</div>
         </div>
-        <button class="btn-main" style="width:100%" onclick="saveCompleteProfile()">ZAPISZ I SYNCHRONIZUJ AI</button>
+        <button class="btn-main" style="width:100%; margin-top:20px;" onclick="saveCompleteProfile()">ZAPISZ I SYNCHRONIZUJ CALENDAR</button>
     </div>
 </div>
 
 <div class="container">
     <header>
         <div>
-            <h1 style="margin:0">COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v4.9.2 ELITE</span></h1>
-            <small>Trend Intelligence & Performance Memory</small>
+            <h1 style="margin:0">COACH AI <span style="font-size: 0.5em; opacity: 0.7;">v5.0 ELITE</span></h1>
+            <small>Context-Aware Training Management</small>
         </div>
-        <button class="btn-main btn-outline" onclick="document.getElementById('profile-overlay').style.display='flex'">PROFIL I PLANER</button>
+        <button class="btn-main" style="background:none; border:1px solid white;" onclick="toggleProfile()">USTAWIENIA PROFILU</button>
     </header>
-
-    <div class="card" id="last-activity-card" style="border-left: 8px solid var(--secondary);">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin:0"><span id="last-title">Ładowanie danych...</span></h3>
-            <span id="last-date" style="font-size:0.8rem; font-weight:700; color:var(--secondary)"></span>
-        </div>
-        <div class="dashboard-grid" style="grid-template-columns: repeat(4, 1fr); margin: 15px 0 0 0;">
-            <div style="text-align:center"><small>Dystans</small><br><b id="last-dist">--</b></div>
-            <div style="text-align:center"><small>TSS</small><br><b id="last-tss">--</b></div>
-            <div style="text-align:center"><small>Moc Znorm. (NP)</small><br><b id="last-np">--</b></div>
-            <div style="text-align:center"><small>Śr. HR</small><br><b id="last-hr">--</b></div>
-        </div>
-    </div>
 
     <div class="dashboard-grid">
         <div class="stat-box"><small>Freshness (TSB)</small><span id="val-tsb">--</span></div>
@@ -121,51 +110,67 @@
 
     <div class="grid-main">
         <div class="card">
-            <h3 style="margin-top:0">📋 Raport Dnia</h3>
+            <h3 style="margin-top:0">📋 Raport Dnia & Aktualizacja</h3>
             <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
-                <div><label>Wysiłek (RPE 1-10)</label><input type="number" id="s-rpe" min="1" max="10" value="5"></div>
-                <div><label>Jakość Snu</label>
+                <div><label>Wysiłek RPE (1-10)</label><input type="number" id="s-rpe" min="1" max="10" value="5"></div>
+                <div><label>Sen</label>
                     <select id="s-sleep">
-                        <option value="5">Bardzo dobra</option>
-                        <option value="3">Średnia</option>
-                        <option value="1">Słaba (Pamięć trendu!)</option>
+                        <option value="5">Bardzo dobry</option>
+                        <option value="3">Średni</option>
+                        <option value="1">Słaby</option>
                     </select>
                 </div>
-                <div style="grid-column: span 2;"><label>Bóle / Zdrowie</label><input type="text" id="s-pains" placeholder="Opisz jeśli coś boli..."></div>
+                <div style="grid-column: span 2;"><label>Bóle / Zdrowie (Wpisz 'brak' aby wyczyścić)</label><input type="text" id="s-pains" placeholder="Zgłoś ból lub napisz brak"></div>
             </div>
-            <button class="btn-main" style="width:100%; background: var(--strength);" onclick="generateTrendVerdict()">ANALIZUJ Z PAMIĘCIĄ TRENDU</button>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-main" style="flex:1; background: var(--strength);" onclick="generateVerdict(true)">AKTUALIZUJ RAPORT</button>
+                <button class="btn-reset" onclick="resetTodayReport()">CZYŚĆ DZISIAJ</button>
+            </div>
+            
+            <h3 style="margin: 30px 0 10px 0;">📅 Kalendarz Treningowy</h3>
+            <div class="calendar-grid" id="calendar-container"></div>
         </div>
 
         <div class="card">
-            <h3 style="margin-top:0">🧠 Werdykt Coach AI (Elite)</h3>
-            <div class="ai-verdict">
+            <h3 style="margin-top:0">🧠 Werdykt Trenera AI (Trend-Aware)</h3>
+            <div class="ai-verdict" id="ai-box">
                 <p id="ai-status" style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">System gotowy.</p>
-                <div id="ai-desc" style="font-size: 0.9rem; line-height: 1.4; margin: 10px 0;">Analizuję Twoje ostatnie 3 dni...</div>
+                <div id="ai-desc" style="font-size: 0.9rem; line-height: 1.4; margin: 10px 0;">Analizuję trendy...</div>
                 <div id="ai-action" style="font-weight: 800; color: var(--secondary); border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 10px;"></div>
             </div>
+            
+            <h3 style="margin-top:25px">📉 Trend PMC (30 dni)</h3>
+            <canvas id="mainChart" height="150"></canvas>
         </div>
-    </div>
-
-    <div class="card">
-        <h3 style="margin-top:0">📉 Performance Chart (PMC)</h3>
-        <canvas id="mainChart" height="100"></canvas>
     </div>
 </div>
 
 <script>
     const daysArr = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Niedz'];
+    const trainingTypes = {
+        'Z2': 'Endurance (Tlen): Budowanie bazy, spalanie tłuszczu.',
+        'Sprinty': 'Sprinty (Z7): 10-30s maks. mocy, siła nerwowa.',
+        'Sweet Spot': 'Sweet Spot (Z3/Z4): 88-94% FTP, wzrost progu.',
+        'HIIT/VO2': 'HIIT (Z5): 3-5 min interwały, pułap tlenowy.',
+        'Siła GÓRA': 'Siła Góra: Wyciskanie, podciąganie, stabilizacja.',
+        'Siła DÓŁ': 'Siła Dół: Przysiady, martwy ciąg, moc nóg.',
+        'Siła FBW': 'FBW: Całościowy trening ogólnorozwojowy.',
+        'Wolne': 'Regeneracja: Czas na adaptację organizmu.'
+    };
+
     let chart;
     let store = {
-        history: JSON.parse(localStorage.getItem('v492_history')) || [],
-        config: JSON.parse(localStorage.getItem('v492_config')) || { plan: Array(7).fill('Wolne') },
-        vo2: localStorage.getItem('v492_vo2') || "--",
-        subjectiveHistory: JSON.parse(localStorage.getItem('v492_sub_hist')) || []
+        history: JSON.parse(localStorage.getItem('v5_history')) || [],
+        config: JSON.parse(localStorage.getItem('v5_config')) || { plan: Array(7).fill('Z2') },
+        vo2: localStorage.getItem('v5_vo2') || "--",
+        sleepTrend: JSON.parse(localStorage.getItem('v5_sleep_trend')) || [],
+        todayReport: JSON.parse(localStorage.getItem('v5_today_report')) || null
     };
 
     window.onload = () => {
         initPlannerUI();
         loadProfileData();
-        refreshDashboard();
+        refreshApp();
         setupDrop('drop-act', 'ACT');
         setupDrop('drop-vo2', 'VO2');
         setupDrop('drop-ftp', 'FTP');
@@ -173,53 +178,56 @@
 
     function initPlannerUI() {
         const container = document.getElementById('planner-container');
+        container.innerHTML = '';
         daysArr.forEach((day, i) => {
             const div = document.createElement('div');
             div.className = 'day-box';
             div.innerHTML = `<b>${day}</b>
                 <select id="p-day-${i}">
-                    <option value="Kolarstwo Z2">🚴 Z2</option>
-                    <option value="Kolarstwo Interwały">⚡ Interwały</option>
-                    <option value="Siła FBW">🏋️ FBW</option>
-                    <option value="Wolne">🛌 Wolne</option>
-                </select>`;
+                    ${Object.keys(trainingTypes).map(t => `<option value="${t}" ${store.config.plan[i] === t ? 'selected' : ''}>${t}</option>`).join('')}
+                </select>
+                <span class="info-tag">${trainingTypes[store.config.plan[i]] || ''}</span>`;
             container.appendChild(div);
         });
     }
 
+    function toggleProfile() {
+        const el = document.getElementById('profile-overlay');
+        el.style.display = el.style.display === 'flex' ? 'none' : 'flex';
+    }
+
     function loadProfileData() {
-        const c = store.config;
-        if(c.weight) {
-            document.getElementById('p-age').value = c.age;
-            document.getElementById('p-weight').value = c.weight;
-            document.getElementById('p-ftp').value = c.ftp;
-            document.getElementById('p-thr-hr').value = c.thrHr;
-            document.getElementById('p-max-hr').value = c.maxHr;
-            document.getElementById('p-race-date').value = c.raceDate;
-            daysArr.forEach((_, i) => { if(c.plan[i]) document.getElementById(`p-day-${i}`).value = c.plan[i]; });
+        if(store.config.weight) {
+            document.getElementById('p-weight').value = store.config.weight;
+            document.getElementById('p-ftp').value = store.config.ftp;
+            document.getElementById('p-thr-hr').value = store.config.thrHr;
+            document.getElementById('p-race-date').value = store.config.raceDate;
+        }
+        if(store.todayReport) {
+            document.getElementById('s-rpe').value = store.todayReport.rpe;
+            document.getElementById('s-sleep').value = store.todayReport.sleep;
+            document.getElementById('s-pains').value = store.todayReport.pains;
         }
     }
 
     function saveCompleteProfile() {
         store.config = {
-            age: document.getElementById('p-age').value,
             weight: parseFloat(document.getElementById('p-weight').value),
             ftp: parseInt(document.getElementById('p-ftp').value),
             thrHr: document.getElementById('p-thr-hr').value,
-            maxHr: document.getElementById('p-max-hr').value,
             raceDate: document.getElementById('p-race-date').value,
             plan: daysArr.map((_, i) => document.getElementById(`p-day-${i}`).value)
         };
-        localStorage.setItem('v492_config', JSON.stringify(store.config));
-        document.getElementById('profile-overlay').style.display = 'none';
-        showToast("Zapisano profil.");
-        refreshDashboard();
+        localStorage.setItem('v5_config', JSON.stringify(store.config));
+        toggleProfile();
+        refreshApp();
     }
 
-    function showToast(m) {
-        const t = document.getElementById('toast');
-        t.innerText = m; t.style.display = 'block';
-        setTimeout(() => t.style.display = 'none', 3000);
+    function resetTodayReport() {
+        store.todayReport = null;
+        localStorage.removeItem('v5_today_report');
+        document.getElementById('s-pains').value = '';
+        refreshApp();
     }
 
     function setupDrop(id, type) {
@@ -237,55 +245,26 @@
     function parseCSV(content, type) {
         const d = content.includes(';') ? ';' : ',';
         const lines = content.split(/\r?\n/).filter(l => l.trim() !== '');
-        
         if (type === 'ACT') {
             const h = lines[0].split(d).map(v => v.trim().replace(/"/g,''));
             const idxDate = h.indexOf('Data');
             const idxTss = h.findIndex(v => v.includes('Training Stress Score'));
-            const idxTitle = h.indexOf('Tytuł');
-            const idxDist = h.indexOf('Dystans');
-            const idxNp = h.findIndex(v => v.includes('Normalized Power'));
-            const idxHr = h.indexOf('Średnie tętno');
-
             store.history = lines.slice(1).map(l => {
                 const c = l.split(d).map(v => v.replace(/"/g,''));
-                return { 
-                    date: c[idxDate], 
-                    tss: parseFloat(c[idxTss]?.replace(',', '.')) || 0, 
-                    title: c[idxTitle], 
-                    dist: c[idxDist], 
-                    np: c[idxNp], 
-                    hr: c[idxHr] 
-                };
+                return { date: c[idxDate], tss: parseFloat(c[idxTss]?.replace(',','.')) || 0 };
             }).filter(i => i.tss > 0);
-            localStorage.setItem('v492_history', JSON.stringify(store.history));
-            showToast("Wczytano aktywności.");
+            localStorage.setItem('v5_history', JSON.stringify(store.history));
         } else if (type === 'VO2') {
             const last = lines[lines.length-1].split(d);
             store.vo2 = last[2] || "--";
-            localStorage.setItem('v492_vo2', store.vo2);
-        } else if (type === 'FTP') {
-            const last = lines[lines.length-1].split(d);
-            const val = parseInt(last.find(v => !isNaN(v) && v > 50));
-            if(val) {
-                store.config.ftp = val;
-                localStorage.setItem('v492_config', JSON.stringify(store.config));
-            }
+            localStorage.setItem('v5_vo2', store.vo2);
         }
-        refreshDashboard();
+        refreshApp();
     }
 
-    function refreshDashboard() {
+    function refreshApp() {
         const h = store.history.map(x => ({...x, date: new Date(x.date.split(' ')[0])}));
         if(h.length > 0) {
-            const last = store.history[0];
-            document.getElementById('last-title').innerText = last.title;
-            document.getElementById('last-date').innerText = last.date.split(' ')[0];
-            document.getElementById('last-dist').innerText = last.dist + " km";
-            document.getElementById('last-tss').innerText = last.tss;
-            document.getElementById('last-np').innerText = (last.np || '--') + " W";
-            document.getElementById('last-hr').innerText = last.hr;
-
             const atl = h.filter(x => (new Date() - x.date)/86400000 <= 7).reduce((s,i)=>s+i.tss,0)/7;
             const ctl = h.filter(x => (new Date() - x.date)/86400000 <= 42).reduce((s,i)=>s+i.tss,0)/42;
             const tsb = ctl - atl;
@@ -296,43 +275,72 @@
             document.getElementById('val-vo2').innerText = store.vo2;
             
             updateChart(h.slice(0, 30).reverse());
+            generateVerdict();
+            renderCalendar();
         }
     }
 
-    function generateTrendVerdict() {
-        const currentTsb = parseInt(document.getElementById('val-tsb').innerText) || 0;
-        const sleep = document.getElementById('s-sleep').value;
-        const pains = document.getElementById('s-pains').value;
+    function renderCalendar() {
+        const container = document.getElementById('calendar-container');
+        container.innerHTML = '';
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
+
+        for(let i = 0; i < 7; i++) {
+            const day = new Date(startOfWeek);
+            day.setDate(startOfWeek.getDate() + i);
+            const isToday = day.toDateString() === now.toDateString();
+            const plan = store.config.plan[i];
+            
+            const div = document.createElement('div');
+            div.className = `cal-day ${isToday ? 'cal-today' : ''}`;
+            div.innerHTML = `<b>${daysArr[i]} ${day.getDate()}</b><br><small>${plan}</small>`;
+            container.appendChild(div);
+        }
+    }
+
+    function generateVerdict(save = false) {
+        if(save) {
+            store.todayReport = {
+                rpe: document.getElementById('s-rpe').value,
+                sleep: document.getElementById('s-sleep').value,
+                pains: document.getElementById('s-pains').value
+            };
+            localStorage.setItem('v5_today_report', JSON.stringify(store.todayReport));
+            
+            // Trendy snu
+            store.sleepTrend.push(store.todayReport.sleep);
+            if(store.sleepTrend.length > 3) store.sleepTrend.shift();
+            localStorage.setItem('v5_sleep_trend', JSON.stringify(store.sleepTrend));
+        }
+
+        const tsb = parseInt(document.getElementById('val-tsb').innerText) || 0;
+        const pains = store.todayReport ? store.todayReport.pains : '';
+        const badSleep = store.sleepTrend.filter(s => s === "1").length >= 2;
         const todayIdx = (new Date().getDay() + 6) % 7;
-        const planned = store.config.plan ? store.config.plan[todayIdx] : "Wolne";
-
-        // Pamięć Trendu: Zapisz dzisiejszy sen
-        store.subjectiveHistory.push({ date: new Date().toLocaleDateString(), sleep: sleep });
-        if(store.subjectiveHistory.length > 3) store.subjectiveHistory.shift();
-        localStorage.setItem('v492_sub_hist', JSON.stringify(store.subjectiveHistory));
-
-        const badSleepTrend = store.subjectiveHistory.filter(s => s.sleep === "1").length >= 2;
+        const planned = store.config.plan[todayIdx];
 
         const st = document.getElementById('ai-status');
         const ds = document.getElementById('ai-desc');
         const ac = document.getElementById('ai-action');
 
-        if (pains.toLowerCase() !== 'brak' && pains.length > 2) {
-            st.innerText = "🚩 ALARM ZDROWOTNY";
-            ds.innerText = `Zgłoszono ból: "${pains}". Trend zmęczenia nieistotny przy ryzyku urazu.`;
-            ac.innerText = "STOP: Dziś tylko mobilizacja. Planowane " + planned + " odwołane.";
-        } else if (badSleepTrend) {
-            st.innerText = "😴 TREND: BRAK REGENERACJI";
-            ds.innerText = "To już kolejna noc ze słabym snem. Twoje TSB ("+currentTsb+") może być mylące - układ nerwowy jest przeciążony.";
-            ac.innerText = "REDUKCJA: Zamiast " + planned + " zrób 30 min jogi lub spacer.";
-        } else if (currentTsb < -15) {
-            st.innerText = "🏗️ STATUS: BUDOWANIE (PRODUKTYWNY)";
-            ds.innerText = "Jesteś w optymalnej strefie adaptacji. Organizm przyjmuje obciążenia.";
-            ac.innerText = "TRENING: Wykonaj " + planned + ". Monitoruj tętno.";
+        if (pains && pains.toLowerCase() !== 'brak' && pains.length > 2) {
+            st.innerText = "🚩 ALARM: RYZYKO KONTUZJI";
+            ds.innerText = `Zgłoszono: ${pains}. Twoje TSB (${tsb}) nie ma znaczenia przy bólu.`;
+            ac.innerText = `ODWOŁANO: ${planned}. Dzisiaj tylko regeneracja.`;
+        } else if (badSleep) {
+            st.innerText = "😴 ALERT: KUMULACJA BRAKU SNU";
+            ds.innerText = "Trend snu z ostatnich 3 dni jest negatywny. CNS (układ nerwowy) może być przeciążony.";
+            ac.innerText = `MODYFIKACJA: Zamiast ${planned}, zrób lekki rozjazd Z1.`;
+        } else if (tsb < -15) {
+            st.innerText = "🏗️ STATUS: PRODUKTYWNY";
+            ds.innerText = "Adaptacja przebiega prawidłowo. Jesteś w cyklu budowania bazy.";
+            ac.innerText = `ZALECENIE: Wykonaj planowe ${planned}.`;
         } else {
-            st.innerText = "⚖️ STATUS: NEUTRALNY";
-            ds.innerText = "Balans świeżości zachowany.";
-            ac.innerText = "TRENING: Realizuj planowe " + planned;
+            st.innerText = "⚖️ STATUS: OPTYMALNY";
+            ds.innerText = "Wszystkie systemy w normie.";
+            ac.innerText = `DZISIAJ: Realizuj ${planned}.`;
         }
     }
 
@@ -343,9 +351,7 @@
             type: 'line',
             data: { 
                 labels: h.map(x=>x.date.toLocaleDateString()), 
-                datasets: [
-                    { label: 'TSS Load', data: h.map(x=>x.tss), borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.05)' }
-                ] 
+                datasets: [{ label: 'TSS Load', data: h.map(x=>x.tss), borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.05)' }] 
             },
             options: { responsive: true, plugins: { legend: { display: false } } }
         });
